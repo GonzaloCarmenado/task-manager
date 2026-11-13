@@ -29,6 +29,7 @@
     "db:push:dry": "supabase db push --remote --dry-run",
     "test:scripts": "node --test scripts/*.test.mjs",
     "verify:auth": "node scripts/verify-auth.mjs",
+    "verify:rls": "node scripts/verify-rls.mjs",
     "verify:supabase": "node scripts/verify-supabase-assumptions.mjs"
   },
   "private": true,

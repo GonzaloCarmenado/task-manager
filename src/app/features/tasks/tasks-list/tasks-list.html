@@ -1,0 +1,109 @@
+<main class="screen">
+  <header class="header">
+    <h1 class="heading">{{ copy.list.title }}</h1>
+  </header>
+
+  @if (access.status() === 'loading' || access.status() === 'idle') {
+  <section class="state" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="state-text">{{ copy.list.loading }}</p>
+  </section>
+  } @else if (access.status() === 'error') {
+  <section class="state" role="alert">
+    <div class="badge"><app-icon name="wifi-off" /></div>
+    <h2 class="state-title">{{ copy.list.errorTitle }}</h2>
+    <p class="state-text">{{ copy.list.errorDescription }}</p>
+    <button type="button" class="action" (click)="retry()">
+      <app-icon name="refresh" />
+      <span>{{ copy.list.retry }}</span>
+    </button>
+  </section>
+  } @else { @if (grouped().groups.length === 0) {
+  <section class="state">
+    <div class="badge"><app-icon name="check" /></div>
+    <h2 class="state-title">{{ copy.list.emptyTitle }}</h2>
+    <p class="state-text">{{ copy.list.emptyDescription }}</p>
+    <button type="button" class="action" (click)="create()">
+      <app-icon name="plus" />
+      <span>{{ copy.list.createFirst }}</span>
+    </button>
+  </section>
+  } @else { @for (group of grouped().groups; track group.key) {
+  <section class="group" [attr.data-kind]="group.kind">
+    <h2 class="group-title">
+      {{ group.label }}
+      <span class="count">{{ group.tasks.length }}</span>
+    </h2>
+    <ul class="tasks">
+      @for (task of group.tasks; track task.id) {
+      <li class="task">
+        <button
+          type="button"
+          class="check"
+          [attr.aria-label]="copy.list.markDone + ': ' + task.title"
+          (click)="toggle(task)"
+        >
+          <app-icon name="check" />
+        </button>
+        <button type="button" class="open" (click)="open(task)">
+          <span class="title">{{ task.title }}</span>
+          @if (task.dueTime || isOverdue(task)) {
+          <span class="meta">
+            @if (isOverdue(task)) {
+            <span class="tag">{{ copy.list.overdueTag }}</span>
+            <span class="when">{{ dayLabel(task.dueDate) }}</span>
+            } @if (task.dueTime) {
+            <span class="when"><app-icon name="clock" />{{ task.dueTime }}</span>
+            }
+          </span>
+          }
+        </button>
+        <app-icon class="chevron" name="chevron-right" />
+      </li>
+      }
+    </ul>
+  </section>
+  } } @if (grouped().groups.length > 0 || grouped().completed.length > 0) {
+  <section class="group completed">
+    <button
+      type="button"
+      class="completed-toggle"
+      [attr.aria-expanded]="expanded()"
+      (click)="toggleCompleted()"
+    >
+      <span>{{ copy.list.completedTitle }} ({{ grouped().completed.length }})</span>
+      <app-icon name="chevron-down" />
+    </button>
+    @if (expanded()) { @if (grouped().completed.length === 0) {
+    <p class="state-text">{{ copy.list.noCompleted }}</p>
+    } @else {
+    <ul class="tasks">
+      @for (task of grouped().completed; track task.id) {
+      <li class="task done">
+        <button
+          type="button"
+          class="check checked"
+          [attr.aria-label]="copy.list.markUndone + ': ' + task.title"
+          (click)="toggle(task)"
+        >
+          <app-icon name="check" />
+        </button>
+        <button type="button" class="open" (click)="open(task)">
+          <span class="title">{{ task.title }}</span>
+        </button>
+      </li>
+      }
+    </ul>
+    } }
+  </section>
+  } } @if (notice(); as n) {
+  <p class="notice" [class.error]="n.error" [attr.role]="n.error ? 'alert' : 'status'">
+    {{ n.text }}
+  </p>
+  }
+
+  <button type="button" class="fab" (click)="create()">
+    <app-icon name="plus" />
+    <span>{{ copy.list.newTask }}</span>
+  </button>
+</main>

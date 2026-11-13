@@ -57,3 +57,7 @@ Para probarlo en el emulador:
 5. Para ver el desactivado automático: `adb shell locksettings clear --old <PIN>` y relanzar la app.
 
 Notas: el aviso del sistema es una ventana protegida (las capturas salen en negro; sus textos se leen con `uiautomator dump`). Los textos fijos del sistema («Touch the fingerprint sensor», «Use PIN») siguen el idioma del teléfono. En «apps recientes» la miniatura puede mostrar el contenido: la cubierta es de mejor esfuerzo y no se usa `FLAG_SECURE` por decisión de la spec.
+
+## Tareas (spec 005)
+
+Los selectores de fecha y hora del formulario son los **nativos** del sistema (`input type="date"` y `type="time"`); en el WebView de Android abren el selector de Android, en el idioma del teléfono. Comprobado en el emulador: el teclado virtual no tapa el campo ni el botón de guardar, y las tareas persisten al cerrar y abrir la app. Con una instalación nueva, la primera carga puede tardar unos segundos (se crea la sesión anónima).

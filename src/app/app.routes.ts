@@ -1,12 +1,24 @@
 import { isDevMode } from '@angular/core';
 import { Routes } from '@angular/router';
 
-/** Las rutas de desarrollo (vista previa de estados) solo se registran fuera de producción. */
+/**
+ * Rutas de la app. `nueva` va antes que `:id` para que no se interprete como identificador.
+ * Las rutas de desarrollo (vista previa de estados) solo se registran fuera de producción.
+ */
 export function buildRoutes(devMode: boolean): Routes {
   return [
     {
       path: '',
-      loadComponent: () => import('./features/home/home').then((m) => m.Home),
+      loadComponent: () =>
+        import('./features/tasks/tasks-list/tasks-list').then((m) => m.TasksList),
+    },
+    {
+      path: 'nueva',
+      loadComponent: () => import('./features/tasks/task-form/task-form').then((m) => m.TaskForm),
+    },
+    {
+      path: ':id',
+      loadComponent: () => import('./features/tasks/task-form/task-form').then((m) => m.TaskForm),
     },
     ...(devMode
       ? [

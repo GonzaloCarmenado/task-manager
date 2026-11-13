@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 58 |
-| Preguntas `F` (funcionalidad) | 19 |
-| Preguntas `W` (flujo) | 30 |
-| **Total preguntas** | **49** |
+| Turnos del usuario | 75 |
+| Preguntas `F` (funcionalidad) | 22 |
+| Preguntas `W` (flujo) | 34 |
+| **Total preguntas** | **56** |
 
 ## Log
 
@@ -73,3 +73,15 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 056 | 2026-11-13 | "¿Las ventanas de la huella están en español?" | 0 | Textos de la app en español; los fijos del sistema siguen el idioma del teléfono (verificado con `uiautomator`) |
 | 057 | 2026-11-13 | "Cambia lo de touch… en español" / "si es del emulador me da igual" | 0 | Son textos del sistema; se deja el idioma del emulador |
 | 058 | 2026-11-13 | "Sigue" (→ verificación en emulador y cierre de la 004) | 0 | Oferta, activar, desbloquear, cancelar, PIN tras intentos, 30 s, modo oscuro y desactivado automático verificados. Hallazgo: la miniatura de «apps recientes» no queda cubierta |
+| 059 | 2026-11-13 | "Vale" (commit de la 004) | 0 | Commit `651010e` tras auditoría del diff (54 ficheros, limpio) |
+| 060 | 2026-11-13 | "Sí" (push) | 0 | Push a `main` (`34b3a37` y `651010e`) tras auditar lo que viajaba |
+| 061 | 2026-11-13 | "De momento seguimos con la siguiente spec" | 0 | Elegida por defecto la 005: tareas básicas (el núcleo del producto) |
+| 062 | 2026-11-13 | `/specify` de la 005 | 1 F (ciclo completo o simple) | Respuesta: completo. Creada `specs/005-tareas-basicas/spec.md` (Borrador, 5 historias) |
+| 063 | 2026-11-13 | "Sí" (aprobación de la spec 005) → `/clarify` | 2 F (hora opcional; alcance de completadas) | Respuestas: hora opcional ya y últimos 30 días. 8 decisiones por defecto. Creado `clarify.md` (CERRADO) y spec ajustada (hora y 30 días) |
+| 064 | 2026-11-13 | "Dale" (→ `/stitch-prompt` de la 005) | 0 | Creado `specs/005-tareas-basicas/stitch-prompt.md` (2 pantallas: lista y formulario, sin estilos). Pendiente: el export de Stitch |
+| 065 | 2026-11-13 | Entrega el export de Stitch de la 005 | 0 | Copiado a `specs/005-tareas-basicas/design/` (hashes verificados; `DESIGN.md` idéntico al existente) y revisado sin hallazgos sensibles. `design/README.md`: lo extra (simulador, avatar, saludo, barra inferior, atajos de hora…) se ignora sin preguntar; el plan resolverá edición, borrado y errores |
+| 066 | 2026-11-13 | "Sí" (→ `/sdd-plan` de la 005) | 1 W (¿apruebas el plan?) | Creado `specs/005-tareas-basicas/plan.md` (Borrador): tabla `tasks` con RLS, `TasksAccessService` con plazo de 8 s y caché por `userId`, rutas `''`/`nueva`/`:id`, selectores nativos de fecha y hora |
+| 067 | 2026-11-13 | "Sí" (aprobación del plan 005) → `/task` | 1 W (¿apruebas las tareas?) | Plan aprobado. Creado `specs/005-tareas-basicas/tasks.md` (56 tareas en 10 bloques; `db push` con confirmación) |
+| 068 | 2026-11-13 | "Vamos" (→ `/implement` de la 005) | 0 | Bloques 1 a 8 hechos con TDD (migración, fechas, agrupado, servicio de acceso, iconos, lista, formulario, rutas; 316 tests de la app y 51 de scripts). Parada en el bloque 9: la CLI de Supabase estaba en la cuenta equivocada; sesión cerrada, sin comandos contra el remoto |
+| 069-072 | 2026-11-13 | Cuenta de Supabase: discusión del correo, el proyecto y el login | 1 W (¿confirmas `db push`?) | CLI con la cuenta equivocada → logout → el usuario hace login. Verificado por id de organización y por el proyecto; `db:push:dry` limpio (solo `tasks`). Pendiente: confirmación para `db push` |
+| 073-075 | 2026-11-13 | "Sí" (db push), "listo" (ventana del navegador) y cierre | 1 W (¿commit?) | `db push` aplicado (verificada la cuenta por id). `pnpm verify:rls`: 15/15. Verificación en navegador y en Android (selectores nativos, teclado, persistencia, borrado) con datos de prueba borrados al terminar. Bug corregido con test: aviso «Escribe un título» con título demasiado largo. Spec 005 Implementada |

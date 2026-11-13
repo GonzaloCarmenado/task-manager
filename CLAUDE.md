@@ -133,6 +133,7 @@ pnpm test:ci               # Vitest sin watch
 pnpm test:scripts          # tests de los scripts de ayuda (node --test)
 pnpm lint:fix && pnpm format
 pnpm secrets:check        # escaneo de secretos (también en pre-commit)
+pnpm verify:rls            # prueba REAL de RLS de `tasks` con dos sesiones anónimas (manual, contra el remoto)
 pnpm env:init              # crea src/environments/environment.ts (ignorado) desde el ejemplo
 pnpm db:new <nombre>       # nueva migración SQL
 pnpm db:push:dry           # simula la subida de migraciones (siempre --remote)

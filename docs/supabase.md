@@ -93,6 +93,26 @@ using ((auth.jwt() ->> 'is_anonymous')::boolean is false)
 - La app solo accede a Supabase a través de `SupabaseService` (`src/app/core/services/supabase.ts`), desde los `*.access.service.ts`. ESLint prohíbe importar `@supabase/supabase-js` en otro sitio.
 - Secretos y credenciales: ver la sección "Seguridad y secretos" de `CLAUDE.md`.
 
+## Tabla `tasks` (spec 005)
+
+Migración `*_tasks.sql`. Una fila por tarea de un usuario:
+
+| Columna | Tipo | Notas |
+|---|---|---|
+| `id` | `uuid` | clave primaria |
+| `user_id` | `uuid` | por defecto `auth.uid()`; borrado en cascada con el usuario |
+| `title` | `text` | 1 a 120 caracteres, sin espacios en los extremos |
+| `due_date` | `date` | opcional; día local `YYYY-MM-DD` |
+| `due_time` | `time` | opcional y **solo con `due_date`** |
+| `completed_at` | `timestamptz` | `null` = pendiente |
+| `created_at` | `timestamptz` | por defecto `now()` |
+
+**RLS**: una política por operación (`select`, `insert`, `update`, `delete`), todas `to authenticated` y con `user_id = (select auth.uid())`. Las sesiones anónimas usan el rol `authenticated`. Se revoca todo a `anon`. La app solo accede desde `TasksAccessService`.
+
+Rollback: una nueva migración con `drop table public.tasks;`.
+
+Verificación real (manual): `pnpm verify:rls` crea dos sesiones anónimas y comprueba que una no ve, edita, borra ni crea tareas de la otra, que sin sesión no se accede a nada y que se rechazan los títulos inválidos y la hora sin fecha; borra lo que crea y nunca imprime claves ni ids.
+
 ## Estado
 
-Todavía no hay migraciones: el modelo de datos (tareas, XP, rachas…) llegará con las siguientes specs. La identidad anónima ya existe (spec 003).
+Migraciones: `tasks` (spec 005). El resto del modelo (XP, rachas…) llegará con las siguientes specs. La identidad anónima ya existe (spec 003).

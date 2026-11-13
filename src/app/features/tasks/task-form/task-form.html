@@ -1,0 +1,126 @@
+<main class="screen">
+  <header class="header">
+    <h1 class="heading">{{ isEdit ? copy.form.editTitle : copy.form.createTitle }}</h1>
+    <button type="button" class="cancel" (click)="cancel()">{{ copy.form.cancel }}</button>
+  </header>
+
+  <section class="card">
+    <div class="label-row">
+      <label class="label" for="task-title">{{ copy.form.titleLabel }}</label>
+      <span class="counter" [class.over]="title().length > max"
+        >{{ title().length }} / {{ max }}</span
+      >
+    </div>
+    <input
+      id="task-title"
+      name="title"
+      type="text"
+      class="field"
+      autocomplete="off"
+      enterkeyhint="done"
+      aria-required="true"
+      [attr.aria-invalid]="titleProblem() !== null"
+      [attr.aria-describedby]="titleProblem() ? 'task-title-help' : null"
+      [placeholder]="copy.form.titlePlaceholder"
+      [value]="title()"
+      (input)="onTitle($event)"
+      (keydown.enter)="save()"
+    />
+    @if (titleProblem(); as problem) {
+    <p id="task-title-help" class="help">{{ problem }}</p>
+    }
+  </section>
+
+  <section class="card">
+    <div class="label-row">
+      <span class="label">
+        <app-icon name="calendar" />
+        {{ copy.form.dateLabel }}
+        <span class="optional">({{ copy.form.optional }})</span>
+      </span>
+      @if (dueDate()) {
+      <button type="button" class="chip clear" (click)="setDate(null)">
+        {{ copy.form.clearDate }}
+      </button>
+      }
+    </div>
+    <div class="chips">
+      <button
+        type="button"
+        class="chip"
+        [attr.aria-pressed]="dueDate() === today"
+        (click)="setDate(today)"
+      >
+        {{ copy.form.today }}
+      </button>
+      <button
+        type="button"
+        class="chip"
+        [attr.aria-pressed]="dueDate() === tomorrow"
+        (click)="setDate(tomorrow)"
+      >
+        {{ copy.form.tomorrow }}
+      </button>
+    </div>
+    <label class="picker">
+      <span class="picker-label">{{ copy.form.pickDate }}</span>
+      <input type="date" class="field" [value]="dueDate() ?? ''" (change)="onDate($event)" />
+    </label>
+  </section>
+
+  <section class="card">
+    <div class="label-row">
+      <span class="label">
+        <app-icon name="clock" />
+        {{ copy.form.timeLabel }}
+        <span class="optional">({{ copy.form.optional }})</span>
+      </span>
+      @if (dueTime()) {
+      <button type="button" class="chip clear" (click)="clearTime()">
+        {{ copy.form.clearTime }}
+      </button>
+      }
+    </div>
+    <label class="picker">
+      <span class="picker-label">{{ copy.form.timeLabel }}</span>
+      <input
+        type="time"
+        class="field"
+        [disabled]="dueDate() === null"
+        [value]="dueTime() ?? ''"
+        (change)="onTime($event)"
+      />
+    </label>
+    @if (dueDate() === null) {
+    <p class="help">{{ copy.form.timeNeedsDate }}</p>
+    }
+  </section>
+
+  @if (error(); as message) {
+  <p class="form-error" role="alert">{{ message }}</p>
+  }
+
+  <button type="button" class="save" [disabled]="!canSave()" (click)="save()">
+    <app-icon name="check" />
+    <span>{{ saving() ? copy.form.saving : copy.form.save }}</span>
+  </button>
+  @if (isEmptyTitle()) {
+  <p class="save-hint">{{ copy.form.saveBlocked }}</p>
+  } @if (isEdit) {
+  <button type="button" class="delete" (click)="askDelete()">
+    <app-icon name="trash" />
+    <span>{{ copy.form.delete }}</span>
+  </button>
+  } @if (confirmingDelete()) {
+  <div class="backdrop">
+    <section class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
+      <h2 id="delete-title" class="dialog-title">{{ copy.form.deleteTitle }}</h2>
+      <p class="dialog-text">{{ copy.form.deleteWarning }}</p>
+      <button type="button" class="confirm" (click)="confirmDelete()">
+        {{ copy.form.deleteConfirm }}
+      </button>
+      <button type="button" class="keep" (click)="keepTask()">{{ copy.form.deleteCancel }}</button>
+    </section>
+  </div>
+  }
+</main>
