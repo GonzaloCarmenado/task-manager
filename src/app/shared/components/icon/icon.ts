@@ -1,0 +1,81 @@
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+
+export const ICON_NAMES = ['wifi-off', 'hourglass', 'server', 'clock', 'alert', 'refresh'] as const;
+export type IconName = (typeof ICON_NAMES)[number];
+
+/** Iconos propios de trazo (viewBox 24×24). Sin fuentes de iconos ni recursos externos. */
+@Component({
+  selector: 'app-icon',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (known()) {
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        [attr.aria-hidden]="label() ? null : 'true'"
+        [attr.role]="label() ? 'img' : null"
+        [attr.aria-label]="label() || null"
+        focusable="false"
+      >
+        @switch (name()) {
+          @case ('wifi-off') {
+            <path d="M3 9a14 14 0 0 1 18 0" />
+            <path d="M6 12.5a9 9 0 0 1 12 0" />
+            <path d="M9.5 16a4 4 0 0 1 5 0" />
+            <path d="M12 19.5h.01" />
+            <path d="M4 4l16 16" />
+          }
+          @case ('hourglass') {
+            <path d="M7 3h10" />
+            <path d="M7 21h10" />
+            <path d="M8 3c0 5 4 5 4 9s-4 4-4 9" />
+            <path d="M16 3c0 5-4 5-4 9s4 4 4 9" />
+          }
+          @case ('server') {
+            <rect x="3" y="4" width="18" height="7" rx="2" />
+            <rect x="3" y="13" width="18" height="7" rx="2" />
+            <path d="M7 7.5h.01" />
+            <path d="M7 16.5h.01" />
+          }
+          @case ('clock') {
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 7v5l3 2" />
+          }
+          @case ('alert') {
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 8v5" />
+            <path d="M12 16.5h.01" />
+          }
+          @case ('refresh') {
+            <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+            <path d="M20 5v6h-6" />
+          }
+        }
+      </svg>
+    }
+  `,
+  styles: `
+    :host {
+      display: inline-flex;
+      width: 1.5em;
+      height: 1.5em;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  `,
+})
+export class Icon {
+  readonly name = input.required<IconName>();
+  /** Texto accesible. Sin él, el icono es decorativo y se oculta a los lectores de pantalla. */
+  readonly label = input<string>('');
+
+  protected readonly known = computed(() =>
+    (ICON_NAMES as readonly string[]).includes(this.name())
+  );
+}

@@ -1,1 +1,10 @@
+@if (showApp()) {
 <router-outlet />
+} @else {
+<app-session-status
+  [status]="auth.status()"
+  [reason]="auth.errorReason()"
+  [autoRetryPending]="auth.autoRetryPending()"
+  (retry)="auth.retry()"
+/>
+}

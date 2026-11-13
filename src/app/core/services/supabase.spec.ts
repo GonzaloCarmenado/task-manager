@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { SUPABASE_CONFIG, SupabaseConfig } from './supabase.config';
-import { SupabaseService } from './supabase';
+import { AUTH_STORAGE_KEY, SupabaseService } from './supabase';
 
 const mocks = vi.hoisted(() => ({
   createClient: vi.fn((..._args: unknown[]) => ({ auth: {} })),
@@ -32,8 +32,23 @@ describe('SupabaseService', () => {
     setup(valid);
 
     expect(mocks.createClient.mock.calls[0][2]).toEqual({
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+        storageKey: AUTH_STORAGE_KEY,
+      },
     });
+  });
+
+  it('US-003-02 usa una storageKey fija, explícita y sin datos del proyecto', () => {
+    expect(AUTH_STORAGE_KEY).toBe('task-manager-auth');
+    expect(AUTH_STORAGE_KEY).not.toContain(valid.url);
+    expect(AUTH_STORAGE_KEY).not.toContain('supabase.co');
+
+    setup(valid);
+    const options = mocks.createClient.mock.calls[0][2] as { auth: { storageKey: string } };
+    expect(options.auth.storageKey).toBe(AUTH_STORAGE_KEY);
   });
 
   it('US-002-04 lanza error si la url está vacía', () => {

@@ -1,27 +1,71 @@
+// Tokens de diseño: sistema «Playful Momentum» (specs/_design/playful-momentum/DESIGN.md).
+// Solo lo que usan las pantallas existentes; se amplía cuando haga falta. Sin fuentes externas.
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #f5f6f8;
-  --color-text: #14161a;
-  --color-text-muted: #5b6270;
-  --color-primary: #3b5bdb;
-  --color-on-primary: #ffffff;
+  color-scheme: light dark;
 
+  // Color (claro)
+  --color-bg: #fcf8ff;
+  --color-surface: #ffffff;
+  --color-surface-soft: #efebff;
+  --color-text: #181445;
+  --color-text-muted: #464554;
+  --color-outline: #c7c4d7;
+  --color-primary: #4648d4;
+  --color-on-primary: #ffffff;
+  --color-primary-soft: #e1e0ff;
+  --color-on-primary-soft: #2f2ebe;
+  --color-accent: #fea619;
+  --color-success: #006c49;
+  --color-error: #ba1a1a;
+  --color-error-soft: #ffdad6;
+
+  // Espaciado
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-6: 24px;
+  --space-8: 36px;
 
-  --radius-md: 12px;
+  // Radios
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-full: 9999px;
+
+  // Interacción
   --tap-target: 44px;
+  --shadow-card: 0 4px 20px -2px rgba(99, 102, 241, 0.08);
+  --shadow-button: 0 10px 25px -5px rgba(70, 72, 212, 0.4);
+
+  // Tipografía (pila del sistema por ahora; ver plan 003, decisión 1)
   --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-size-label: 0.75rem;
+  --font-size-body: 0.875rem;
+  --font-size-body-lg: 1rem;
+  --font-size-headline: 1.375rem;
+  --font-size-display: 2.25rem;
+  --line-height-body: 1.5;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #0f1115;
-    --color-surface: #1a1d23;
-    --color-text: #eceef2;
-    --color-text-muted: #9aa1ae;
+    --color-bg: #0f0e17;
+    --color-surface: #1b1a2e;
+    --color-surface-soft: #2e2a56;
+    --color-text: #e2e8f0;
+    --color-text-muted: #a8a6c0;
+    --color-outline: #464554;
+    --color-primary: #6366f1;
+    --color-on-primary: #ffffff;
+    --color-primary-soft: #2e2a56;
+    --color-on-primary-soft: #c0c1ff;
+    --color-accent: #f59e0b;
+    --color-success: #10b981;
+    --color-error: #ffb4ab;
+    --color-error-soft: #93000a;
+    --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+    --shadow-button: 0 10px 25px -5px rgba(99, 102, 241, 0.45);
   }
 }

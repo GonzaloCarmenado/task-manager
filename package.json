@@ -27,7 +27,9 @@
     "db:new": "supabase migration new",
     "db:status": "supabase migration list --remote",
     "db:push:dry": "supabase db push --remote --dry-run",
-    "test:scripts": "node --test scripts/*.test.mjs"
+    "test:scripts": "node --test scripts/*.test.mjs",
+    "verify:auth": "node scripts/verify-auth.mjs",
+    "verify:supabase": "node scripts/verify-supabase-assumptions.mjs"
   },
   "private": true,
   "packageManager": "pnpm@11.9.0",

@@ -1,0 +1,26 @@
+@switch (view()) { @case ('loading') {
+<section class="screen" role="status" aria-live="polite" data-variant="loading">
+  <div class="spinner" data-testid="spinner" aria-hidden="true"></div>
+  <h1 class="title">{{ copy.loading.title }}</h1>
+  <p class="description">{{ copy.loading.description }}</p>
+</section>
+} @case ('error') {
+<section class="screen" role="alert" [attr.data-variant]="variant()">
+  <div class="card">
+    <span class="pill"><span class="dot" aria-hidden="true"></span>{{ errorCopy().pill }}</span>
+    <div class="badge"><app-icon [name]="errorCopy().icon" /></div>
+    <h1 class="title">{{ errorCopy().title }}</h1>
+    <p class="description">{{ errorCopy().description }}</p>
+  </div>
+
+  @if (autoRetryPending()) {
+  <p class="notice"><span class="dot ok" aria-hidden="true"></span>{{ copy.autoRetryNotice }}</p>
+  }
+
+  <button type="button" class="retry" (click)="retry.emit()">
+    <app-icon name="refresh" />
+    <span>{{ copy.retryLabel }}</span>
+  </button>
+  <p class="hint">{{ autoRetryPending() ? copy.autoRetryHint : copy.manualRetryHint }}</p>
+</section>
+} }

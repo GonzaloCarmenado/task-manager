@@ -4,6 +4,12 @@ import { SUPABASE_CONFIG } from './supabase.config';
 
 const PLACEHOLDER_MARK = 'YOUR_';
 
+/**
+ * Clave fija del almacenamiento de la sesión. Es explícita para poder leer la sesión guardada sin
+ * pasar por `getSession()` (que sin red y con el token caducado tarda ~25 s y devuelve `null`).
+ */
+export const AUTH_STORAGE_KEY = 'task-manager-auth';
+
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
   readonly client: SupabaseClient;
@@ -14,7 +20,12 @@ export class SupabaseService {
     this.assertConfigured('key', key);
 
     this.client = createClient(url, key, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
+        storageKey: AUTH_STORAGE_KEY,
+      },
     });
   }
 

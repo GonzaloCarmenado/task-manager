@@ -56,6 +56,14 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - Cambio de cuenta (lo hace el usuario): Claude ejecuta `npx supabase logout --yes` (el `!` y la herramienta Bash son **no TTY**, sin `--yes` falla). El `login` automático **no funciona desde `!` ni desde Claude**: el usuario lo ejecuta en una terminal normal fuera de Claude con `npx supabase login` (abre el SSO en el navegador; iniciar sesión con la cuenta del propietario, usando el perfil/ventana de esa cuenta). Claude nunca lee ni copia el token de acceso ni acepta `--token` pegado en el chat.
 - Nunca ejecutar comandos de Supabase contra proyectos de otras cuentas/organizaciones: no pertenecen a esta app.
 
+### Identidad y datos por usuario (spec 003)
+
+- La app crea sola una **sesión anónima** de Supabase (sin registro); el registro y el login llegan con la spec de cuenta. Detalles en `docs/supabase.md`.
+- **Toda tabla de datos de usuario** lleva `user_id` y RLS con `auth.uid()` en la misma migración.
+- Solo `AuthAccessService` (`core/services/auth.access.service.ts`) toca `supabase.auth`. **No usar `getSession()` para decidir el arranque** (sin red y con token caducado tarda ~25 s y devuelve `null`): la sesión guardada se lee directamente.
+- **`ready` significa que hay identidad, no conexión ni token vigente.** Las capas de datos aplican plazos propios, tratan los 401 y el modo sin red, e **indexan datos y cachés por `userId()`**.
+- Tras actualizar `@supabase/supabase-js`, ejecutar `pnpm verify:supabase` (manual).
+
 ### Móvil primero
 
 - La app final es **solo Android** vía Tauri. No hay versión web como entregable.
