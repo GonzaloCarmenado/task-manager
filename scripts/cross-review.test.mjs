@@ -268,3 +268,12 @@ test('hook-clarify ignora las plantillas (specs/_TEMPLATE) y no lanza ninguna re
   await new Promise((r) => child.on('close', r));
   assert.equal(out, '');
 });
+
+test('localDay usa el día local (no UTC), aunque la hora local ya sea otro día en UTC', async () => {
+  const { localDay } = await import('./cross-review.mjs');
+  assert.equal(typeof localDay, 'function');
+  // 00:30 hora local del 5 de enero: en zonas UTC+ sigue siendo el día 4 en UTC
+  assert.equal(localDay(new Date(2026, 0, 5, 0, 30)), '2026-01-05');
+  assert.equal(localDay(new Date(2026, 11, 31, 23, 59)), '2026-12-31');
+  assert.equal(localDay(new Date(2026, 8, 3, 12, 0)), '2026-09-03');
+});

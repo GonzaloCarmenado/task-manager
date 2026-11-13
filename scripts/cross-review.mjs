@@ -108,14 +108,23 @@ function git(...args) {
   return r.status === 0 ? r.stdout.trim() : null;
 }
 
+const pad = (n, len = 2) => String(n).padStart(len, '0');
+
+/** Día en hora local (AAAA-MM-DD); nunca `toISOString()`, que da el día en UTC. */
+export function localDay(d = new Date()) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 function dayCount() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDay();
   if (!existsSync(OUT_DIR)) return 0;
   return readdirSync(OUT_DIR).filter((f) => f.startsWith(today) && f.endsWith('.json')).length;
 }
 
 function stamp() {
-  return new Date().toISOString().replace(/[:.]/g, '-');
+  const d = new Date();
+  const time = `${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}-${pad(d.getMilliseconds(), 3)}`;
+  return `${localDay(d)}T${time}`;
 }
 
 function findExisting(label) {

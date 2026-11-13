@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 25 |
+| Turnos del usuario | 26 |
 | Preguntas `F` (funcionalidad) | 9 |
-| Preguntas `W` (flujo) | 12 |
-| **Total preguntas** | **21** |
+| Preguntas `W` (flujo) | 13 |
+| **Total preguntas** | **22** |
 
 ## Log
 
@@ -20,7 +20,7 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 003 | 2026-11-13 | "1-si, 2-si, 3-si" (nombre `task-manager`/`com.polyp.taskmanager`, zoneless, prefijo `app`) | 0 | Spec 001 aprobada. Generado esqueleto Angular 22 zoneless+Vitest en scratchpad y copiado (src, angular.json, tsconfig, package.json, configs de lint/prettier de la referencia). Interrumpido por el usuario |
 | 004 | 2026-11-13 | Reproche: "¿has copiado los agentes de SDD? specify, clarify, plan..." | 0 | No los había copiado. Ejecutado `specify init --ai claude` (Spec Kit 0.7.3): 9 skills `speckit-*` en `.claude/skills`, `.specify/`. Constitución rellena (TDD obligatorio), plantilla de tasks con tests obligatorios, CLAUDE.md documentado |
 | 005 | 2026-11-13 | "seguimos" | 0 | Scaffolding completado con TDD (Red→Green, 6 tests, 100 % cob.), lint/format/type-check/build OK, Husky, Tauri Android init, APK verificado en emulador (incidencia: ABI aarch64 vs x86_64 → pantalla en blanco, resuelto). Spec 001 marcada Implementada. Sin commit |
-| 006 | 2026-11-13 | "vale sí" (commit) + crear el repo en GitHub público | 2 W (¿commit? al cerrar el turno 005; ¿push? al cerrar este turno) | Creado `GonzaloCarmenado/task-manager` (público), remoto `origin`. Commit `b477c82` (85 ficheros), hook pre-commit OK. Sin push |
+| 006 | 2026-11-13 | "vale sí" (commit) + crear el repo en GitHub público | 2 W (¿commit? al cerrar el turno 005; ¿push? al cerrar este turno) | Creado `task-manager` (público), remoto `origin`. Commit `b477c82` (85 ficheros), hook pre-commit OK. Sin push |
 | 007 | 2026-11-13 | "sí, sube a main y la dejamos como principal" | 0 | Push `HEAD:main` a `origin`; `main` es la rama por defecto del repo. Upstream de la rama local → `origin/main` |
 | 008 | 2026-11-13 | Apuntar en CLAUDE.md que es obligatorio revisar todos los diseños en el navegador con la extensión de Chrome sincronizada | 0 | Añadida sección "Revisión visual obligatoria en el navegador" en CLAUDE.md, paso 9 del ciclo y plantilla de spec actualizados |
 | 009 | 2026-11-13 | Descripción del producto (gestor de tareas gamificado, desenfadado, usuarios no profesionales) y petición de un prompt de guideline de estilo para Stitch, sin CSS/tamaños/fuentes | 1 W (¿commit? al cerrar el turno 008, sin respuesta explícita) | Entregado el prompt en el chat; sin cambios de código |
@@ -39,4 +39,5 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 022 | 2026-11-13 | "lo dejamos todo listo y subimos" → interrumpido y corregido a "lo dejamos todo listo y seguimos" (se retira el push) | 1 F (método de autenticación para la spec 003) | Log al día y commit. **Sin push**: la orden de subir se retiró; el commit e5431dc y el del log quedan solo en local |
 | 023 | 2026-11-13 | Respuesta a la pregunta F de auth: "Anónimo primero, cuenta después" (decisión para la spec 003) | 0 | Registrada. Interrumpido |
 | 024 | 2026-11-13 | Nuevo flujo: spec → clarify → (si hay frontal) prompt para Stitch solo con funcionalidad, sin estilos → plan. Y revisar si existen los scripts de DeepSeek que Claude lanzaba para confirmar specs y reviews | 2 F (base del flujo: Spec Kit vs comandos propios; alcance de la revisión cruzada) | Flujo anotado en CLAUDE.md. Búsqueda: los scripts NO están en este repo; existen en un worktree más reciente del proyecto de referencia (`scripts/cross-review.mjs`, hooks, agente revisor de opencode). Decisión del usuario: comandos propios (se retira Spec Kit) + las dos revisiones. Portado: `scripts/cross-review.mjs` (+14 tests, uno nuevo por TDD: el hook ignora `_TEMPLATE`), agente `.opencode`, `AGENTS.md`, hooks en `.claude/settings.json`, comandos `/specify` `/clarify` `/stitch-prompt` `/sdd-plan` `/task` `/implement` `/pr-review`, plantillas de spec. El hook se disparó solo y DeepSeek devolvió 5 hallazgos reales sobre las specs 001/002 (ver respuesta). Sin commit |
-| 025 | 2026-11-13 | "Antes asegúrate de que no subimos nada raro (emails, URLs/rutas de mi PC, tokens); si es así, subimos" | 1 W (cómo purgar el historial ya publicado: reescribir / recrear repo / push normal) | Auditoría del árbol: sin tokens, sin correos propios, sin nombres privados. Hallazgo: rutas de tu disco (SDK, JDK, AVD) en `docs/setup-android.md` y spec 001 → corregido en el árbol. Pero ya están en `origin/main` (commit 7683b45). Pendiente de decisión; sin commit ni push |
+| 025 | 2026-11-13 | "Antes asegúrate de que no subimos nada raro (emails, URLs/rutas de mi PC, tokens); si es así, subimos" | 1 W (cómo purgar el historial ya publicado: reescribir / recrear repo / push normal) | Auditoría del árbol: sin tokens, sin correos propios, sin nombres privados. Hallazgo: rutas de tu disco (SDK, JDK, AVD) en `docs/setup-android.md` y spec 001 → corregido en el árbol. Pero ya están en `origin/main` (commit 7683b45). Decisión del usuario: reescribir + force push, y fijar las normas en CLAUDE.md. Hecho: `check-secrets` ahora detecta rutas locales y correos personales (8 tests nuevos, TDD), normas 7-10 en CLAUDE.md y constitución, commit de tooling, historial reescrito (5 commits verificados uno a uno, 0 coincidencias). El hook de revisión cruzada BLOQUEÓ el push (1 hallazgo grave: TypeScript sin `strict`; 2 leves). Pendiente de decisión del usuario |
+| 026 | 2026-11-13 | "a" (opción A: corregir los 3 hallazgos y volver a intentar el push) | 0 | `strict: true` en tsconfig (compila, 13 tests); `localDay()` con TDD en cross-review (15/15 tests) en vez de `toISOString().slice(0,10)`; referencia genérica en el log. Commit y nuevo intento de push |
