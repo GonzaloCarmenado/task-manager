@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 46 |
-| Preguntas `F` (funcionalidad) | 17 |
-| Preguntas `W` (flujo) | 23 |
-| **Total preguntas** | **40** |
+| Turnos del usuario | 50 |
+| Preguntas `F` (funcionalidad) | 19 |
+| Preguntas `W` (flujo) | 25 |
+| **Total preguntas** | **44** |
 
 ## Log
 
@@ -61,3 +61,7 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 044 | 2026-11-13 | "1, prueba otra vez" (el usuario hizo el login de la CLI) | 0 | Cuenta verificada por id de organización. T-41: `supabase config diff` (solo lectura): 12 diferencias; `config push` degradaría confirmación de email, MFA y SMS y cambiaría `site_url`, OTP y pooler. Decisión: no usar `config push`; el usuario activa solo el proveedor anónimo en el panel. Docs, plan y tareas actualizados |
 | 045 | 2026-11-13 | "listo" (interruptor de registro anónimo en el panel) | 0 | Comprobado: el remoto SIGUE desactivado (`config diff`: remoto false; `verify:auth`: `anonymous_provider_disabled`). Pendiente de que el usuario lo revise (proyecto/guardado). Arreglado `verify-auth.mjs` (salida limpia en Windows) |
 | 046 | 2026-11-13 | "no le había dado a guardar" / "listo" | 0 | Remoto verificado: registro anónimo activado (`config diff` y `verify:auth` OK). Android con sesión guardada, con y sin red, incluido token caducado (reloj +2 h): abre al instante. T-42, 43, 46 y 47 hechas. Spec 003 **Implementada** (sin commit). Pendiente: commit y push |
+| 047 | 2026-11-13 | "Sí" (commit de la spec 003) | 0 | Auditoría del diff (51 ficheros; recuento inicial erróneo corregido leyendo el diff de verdad), commit `6d821aa` |
+| 048 | 2026-11-13 | "Sí" (push) | 0 | Push a `main` sin forzar; el hook de revisión del diff no bloqueó |
+| 049 | 2026-11-13 | "Dale, solo una pasada de DeepSeek, déjalo en el md" (clarify de la spec 004) | 2 F (dónde activar el bloqueo; vista previa de apps recientes) | Ambas recomendadas: solo oferta inicial (interruptor con la spec de ajustes) y cubrir al pasar a segundo plano sin FLAG_SECURE. Clarify 004 cerrado. **Una sola pasada** de DeepSeek: 5 hallazgos (1 grave), todos válidos, registrados en `specs/004-bloqueo-huella/review.md` y aplicados a la spec sin tocar el clarify. Creado `stitch-prompt.md` de la 004 |
+| 050 | 2026-11-13 | Entrega de los diseños de Stitch de la spec 004 (carpeta de descargas) y recordatorio de copiarlos a la app | 0 | Revisados como datos no confiables (sin scripts ejecutados; solo Google Fonts y Tailwind CDN; sin datos privados). Copiados con verificación por hash a `specs/004-bloqueo-huella/design/` (3 pantallas; el `DESIGN.md` es idéntico al versionado, no se duplica). Revisión vs spec: 7 puntos (D1-D7), entre ellos datos de la app en la pantalla de bloqueo (contradice US-004-02 CA 2) y afirmaciones falsas de cifrado. Creados `design/README.md` y `stitch-ajustes.md` |

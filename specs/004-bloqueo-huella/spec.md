@@ -19,6 +19,7 @@ Que el usuario pueda proteger la app con el lector de huellas de Android (o el d
 - Separada de la spec 003 (sesión anónima) por tamaño y para que cada una tenga su propio ciclo y revisión. Se implementa **después** de la 003.
 - **Qué protege**: es un **bloqueo de pantalla**. Hay que autenticarse (`authenticate`) antes de ver ningún dato. No guarda ni cifra nada: es una protección de privacidad, no un almacén seguro. Proteger el token de sesión o credenciales con biometría solo tendrá sentido en la spec de vincular cuenta.
 - **Cuándo se pide**: al abrir la app desde cero y al volver de segundo plano si han pasado más de 30 segundos.
+- **Diseño recibido** (Stitch, 2026-11-13): ver `design/`. Es una referencia que **no se implementa tal cual**: contiene elementos de prototipo, datos de la app que la pantalla de bloqueo no puede mostrar y afirmaciones falsas de cifrado que hay que resolver antes del plan (ver `design/README.md`, decisiones D1 a D7).
 - Se usará el plugin comunitario de Tauri 2 `tauri-plugin-biometry` (crate y paquete npm `@choochmeque/tauri-plugin-biometry-api`), vigente en `0.3.0-rc.3` a 2026-11-13. Es la misma solución que ya se usó con éxito en el proyecto de referencia anterior, de donde se toma el patrón: plugin solo Android con versión fijada exacta, permisos acotados en una *capability* solo móvil, un único *access service* con carga diferida del plugin (en navegador y escritorio no se importa), aviso biométrico lanzado una sola vez al abrir con botón para repetirlo, oferta en el primer uso, preferencia local al dispositivo (sin base de datos) y «cancelar» tratado como no-error.
 - **Diferencia clave con el proyecto de referencia**: allí la huella protegía las *credenciales* (correo y contraseña) para volver a entrar tras cerrar sesión. Aquí no hay contraseña ni cierre de sesión: la huella es solo un bloqueo local.
 - Esta spec **no es un login**: el usuario ya tiene su identidad anónima (spec 003). La huella solo decide si se muestra la app.
@@ -33,12 +34,12 @@ Que el usuario pueda proteger la app con el lector de huellas de Android (o el d
 **Como** usuario de Android, **quiero** poder proteger mi app con mi huella, **para** que nadie que coja mi móvil vea mis tareas.
 
 **Criterios de aceptación:**
-- Solo se ofrece en Android y si el móvil tiene biometría disponible y registrada (`checkStatus`); si no, la opción no aparece (o aparece desactivada con el motivo).
+- Solo se ofrece en Android y si el móvil tiene biometría disponible y registrada (`checkStatus`), lo que implica un bloqueo de pantalla en el móvil; si no, no se ofrece nada.
 - Tras tener sesión lista por primera vez, con biometría disponible y sin decisión previa, se pregunta «¿Proteger la app con tu huella?» con tres respuestas: **Activar**, **Ahora no** y **No volver a preguntar**.
 - «Ahora no» vuelve a preguntar en el siguiente arranque; tras tres respuestas «Ahora no» se trata como «No volver a preguntar».
 - Para activar hay que superar una autenticación biométrica en ese momento (confirma que hay biometría registrada y que el usuario está presente).
 - La decisión y el estado de «activado» son preferencias **locales al dispositivo**: no se guardan en la base de datos ni se sincronizan. No se guarda ningún dato sensible.
-- Se puede activar y desactivar después; **desactivar exige autenticarse** para que otra persona no pueda quitar la protección. El lugar de ese interruptor se decide en el clarify.
+- **En esta spec solo existe la oferta inicial.** El interruptor para activar y desactivar después llega con la spec de ajustes (todavía no hay navegación). Consecuencias asumidas: «No volver a preguntar» solo se revierte borrando los datos de la app, y un bloqueo ya activado solo se desactiva solo cuando la biometría deja de estar disponible (US-004-03) o borrando los datos de la app.
 
 ### US-004-02 — Desbloquear con huella al abrir la app (P1)
 
@@ -46,11 +47,12 @@ Que el usuario pueda proteger la app con el lector de huellas de Android (o el d
 
 **Criterios de aceptación:**
 - Con el bloqueo activado, al abrir la app se muestra una **pantalla de bloqueo** y se lanza automáticamente el aviso biométrico, **una sola vez por apertura**; si se cancela queda el botón «Desbloquear con huella» para repetirlo.
-- Hasta superar la autenticación no se muestra **ningún dato** de la app (ni parcial ni en la vista previa de apps recientes).
+- Hasta superar la autenticación no se muestra **ningún dato** de la app, ni siquiera parcial. La vista previa de «apps recientes» se trata aparte, como mejor esfuerzo (CA 7).
 - Al volver de segundo plano tras **más de 30 segundos** se vuelve a pedir; antes de eso no.
 - El aviso del sistema está en español (título, subtítulo y botón de cancelar).
 - La pantalla de carga y la sesión anónima (spec 003) siguen su curso mientras la app está bloqueada.
 - No hay bucles de aviso: cancelar repetidamente no relanza el aviso solo.
+- **Apps recientes**: al pasar la app a segundo plano con el bloqueo activo se muestra la pantalla de bloqueo, para que la miniatura de «apps recientes» salga cubierta. No es garantizado al 100 % (Android hace la captura al pausar) y **no se usa `FLAG_SECURE`**, para no bloquear las capturas de pantalla del usuario ni exigir código nativo en un proyecto Android que se regenera. Queda documentado como limitación conocida.
 
 ### US-004-03 — Fallos y salida de emergencia: nunca se queda bloqueado (P1)
 
@@ -71,7 +73,7 @@ Que el usuario pueda proteger la app con el lector de huellas de Android (o el d
 - Los permisos se conceden solo en una *capability* de Android (`capabilities/mobile.json`, plataforma `android`), con los mínimos necesarios. Como el bloqueo solo usa `checkStatus` y `authenticate`, **no se conceden** los comandos de almacenamiento (`getData`/`setData`/`hasData`/`removeData`).
 - Carga diferida: en navegador y escritorio el módulo del plugin no se importa y la interfaz no muestra nada de huella.
 - Solo el *access service* de biometría toca el plugin; los componentes no.
-- Se comprueba que no hace falta el parche local que el proyecto de referencia aplicó a `getData` para los textos en español (aquí solo se usa `authenticate`). Si hiciera falta, se documenta.
+- Se comprueba en el plan que `authenticate` admite título, subtítulo y botón de cancelar en español sin el parche local que el proyecto de referencia aplicó a `getData`. Si no fuera así, **no se aplica ningún parche nativo sin decisión del usuario** y el criterio de aviso en español (US-004-02 CA 4) pasa a P2.
 - La release minificada (R8) y las reglas de conservación del plugin se comprobarán al preparar la primera release; esta spec no incluye builds de release.
 
 ---
@@ -85,11 +87,13 @@ Cada criterio tiene al menos un test. El orden es el orden Red → Green.
 | `US-004-01 solo se ofrece en Android con biometría disponible` | US-004-01 CA 1 | `src/app/core/services/biometric.access.service.spec.ts` y `biometric-lock.service.spec.ts` | unit (plugin simulado) |
 | `US-004-01 la oferta respeta Activar / Ahora no / No volver a preguntar` | US-004-01 CA 2 | `biometric-lock.service.spec.ts` | unit |
 | `US-004-01 tras tres «Ahora no» deja de preguntar` | US-004-01 CA 3 | idem | unit |
-| `US-004-01 activar exige autenticar; desactivar también` | US-004-01 CA 4, 6 | idem | unit |
+| `US-004-01 activar exige autenticar con la huella en ese momento` | US-004-01 CA 4 | idem | unit |
 | `US-004-01 la preferencia es local y no guarda datos sensibles` | US-004-01 CA 5 | idem | unit (almacenamiento simulado) |
 | `US-004-02 con bloqueo activo lanza el aviso una sola vez y deja el botón` | US-004-02 CA 1, 6 | idem | unit |
+| `US-004-02 el aviso del sistema se pide en español (título, subtítulo y botón de cancelar)` | US-004-02 CA 4 | `biometric.access.service.spec.ts` | unit |
 | `US-004-02 no muestra datos hasta autenticar` | US-004-02 CA 2 | `src/app/shared/components/biometric-lock-screen/biometric-lock-screen.spec.ts` | unit (componente) |
 | `US-004-02 vuelve a pedir pasados 30 s en segundo plano y no antes` | US-004-02 CA 3 | `biometric-lock.service.spec.ts` | unit (reloj simulado) |
+| `US-004-02 al pasar a segundo plano con el bloqueo activo se cubre la app con la pantalla de bloqueo` | US-004-02 CA 7 | `biometric-lock.service.spec.ts` y `app.spec.ts` | unit |
 | `US-004-02 la sesión sigue creándose en segundo plano mientras está bloqueada` | US-004-02 CA 5 | idem | unit |
 | `US-004-03 cancelar no es error y se clasifican los fallos del plugin` | US-004-03 CA 1, 4 | `biometric.access.service.spec.ts` | unit |
 | `US-004-03 tras agotar intentos se ofrece el método alternativo del móvil` | US-004-03 CA 2 | idem | unit |
@@ -148,10 +152,12 @@ export interface BiometricLockPrefs {
 
 ---
 
-## Decisiones abiertas (para el `/clarify` de esta spec)
+## Decisiones tomadas en el clarify
 
-1. **Dónde se activa/desactiva** el bloqueo, al no existir ajustes: ¿pantalla mínima de ajustes con ese único interruptor en esta spec, o solo la oferta inicial y el interruptor llega con la spec de ajustes o perfil?
-2. **Vista previa de apps recientes**: cómo ocultar el contenido (bandera `FLAG_SECURE` o pantalla de bloqueo al pasar a segundo plano) y si basta con la pantalla de bloqueo.
+1. **Interruptor**: solo la oferta inicial; el interruptor llega con la spec de ajustes.
+2. **Apps recientes**: se cubre al pasar a segundo plano; sin `FLAG_SECURE`.
+
+Ver [`clarify.md`](./clarify.md).
 
 ---
 
@@ -160,5 +166,6 @@ export interface BiometricLockPrefs {
 - Guardar credenciales o el token de sesión protegidos por biometría (spec de vincular cuenta).
 - Windows Hello, iOS, biometría en navegador, passkeys y WebAuthn.
 - Bloqueo por inactividad configurable por el usuario (el tiempo de 30 s es fijo).
-- Pantalla de ajustes completa o perfil de usuario (solo, como mucho, el interruptor mínimo si el clarify lo decide).
+- Pantalla de ajustes y el interruptor para activar o desactivar el bloqueo después de la oferta (spec de ajustes).
+- `FLAG_SECURE` y cualquier código nativo propio para ocultar la vista previa de apps recientes.
 - Builds de release y comprobación con R8 (se hará al preparar la primera release).

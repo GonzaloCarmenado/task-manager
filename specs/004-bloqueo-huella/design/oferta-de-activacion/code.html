@@ -1,0 +1,461 @@
+<!doctype html>
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_stack" name="shell-type" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'on-secondary-fixed': '#2a1700',
+              background: '#fcf8ff',
+              'surface-container-highest': '#e3dfff',
+              'on-tertiary-fixed-variant': '#005236',
+              'on-primary-fixed': '#07006c',
+              'primary-fixed-dim': '#c0c1ff',
+              'on-primary': '#ffffff',
+              'tertiary-fixed-dim': '#4edea3',
+              'surface-container': '#efebff',
+              'on-surface': '#181445',
+              tertiary: '#006c49',
+              'on-secondary': '#ffffff',
+              'on-error': '#ffffff',
+              'on-primary-container': '#fffbff',
+              error: '#ba1a1a',
+              'on-secondary-container': '#684000',
+              'tertiary-fixed': '#6ffbbe',
+              'secondary-container': '#fea619',
+              primary: '#4648d4',
+              secondary: '#855300',
+              'on-secondary-fixed-variant': '#653e00',
+              outline: '#767586',
+              'inverse-surface': '#2d2a5b',
+              'surface-container-low': '#f6f2ff',
+              'on-background': '#181445',
+              'surface-variant': '#e3dfff',
+              'surface-bright': '#fcf8ff',
+              'tertiary-container': '#00885d',
+              'surface-dim': '#dad6ff',
+              'on-tertiary-fixed': '#002113',
+              'inverse-primary': '#c0c1ff',
+              'primary-container': '#6063ee',
+              'error-container': '#ffdad6',
+              'on-error-container': '#93000a',
+              'inverse-on-surface': '#f3eeff',
+              'outline-variant': '#c7c4d7',
+              'on-surface-variant': '#464554',
+              'primary-fixed': '#e1e0ff',
+              surface: '#fcf8ff',
+              'secondary-fixed-dim': '#ffb95f',
+              'surface-tint': '#494bd6',
+              'secondary-fixed': '#ffddb8',
+              'on-tertiary-container': '#000703',
+              'on-primary-fixed-variant': '#2f2ebe',
+              'surface-container-high': '#e9e5ff',
+              'surface-container-lowest': '#ffffff',
+              'on-tertiary': '#ffffff',
+            },
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+            spacing: {
+              'space-md': '1rem',
+              gutter: '1rem',
+              margin: '1.25rem',
+              'space-sm': '0.5rem',
+              'space-lg': '1.5rem',
+              'space-xs': '0.25rem',
+              'space-xl': '2.25rem',
+            },
+            fontFamily: {
+              'headline-lg': ['Plus Jakarta Sans'],
+              'body-lg': ['Plus Jakarta Sans'],
+              'display-lg': ['Plus Jakarta Sans'],
+              'headline-md': ['Plus Jakarta Sans'],
+              'body-md': ['Plus Jakarta Sans'],
+              'body-sm': ['Plus Jakarta Sans'],
+              'label-sm': ['Plus Jakarta Sans'],
+              'label-lg': ['Plus Jakarta Sans'],
+              'label-md': ['Plus Jakarta Sans'],
+              'headline-sm': ['Plus Jakarta Sans'],
+            },
+            fontSize: {
+              'headline-lg': [
+                '28px',
+                { lineHeight: '36px', letterSpacing: '-0.02em', fontWeight: '700' },
+              ],
+              'body-lg': ['16px', { lineHeight: '24px', fontWeight: '500' }],
+              'display-lg': [
+                '36px',
+                { lineHeight: '44px', letterSpacing: '-0.03em', fontWeight: '800' },
+              ],
+              'headline-md': [
+                '22px',
+                { lineHeight: '28px', letterSpacing: '-0.01em', fontWeight: '700' },
+              ],
+              'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+              'body-sm': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+              'label-sm': [
+                '10px',
+                { lineHeight: '14px', letterSpacing: '0.04em', fontWeight: '700' },
+              ],
+              'label-lg': [
+                '14px',
+                { lineHeight: '20px', letterSpacing: '0.01em', fontWeight: '700' },
+              ],
+              'label-md': [
+                '12px',
+                { lineHeight: '16px', letterSpacing: '0.02em', fontWeight: '600' },
+              ],
+              'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100vw;
+          min-height: 100vh;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior-y: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen">
+    <header
+      class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"
+    >
+      <div class="h-16 px-margin flex items-center justify-between">
+        <button
+          aria-label="Volver"
+          class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors"
+          onclick="history.back()"
+          type="button"
+        >
+          <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+        </button>
+        <h1
+          class="font-headline-sm text-headline-sm text-on-surface tracking-tight text-center flex-1 px-space-sm truncate"
+        >
+          Oferta De Activacion
+        </h1>
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 flex flex-col relative w-full px-margin pt-16 pb-safe bg-surface">
+      <div class="flex flex-col w-full pb-space-xl">
+        <!-- Barra superior auxiliar: Tag de estado y selector de tema para prueba -->
+        <div class="flex items-center justify-between pt-space-xs pb-space-sm">
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant"
+          >
+            <span
+              class="material-symbols-outlined text-[16px] text-tertiary"
+              style="font-variation-settings: 'FILL' 1"
+              >verified_user</span
+            >
+            <span class="font-label-sm text-label-sm uppercase tracking-wider"
+              >Tu espacio protegido</span
+            >
+          </div>
+          <!-- Botón interactivo de Modo Claro / Modo Oscuro -->
+          <button
+            aria-label="Cambiar tema visual claro u oscuro"
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-highest transition-colors active:scale-95"
+            id="theme-toggle-btn"
+            onclick="toggleAppTheme()"
+            type="button"
+          >
+            <span
+              class="material-symbols-outlined text-[16px] text-primary"
+              id="theme-icon"
+              style="font-variation-settings: 'FILL' 1"
+              >dark_mode</span
+            >
+            <span class="font-label-md text-label-md text-on-surface" id="theme-label">Oscuro</span>
+          </button>
+        </div>
+        <!-- Hero Visual: Emblema táctil gamificado con destello y recompensa -->
+        <div class="relative flex flex-col items-center justify-center my-space-md py-space-sm">
+          <!-- Halo ambiental difuso de elevación -->
+          <div
+            class="absolute w-44 h-44 rounded-full bg-primary-fixed-dim/40 blur-2xl pointer-events-none"
+          ></div>
+          <div
+            class="absolute w-28 h-28 rounded-full bg-secondary-container/20 blur-xl translate-y-3 pointer-events-none"
+          ></div>
+          <!-- Escudo / Insignia amigable con huella dactilar central -->
+          <div
+            class="relative w-36 h-36 rounded-3xl bg-surface-container-lowest shadow-lg shadow-primary/10 flex items-center justify-center overflow-visible"
+          >
+            <!-- Decoración lúdica: Píldora de Racha Segura flotante -->
+            <div
+              class="absolute -top-3 -right-2 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container shadow-md flex items-center gap-1 animate-bounce"
+              style="animation-duration: 3s"
+            >
+              <span
+                class="material-symbols-outlined text-[14px]"
+                style="font-variation-settings: 'FILL' 1"
+                >local_fire_department</span
+              >
+              <span class="font-label-sm text-label-sm font-bold">+50 XP</span>
+            </div>
+            <!-- Icono central: Escudo con huella y curvas orgánicas -->
+            <div
+              class="w-24 h-24 rounded-2xl bg-surface-container flex items-center justify-center relative"
+            >
+              <span
+                class="material-symbols-outlined text-[54px] text-primary transition-transform hover:scale-105"
+                style="font-variation-settings: 'FILL' 1"
+              >
+                fingerprint
+              </span>
+              <!-- Chispita de seguridad lúdica -->
+              <span
+                class="material-symbols-outlined text-[18px] text-secondary absolute bottom-2 right-2 animate-pulse"
+                style="font-variation-settings: 'FILL' 1"
+              >
+                auto_awesome
+              </span>
+            </div>
+          </div>
+          <!-- Píldora motivacional gamificada -->
+          <div
+            class="mt-space-md inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed"
+          >
+            <span
+              class="material-symbols-outlined text-[15px]"
+              style="font-variation-settings: 'FILL' 1"
+              >lock_open_right</span
+            >
+            <span class="font-label-md text-label-md">Privacidad a tu ritmo</span>
+          </div>
+        </div>
+        <!-- Bloque tipográfico principal -->
+        <div class="text-center px-space-xs mt-space-xs">
+          <h2 class="font-headline-md text-headline-md text-on-surface tracking-tight">
+            ¿Protegemos tus tareas con tu huella?
+          </h2>
+          <p class="font-body-md text-body-md text-on-surface-variant mt-2 max-w-sm mx-auto">
+            Así solo tú podrás ver tus metas, notas y rachas cuando abras la app. Rápido, seguro y
+            sin contraseñas.
+          </p>
+        </div>
+        <!-- Tarjetas informativas de valor: Sin fricción y sin estrés -->
+        <div class="flex flex-col gap-space-sm mt-space-lg">
+          <!-- Tarjeta 1: Desbloqueo ultra rápido -->
+          <div
+            class="flex items-start gap-3.5 p-space-md rounded-2xl bg-surface-container-lowest shadow-sm"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center shrink-0"
+            >
+              <span
+                class="material-symbols-outlined text-[20px] text-on-primary-fixed"
+                style="font-variation-settings: 'FILL' 1"
+                >bolt</span
+              >
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="font-headline-sm text-headline-sm text-on-surface text-[15px]"
+                >Un toque y listo</span
+              >
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                El lector de huellas de tu móvil se encarga de todo en menos de un segundo.
+              </p>
+            </div>
+          </div>
+          <!-- Tarjeta 2: Resguardo de racha y metas privadas -->
+          <div
+            class="flex items-start gap-3.5 p-space-md rounded-2xl bg-surface-container-low shadow-sm"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-tertiary-fixed-dim/40 flex items-center justify-center shrink-0"
+            >
+              <span
+                class="material-symbols-outlined text-[20px] text-tertiary"
+                style="font-variation-settings: 'FILL' 1"
+                >shield_with_heart</span
+              >
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="font-headline-sm text-headline-sm text-on-surface text-[15px]"
+                >Tus secretos a salvo</span
+              >
+              <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                Tus listas personales, recordatorios familiares y notas íntimas se mantienen solo
+                para tus ojos.
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- Zona de acción para el pulgar (Thumb zone ergonómica) -->
+        <div class="flex flex-col gap-2.5 mt-space-xl pt-space-xs">
+          <!-- Acción 1: Primaria destacada con microfeedback y altura táctil accesible -->
+          <button
+            aria-label="Activar protección biométrica con huella"
+            class="w-full h-[54px] rounded-full bg-primary text-on-primary font-label-lg text-label-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/25 active:scale-[0.98] transition-all"
+            onclick="handleBiometricAction('activate')"
+            type="button"
+          >
+            <span
+              class="material-symbols-outlined text-[20px]"
+              style="font-variation-settings: 'FILL' 1"
+              >fingerprint</span
+            >
+            <span>Activar protección</span>
+          </button>
+          <!-- Acción 2: Secundaria contenida, suave y afable -->
+          <button
+            aria-label="Preguntarme más tarde"
+            class="w-full h-[50px] rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-lg text-label-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+            onclick="handleBiometricAction('later')"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[18px] text-outline">schedule</span>
+            <span>Preguntarme más tarde</span>
+          </button>
+          <!-- Acción 3: Terciaria sin presión -->
+          <button
+            aria-label="No volver a preguntar"
+            class="w-full h-[48px] rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors active:scale-95"
+            onclick="handleBiometricAction('never')"
+            type="button"
+          >
+            <span>No volver a preguntar</span>
+          </button>
+        </div>
+        <!-- Notificación Toast de feedback interactivo -->
+        <div
+          aria-live="polite"
+          class="fixed bottom-6 left-5 right-5 max-w-sm mx-auto p-4 rounded-2xl bg-inverse-surface text-inverse-on-surface shadow-xl flex items-center gap-3 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none z-50"
+          id="feedback-toast"
+          role="status"
+        >
+          <div
+            class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"
+            id="toast-icon-wrap"
+          >
+            <span class="material-symbols-outlined text-[18px] text-on-primary" id="toast-icon"
+              >check</span
+            >
+          </div>
+          <div class="flex-1 min-w-0">
+            <p
+              class="font-label-lg text-label-lg text-inverse-on-surface leading-tight"
+              id="toast-title"
+            >
+              Configuración guardada
+            </p>
+            <p
+              class="font-body-sm text-body-sm text-inverse-on-surface/80 leading-tight mt-0.5"
+              id="toast-desc"
+            >
+              Acción procesada con éxito.
+            </p>
+          </div>
+        </div>
+      </div>
+      <script>
+        // Control de Tema Claro / Oscuro para verificación interactiva
+        function toggleAppTheme() {
+          const htmlElem = document.documentElement;
+          const iconElem = document.getElementById('theme-icon');
+          const labelElem = document.getElementById('theme-label');
+          const isDark = htmlElem.classList.toggle('dark');
+
+          if (isDark) {
+            iconElem.textContent = 'light_mode';
+            labelElem.textContent = 'Claro';
+          } else {
+            iconElem.textContent = 'dark_mode';
+            labelElem.textContent = 'Oscuro';
+          }
+        }
+
+        // Manejo de acciones y respuesta inmediata
+        let toastTimer = null;
+        function handleBiometricAction(type) {
+          const toast = document.getElementById('feedback-toast');
+          const toastTitle = document.getElementById('toast-title');
+          const toastDesc = document.getElementById('toast-desc');
+          const toastIcon = document.getElementById('toast-icon');
+
+          if (type === 'activate') {
+            toastTitle.textContent = '¡Sensor activado!';
+            toastDesc.textContent = 'Tu huella ahora protege tus rachas y tareas privadas.';
+            toastIcon.textContent = 'fingerprint';
+          } else if (type === 'later') {
+            toastTitle.textContent = 'Te recordaremos luego';
+            toastDesc.textContent = 'Puedes activarlo cuando quieras desde tu perfil.';
+            toastIcon.textContent = 'hourglass_empty';
+          } else if (type === 'never') {
+            toastTitle.textContent = 'Entendido, sin molestias';
+            toastDesc.textContent = 'No volveremos a preguntarte por la huella.';
+            toastIcon.textContent = 'block';
+          }
+
+          // Mostrar el toast
+          clearTimeout(toastTimer);
+          toast.classList.remove('translate-y-24', 'opacity-0');
+          toast.classList.add('translate-y-0', 'opacity-100');
+
+          toastTimer = setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-24', 'opacity-0');
+          }, 3200);
+        }
+      </script>
+    </main>
+  </body>
+</html>
