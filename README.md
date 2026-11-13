@@ -8,7 +8,7 @@ Gestor de tareas **gamificado** para móvil (Android), pensado para usuarios no 
 
 - **Angular 22** (standalone, Signals, OnPush, zoneless) — UI propia, **sin Angular Material**
 - **Tauri 2** — solo **Android** (no hay versión web como entregable)
-- **Supabase** — backend (conexión en curso, spec 002)
+- **Supabase** — backend (cliente y CLI configurados; sin tablas todavía)
 - pnpm · Vitest · ESLint + Prettier · Husky
 
 ## Puesta en marcha
@@ -25,7 +25,7 @@ pnpm tauri:android:dev  # app en emulador/dispositivo Android
 
 ## Base de datos (Supabase)
 
-El esquema se define **solo con migraciones versionadas** en `supabase/migrations/`; nunca se cambia desde el panel web. Cualquiera que clone el repo podrá crear sus propias tablas en **su propio proyecto Supabase** con la CLI (`supabase link` + `db push`). Las migraciones llegarán con las primeras features; el flujo se documentará en `docs/supabase.md` (spec 002).
+El esquema se define **solo con migraciones versionadas** en `supabase/migrations/`; nunca se cambia desde el panel web. Cualquiera que clone el repo podrá crear sus propias tablas en **su propio proyecto Supabase** con la CLI (`supabase link` + `db push`). Las migraciones llegarán con las primeras features; el flujo está en [`docs/supabase.md`](./docs/supabase.md).
 
 ## Secretos
 

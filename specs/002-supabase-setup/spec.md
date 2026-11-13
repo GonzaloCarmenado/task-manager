@@ -2,7 +2,7 @@
 
 **Rama**: `interaction-logging-claude-md` (actual)
 **Creada**: 2026-11-13
-**Estado**: Borrador
+**Estado**: Implementada
 
 ---
 
@@ -132,3 +132,18 @@ Sin UI nueva: la revisión visual en navegador no aplica en esta spec.
 - Entorno local con Docker (`supabase start`) y seeds.
 - CI/CD y despliegue de edge functions.
 - Notificaciones/alarmas.
+
+---
+
+## Verificación realizada
+
+- Red: 3 ficheros de test fallan por módulos inexistentes → Green: 13/13 tests pasan, cobertura 100 %.
+- Un test se corrigió por un fallo del propio test (`TestBed` reconfigurado dos veces en la misma prueba), no del código.
+- `pnpm lint`, `format:check`, `type-check`, `secrets:check`, `build` en verde.
+- Regla ESLint comprobada: importar `@supabase/supabase-js` fuera del servicio falla.
+- Cuenta de la CLI verificada por id de organización antes de vincular; `supabase link` OK.
+- `db push --remote --dry-run` y `migration list --remote`: remoto al día, 0 migraciones, sin pedir contraseña de BBDD.
+- `secrets:check` afinado: ignora referencias `env(VAR)` de `config.toml` (falso positivo) y sigue detectando literales.
+- Descubierto: la CLI 3.x apunta a **local** por defecto; los scripts `db:*` usan `--remote` explícito.
+- US-002-05 verificada con una sonda temporal (revertida, no commiteada) que consulta una tabla inexistente: navegador (extensión de Chrome) y APK en emulador devuelven `404 PGRST205`, es decir, la petición llega al proyecto y este responde. La clave se validó por tipo (*publishable*) sin imprimirla.
+- La CSP de Tauri sigue en `null` (sin restricción) y la conexión funciona; se endurecerá en una spec de seguridad posterior.

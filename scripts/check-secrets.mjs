@@ -14,7 +14,7 @@ const CONTENT_RULES = [
   ['token de GitHub', /\bgh[pousr]_[A-Za-z0-9]{20,}/],
   ['clave de AWS', /\bAKIA[0-9A-Z]{16}\b/],
   ['token de Slack', /\bxox[abprs]-[A-Za-z0-9-]{10,}/],
-  ['contraseña o api key literal', /(password|passwd|secret|api[_-]?key|token)\s*[:=]\s*['"][^'"\s]{8,}['"]/i],
+  ['contraseña o api key literal', /(password|passwd|secret|api[_-]?key|token)\s*[:=]\s*['"](?!env\()[^'"\s]{8,}['"]/i],
 ];
 
 const FILE_RULES = [

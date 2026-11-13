@@ -46,7 +46,7 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 | Vitest | ^4 | Unit testing |
 | ESLint + typescript-eslint + Prettier | — | Lint y formato |
 | Husky + lint-staged | — | Pre-commit: lint, lint-staged y tests |
-| Supabase JS + CLI | ^2 | Backend (spec 002). Esquema solo por migraciones versionadas |
+| Supabase JS + CLI | ^2 / 3 | Backend (spec 002). Esquema solo por migraciones versionadas; la CLI 3.x apunta a **local** por defecto, los scripts `db:*` usan `--remote`. Ver `docs/supabase.md` |
 
 ### Cuenta de Supabase (CRITICO)
 
@@ -111,6 +111,10 @@ pnpm test                  # Vitest en watch
 pnpm test:ci               # Vitest sin watch
 pnpm lint:fix && pnpm format
 pnpm secrets:check        # escaneo de secretos (también en pre-commit)
+pnpm env:init              # crea src/environments/environment.ts (ignorado) desde el ejemplo
+pnpm db:new <nombre>       # nueva migración SQL
+pnpm db:push:dry           # simula la subida de migraciones (siempre --remote)
+pnpm db:push               # aplica migraciones al proyecto remoto vinculado
 pnpm type-check
 pnpm tauri android dev     # App en emulador/dispositivo Android
 pnpm tauri android build   # APK/AAB

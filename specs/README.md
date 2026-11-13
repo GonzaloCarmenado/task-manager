@@ -9,7 +9,7 @@
 | # | Especificación | Estado | Descripción |
 |---|---|---|---|
 | [001](./001-scaffolding/spec.md) | Scaffolding Angular + Tauri Android | Implementada | Esqueleto Angular sin Material, lint/format/tests/hooks, Tauri 2 solo Android |
-| [002](./002-supabase-setup/spec.md) | Conexión con Supabase | Borrador | CLI, migraciones, cliente Angular y entorno sin secretos en git |
+| [002](./002-supabase-setup/spec.md) | Conexión con Supabase | Implementada | CLI, migraciones, cliente Angular y entorno sin secretos en git |
 
 ---
 

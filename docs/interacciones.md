@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 18 |
-| Preguntas `F` (funcionalidad) | 5 |
-| Preguntas `W` (flujo) | 6 |
-| **Total preguntas** | **11** |
+| Turnos del usuario | 21 |
+| Preguntas `F` (funcionalidad) | 6 |
+| Preguntas `W` (flujo) | 10 |
+| **Total preguntas** | **16** |
 
 ## Log
 
@@ -33,3 +33,6 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 016 | 2026-11-13 | "ya está, mira a ver si funciona" (login hecho) | 1 F (¿es el proyecto por defecto de la cuenta el proyecto de la app, o creamos otro?) | Login OK: cuenta correcta (un proyecto por defecto, org distinta de la sesión anterior). Descubierto que el marcador "org Task-manager" era de la cuenta anterior → corregido en CLAUDE.md y memoria (ahora por id de org) |
 | 017 | 2026-11-13 | "He creado este" (URL del proyecto Supabase, coincide con el existente) | 1 W (aprobación explícita de la spec 002, aún no dada) | Proyecto confirmado como el de la app. Spec 002 y memoria actualizadas. No se ha vinculado ni implementado nada |
 | 018 | 2026-11-13 | Antes del commit: asegurar que no hay nada raro, que quien entre sepa que hay migraciones para crear tablas, y vigilar siempre que jamás se exponen URLs privadas, contraseñas ni tokens | 0 | Auditoría (sin secretos; ref de proyecto y rutas/nombre de proyecto privado en 3 ficheros ya publicados). Regla "Seguridad y secretos" en CLAUDE.md y constitución v1.1.0, `pnpm secrets:check` en pre-commit (Red/Green verificado), `.gitignore` reforzado, README creado, referencias privadas quitadas del árbol de trabajo |
+| 019 | 2026-11-13 | "Sí, hazlo" (reescribir el historial publicado y hacer el commit pendiente) | 1 F (correo de autor: noreply de GitHub vs. actual → noreply). Contadas además 2 W formuladas en el turno 018 (¿reescribir historial?, ¿commit?) | Historial reescrito (raíz vacía + 1 commit, autor noreply) y force push a `main` con `--force-with-lease`. Verificado: árbol sin datos privados, hook y tests OK. El commit antiguo sigue accesible por SHA en GitHub (objeto huérfano) |
+| 020 | 2026-11-13 | "vamos" (tomado como aprobación de la spec 002) | 1 W (¿commit?) | Implementada la spec 002 con TDD (13 tests, 100 %): SupabaseService, token de config, environment.example + env:init, regla ESLint, supabase init/link, scripts db:* con --remote, docs/supabase.md. Escáner de secretos afinado. Pendiente: clave publishable (la pega el usuario) y verificar conectividad |
+| 021 | 2026-11-13 | "sí, listo" (clave pegada + visto bueno al commit) | 1 W (¿push?) | Clave validada por tipo sin imprimirla. Conectividad verificada en navegador (extensión Chrome) y APK/emulador: `404 PGRST205`. Sonda temporal revertida. Spec 002 cerrada. Commit de la spec 002 |

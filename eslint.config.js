@@ -36,6 +36,24 @@ export default [
     },
   },
   {
+    files: ['src/**/*.ts'],
+    ignores: ['src/app/core/services/supabase.ts', '**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@supabase/supabase-js',
+              message:
+                'Usa SupabaseService (core/services/supabase.ts) desde un *.access.service.ts.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     files: ['**/*.spec.ts'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
