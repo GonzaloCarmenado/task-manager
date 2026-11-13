@@ -54,3 +54,7 @@ src/environments/environment.ts
 supabase/.temp/
 supabase/.env
 supabase/.env.*
+
+# Revisión cruzada (informes y copias temporales del revisor)
+reports/
+.review/

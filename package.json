@@ -26,7 +26,8 @@
     "db:pull": "supabase db pull --remote",
     "db:new": "supabase migration new",
     "db:status": "supabase migration list --remote",
-    "db:push:dry": "supabase db push --remote --dry-run"
+    "db:push:dry": "supabase db push --remote --dry-run",
+    "test:scripts": "node --test scripts/*.test.mjs"
   },
   "private": true,
   "packageManager": "pnpm@11.9.0",

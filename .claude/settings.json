@@ -1,0 +1,31 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/cross-review.mjs\" hook-clarify",
+            "timeout": 600,
+            "statusMessage": "Revisión cruzada de la spec (DeepSeek)..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(*git push*)",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/cross-review.mjs\" hook-push",
+            "timeout": 600,
+            "statusMessage": "Revisión cruzada antes del push (DeepSeek)..."
+          }
+        ]
+      }
+    ]
+  }
+}

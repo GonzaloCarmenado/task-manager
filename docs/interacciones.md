@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 22 |
-| Preguntas `F` (funcionalidad) | 7 |
-| Preguntas `W` (flujo) | 10 |
-| **Total preguntas** | **17** |
+| Turnos del usuario | 25 |
+| Preguntas `F` (funcionalidad) | 9 |
+| Preguntas `W` (flujo) | 12 |
+| **Total preguntas** | **21** |
 
 ## Log
 
@@ -37,3 +37,6 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 020 | 2026-11-13 | "vamos" (tomado como aprobación de la spec 002) | 1 W (¿commit?) | Implementada la spec 002 con TDD (13 tests, 100 %): SupabaseService, token de config, environment.example + env:init, regla ESLint, supabase init/link, scripts db:* con --remote, docs/supabase.md. Escáner de secretos afinado. Pendiente: clave publishable (la pega el usuario) y verificar conectividad |
 | 021 | 2026-11-13 | "sí, listo" (clave pegada + visto bueno al commit) | 1 W (¿push?) | Clave validada por tipo sin imprimirla. Conectividad verificada en navegador (extensión Chrome) y APK/emulador: `404 PGRST205`. Sonda temporal revertida. Spec 002 cerrada. Commit de la spec 002 |
 | 022 | 2026-11-13 | "lo dejamos todo listo y subimos" → interrumpido y corregido a "lo dejamos todo listo y seguimos" (se retira el push) | 1 F (método de autenticación para la spec 003) | Log al día y commit. **Sin push**: la orden de subir se retiró; el commit e5431dc y el del log quedan solo en local |
+| 023 | 2026-11-13 | Respuesta a la pregunta F de auth: "Anónimo primero, cuenta después" (decisión para la spec 003) | 0 | Registrada. Interrumpido |
+| 024 | 2026-11-13 | Nuevo flujo: spec → clarify → (si hay frontal) prompt para Stitch solo con funcionalidad, sin estilos → plan. Y revisar si existen los scripts de DeepSeek que Claude lanzaba para confirmar specs y reviews | 2 F (base del flujo: Spec Kit vs comandos propios; alcance de la revisión cruzada) | Flujo anotado en CLAUDE.md. Búsqueda: los scripts NO están en este repo; existen en un worktree más reciente del proyecto de referencia (`scripts/cross-review.mjs`, hooks, agente revisor de opencode). Decisión del usuario: comandos propios (se retira Spec Kit) + las dos revisiones. Portado: `scripts/cross-review.mjs` (+14 tests, uno nuevo por TDD: el hook ignora `_TEMPLATE`), agente `.opencode`, `AGENTS.md`, hooks en `.claude/settings.json`, comandos `/specify` `/clarify` `/stitch-prompt` `/sdd-plan` `/task` `/implement` `/pr-review`, plantillas de spec. El hook se disparó solo y DeepSeek devolvió 5 hallazgos reales sobre las specs 001/002 (ver respuesta). Sin commit |
+| 025 | 2026-11-13 | "Antes asegúrate de que no subimos nada raro (emails, URLs/rutas de mi PC, tokens); si es así, subimos" | 1 W (cómo purgar el historial ya publicado: reescribir / recrear repo / push normal) | Auditoría del árbol: sin tokens, sin correos propios, sin nombres privados. Hallazgo: rutas de tu disco (SDK, JDK, AVD) en `docs/setup-android.md` y spec 001 → corregido en el árbol. Pero ya están en `origin/main` (commit 7683b45). Pendiente de decisión; sin commit ni push |

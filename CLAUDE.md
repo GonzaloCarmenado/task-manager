@@ -42,7 +42,7 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 | Angular | ^22 | Standalone components, Signals, OnPush |
 | **Sin Angular Material** | — | UI propia con SCSS (tokens/variables CSS). No instalar `@angular/material` |
 | Tauri | ^2 | **Solo Android** (`tauri android dev/build`). Sin builds desktop |
-| pnpm | 9 | Gestor de paquetes — **NUNCA** usar npm ni yarn |
+| pnpm | 11 | Gestor de paquetes — **NUNCA** usar npm ni yarn |
 | Vitest | ^4 | Unit testing |
 | ESLint + typescript-eslint + Prettier | — | Lint y formato |
 | Husky + lint-staged | — | Pre-commit: lint, lint-staged y tests |
@@ -91,6 +91,13 @@ Reglas operativas:
 4. Si algo sensible llegó a publicarse: **rotar la credencial primero**, y solo después valorar reescribir el historial (requiere confirmación explícita; es destructivo).
 5. Los ficheros de memoria, specs y el log de interacciones también son públicos: usar referencias genéricas ("la cuenta del propietario", "proyecto privado anterior").
 6. La base de datos solo cambia por **migraciones versionadas** en `supabase/migrations/` (sin datos reales ni seeds con información personal). Quien clone el repo debe poder crear sus tablas con `db push` en su propio proyecto.
+7. **Nunca rutas de la máquina del usuario** en código, docs, specs, comandos, logs ni commits: ni rutas que empiecen por una letra de unidad de disco, ni carpetas personales del sistema (`home` o `Users` seguidas del nombre de usuario), ni nombres de usuario del sistema. Usar placeholders (`<ruta del Android SDK>`, `$ANDROID_HOME`) y variables de entorno. Los correos solo pueden ser genéricos o `noreply`.
+8. **Auditoría obligatoria antes de cada commit y de cada push**, y no basta con el escáner:
+   - `pnpm secrets:check` (detecta tokens, contraseñas, claves, **rutas locales y correos personales**) y revisar a mano `git diff --cached`.
+   - Antes del push, revisar también lo que viaja: `git log -p origin/main..HEAD` y las URLs nuevas. Los mensajes de commit y los cuerpos de PR también son públicos.
+   - El escáner **no** detecta URLs privadas, nombres de proyectos/clientes ni ids de cuentas: eso se revisa a mano siempre.
+9. Las salidas de herramientas (informes de `reports/`, logs de hooks, errores de CLI) suelen contener rutas locales, correos o ids de cuenta: **no se pegan en el repo** (specs, docs, log de interacciones). `reports/` y `.review/` están ignorados.
+10. Si algo sensible ya se publicó: rotar la credencial (si lo es), reescribir el historial local para que no esté en ningún commit, `git push --force-with-lease` **con confirmación explícita del usuario**, y recordar que los commits antiguos siguen accesibles en GitHub por su hash exacto un tiempo (solo borrar y recrear el repo los elimina del todo).
 
 ---
 
@@ -109,6 +116,7 @@ Reglas operativas:
 pnpm start                 # ng serve — solo para pruebas rápidas en navegador
 pnpm test                  # Vitest en watch
 pnpm test:ci               # Vitest sin watch
+pnpm test:scripts          # tests de los scripts de ayuda (node --test)
 pnpm lint:fix && pnpm format
 pnpm secrets:check        # escaneo de secretos (también en pre-commit)
 pnpm env:init              # crea src/environments/environment.ts (ignorado) desde el ejemplo
@@ -122,29 +130,40 @@ pnpm tauri android build   # APK/AAB
 
 ### Comandos de Claude (`.claude/commands/`)
 
-| Comando | Qué hace |
-|---|---|
-| `/spec` | Crea una spec SDD (con plan de tests) y espera aprobación |
-| `/pr` | Prepara y abre una PR tras confirmación |
-| `/stats` | Muestra los contadores de interacciones |
+Pipeline SDD+TDD (portado del proyecto de referencia; sustituye a Spec Kit, que se retiró):
 
-### Skills de Spec Kit (`.claude/skills/`, v0.7.3)
+```
+/specify → /clarify → [/stitch-prompt] → /sdd-plan → /task → /implement → /pr-review
+```
 
-Pipeline completo para features **grandes** (instalado con `specify init --ai claude`; plantillas y constitución en `.specify/`):
+| Fase | Comando | Artefacto | Cuándo parar |
+|---|---|---|---|
+| 1. Especificación | `/specify` | `specs/NNN-nombre/spec.md` | Esperar aprobación del usuario |
+| 2. Clarificación | `/clarify` | `clarify.md` (cierra con `Estado: CERRADO`) | Esperar respuestas; revisión cruzada automática |
+| 3. Diseño (solo si hay frontal) | `/stitch-prompt` | `stitch-prompt.md` | Esperar el diseño de Stitch |
+| 4. Plan técnico | `/sdd-plan` | `plan.md` | Esperar aprobación del usuario |
+| 5. Tareas | `/task` | `tasks.md` (TDD: Red antes que Green) | Esperar aprobación |
+| 6. Implementación | `/implement` | Código + tests + verificación visual | Ante `db push`, borrados o fallos |
+| 7. Revisión y PR | `/pr-review` | `review.md` + PR | Confirmación para `gh pr create` |
 
-| Skill | Cuándo |
-|---|---|
-| `/speckit-constitution` | Enmendar `.specify/memory/constitution.md` (ya rellena: TDD, móvil, sin Material) |
-| `/speckit-specify` | Spec de una feature grande |
-| `/speckit-clarify` | Opcional, antes del plan: preguntas dirigidas (cuentan como `F`) |
-| `/speckit-plan` | Plan técnico (`plan.md`, `data-model.md`) |
-| `/speckit-tasks` | Tareas ordenadas por historia; **tests siempre obligatorios** (TDD) |
-| `/speckit-analyze` | Opcional: consistencia spec/plan/tasks antes de implementar |
-| `/speckit-checklist` | Opcional: checklist de calidad de requisitos |
-| `/speckit-implement` | Ejecuta las tareas respetando Red → Green → Refactor |
-| `/speckit-taskstoissues` | Convierte tareas en issues de GitHub (solo si el usuario lo pide) |
+Otros: `/pr` (abre una PR tras confirmación) y `/stats` (contadores de interacciones). Cada comando registra el turno y las preguntas en `docs/interacciones.md`.
 
-Uso: specs pequeñas/medianas → `/spec`. Specs grandes → pipeline `speckit-*`. En ambos casos las specs viven en `specs/NNN-nombre/` y rigen las reglas de flujo (sin commit/push/PR sin confirmación). La extensión de git de Spec Kit (auto-commits) **no está instalada** a propósito.
+Artefactos por spec: `spec.md`, `clarify.md`, `stitch-prompt.md` (si hay frontal), `plan.md`, `tasks.md`, `review.md`. `/clarify` es siempre obligatorio (mínimo 2 preguntas). La spec declara `**Ciclo**: completo|simple` y `**Frontal**: sí|no`.
+
+### Revisión cruzada con DeepSeek (`scripts/cross-review.mjs`)
+
+Un segundo modelo, con contexto limpio y de solo lectura, revisa el trabajo antes de seguir. Lo lanzan **hooks de Claude Code** (`.claude/settings.json`):
+
+| Cuándo | Qué revisa | Si hay hallazgos graves (alta/media) |
+|---|---|---|
+| Al guardar un `clarify.md` con `Estado: CERRADO` (hook `hook-clarify`) | `spec.md` + `clarify.md` | **Parar**, resumir al usuario cuáles son válidos y esperar su decisión |
+| Antes de cada `git push` (hook `hook-push`) | El diff de la rama contra `origin/main` | **El push se bloquea** hasta que el usuario decida; si sube igualmente: `node scripts/cross-review.mjs accept` y repetir el push |
+
+- Proveedor: `opencode run` con el agente de solo lectura `.opencode/agents/reviewer.md`; si no hay opencode, la API de DeepSeek. Ambos usan `DEEPSEEK_API_KEY` **del entorno del usuario** (nunca en el repo). Reglas del revisor en `AGENTS.md`.
+- Al revisor solo llega lo **versionado en HEAD** (copia temporal sin `environment.ts`, `.env`, `supabase/.temp`…). Informes en `reports/cross-review/` (ignorado por git).
+- `Ciclo: simple` en la spec salta ambas revisiones (solo mantenimiento sin lógica). `CROSS_REVIEW=0` las desactiva; límite de 20 revisiones al día.
+- Si el revisor no está disponible, avisa y el flujo sigue (no bloquea). Los hallazgos son una **segunda opinión**: Claude indica cuáles considera válidos y cuáles no; decide el usuario.
+- Los tests del script: `pnpm test:scripts`.
 
 ---
 
@@ -155,15 +174,22 @@ Para cualquier feature con 2+ ficheros afectados: **spec primero, tests después
 ### Ciclo completo
 
 1. Asignar el número siguiente (consultar `specs/README.md`).
-2. Crear `specs/NNN-nombre-kebab/spec.md` desde `specs/_TEMPLATE/spec.md` (`/spec`).
-3. **Esperar aprobación explícita** del usuario ("dale", "ok", "adelante").
-4. **Red** — escribir los tests derivados de los criterios de aceptación y ver que fallan por el motivo correcto.
-5. **Green** — implementar lo mínimo para que pasen.
-6. **Refactor** — limpiar con los tests en verde.
-7. Repetir 4–6 por cada historia de usuario, en orden de prioridad (P1 → P2 → P3).
-8. Ejecutar `pnpm lint:fix && pnpm format && pnpm test:ci`.
-9. Revisar el diseño en el navegador con la extensión de Chrome (obligatorio) y comprobar en Android los criterios visuales.
-10. Pedir confirmación antes de `git commit`, luego antes de `git push`, luego antes de abrir PR.
+2. **Spec**: crear `specs/NNN-nombre-kebab/spec.md` desde `specs/_TEMPLATE/spec.md` (`/specify`).
+3. **Esperar aprobación explícita** del usuario ("dale", "ok", "adelante", "vamos").
+4. **Clarify**: cerrar ambigüedades antes de planificar. Las preguntas se hacen al usuario y cuentan como `F`; las decisiones se registran en la spec (o en `clarify.md`).
+5. **Prompt para Stitch (solo si la spec tiene frontal)**: antes del plan, Claude entrega al usuario un prompt para que Stitch (IA generativa de diseño de Google) genere las pantallas. Reglas del prompt:
+   - Solo **funcionalidad necesaria**: pantallas, elementos, estados (vacío, carga, error), acciones y flujos de navegación.
+   - **Nada de estilos**: ni colores, tipografías, tamaños, espaciados, radios ni CSS; eso lo decide Stitch con la guía de estilo ya compartida.
+   - Una pantalla = qué datos muestra, qué acciones permite y qué ocurre tras cada una.
+   - El usuario pasa el prompt a Stitch y trae el resultado; Claude lo incorpora al plan y a la spec. Sin frontal este paso se omite.
+6. **Plan**: diseño técnico (`plan.md`) a partir de spec + clarify + diseño de Stitch; aprobación explícita.
+7. **Red** — escribir los tests derivados de los criterios de aceptación y ver que fallan por el motivo correcto.
+8. **Green** — implementar lo mínimo para que pasen.
+9. **Refactor** — limpiar con los tests en verde.
+10. Repetir 7–9 por cada historia de usuario, en orden de prioridad (P1 → P2 → P3).
+11. Ejecutar `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci`.
+12. Revisar el diseño en el navegador con la extensión de Chrome (obligatorio) y comprobar en Android los criterios visuales.
+13. Pedir confirmación antes de `git commit`, luego antes de `git push` (el hook lanza la revisión cruzada del diff), luego antes de abrir PR (`/pr-review`).
 
 ### Reglas TDD
 
@@ -172,15 +198,9 @@ Para cualquier feature con 2+ ficheros afectados: **spec primero, tests después
 - Un bug se corrige escribiendo primero el test que lo reproduce.
 - Commits pequeños por ciclo verde cuando el usuario los apruebe.
 
-### Sizing de spec
+### Cuándo aplica
 
-| Tamaño | Criterio | Artefactos |
-|---|---|---|
-| Pequeño | 1-4 ficheros, sin cambios de datos | `spec.md` |
-| Mediano | 5-10 ficheros | `spec.md` |
-| Grande | Nueva entidad / persistencia / feature | `spec.md` + `data-model.md` |
-
-`plan.md` y `tasks.md` solo en specs grandes con dependencias ordenadas.
+Cualquier cambio que toque **2 o más ficheros** sigue el pipeline completo. Si es mantenimiento sin lógica (texto, estilos, actualizar una librería), la spec puede declarar `Ciclo: simple` (sin revisión cruzada), pero sigue necesitando spec y tests.
 
 ### Elementos obligatorios en `spec.md`
 
@@ -241,8 +261,3 @@ const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${Stri
 - Mocks de módulos a nivel de módulo; para capturar valores usar `vi.hoisted()`.
 - Un `*.spec.ts` por servicio o componente relevante.
 - Cobertura objetivo ≥ 80 % en access services.
-
-<!-- SPECKIT START -->
-Contexto técnico, estructura y comandos: leer el `plan.md` de la spec en curso (`specs/NNN-*/plan.md`).
-Principios no negociables: `.specify/memory/constitution.md`.
-<!-- SPECKIT END -->

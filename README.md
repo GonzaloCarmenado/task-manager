@@ -33,4 +33,4 @@ Este repositorio es público. **Nunca** se versionan contraseñas, tokens, clave
 
 ## Cómo se trabaja aquí
 
-Las reglas del proyecto (flujo, SDD + TDD, convenciones, seguridad) están en [`CLAUDE.md`](./CLAUDE.md) y [`.specify/memory/constitution.md`](./.specify/memory/constitution.md).
+Las reglas del proyecto (flujo, SDD + TDD, convenciones, seguridad) están en [`CLAUDE.md`](./CLAUDE.md) y [`docs/constitution.md`](./docs/constitution.md).
