@@ -1,0 +1,56 @@
+# Compiled output
+/dist
+/tmp
+/out-tsc
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Misc
+/.angular/cache
+.sass-cache/
+/coverage
+testem.log
+__screenshots__/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Tauri
+/src-tauri/target/
+/src-tauri/gen/
+
+# Claude local
+.claude/settings.local.json
+
+# Secretos y credenciales (NUNCA versionar)
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+google-services.json
+local.properties
+credentials.json
+src/environments/environment.ts
+supabase/.temp/
+supabase/.env
+supabase/.env.*

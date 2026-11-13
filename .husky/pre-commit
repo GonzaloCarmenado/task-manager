@@ -1,0 +1,4 @@
+pnpm secrets:check
+pnpm run lint
+pnpm lint-staged --no-stash
+pnpm test:ci

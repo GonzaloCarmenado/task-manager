@@ -1,0 +1,35 @@
+# Registro de interacciones
+
+Ver reglas en `CLAUDE.md` → "Registro de interacciones".
+
+## Contadores
+
+| Métrica | Total |
+|---|---|
+| Turnos del usuario | 18 |
+| Preguntas `F` (funcionalidad) | 5 |
+| Preguntas `W` (flujo) | 6 |
+| **Total preguntas** | **11** |
+
+## Log
+
+| # | Fecha | Turno del usuario (resumen) | Preguntas de Claude | Resultado |
+|---|---|---|---|---|
+| 001 | 2026-11-13 | Arranque del proyecto: registrar interacciones en CLAUDE.md con contadores F/W; copiar tecnología y características de Claude de un proyecto privado de referencia (comandos, SDD con TDD); Angular sin Material; Tauri solo Android (web solo para pruebas rápidas) | 0 | Creados `CLAUDE.md`, `docs/interacciones.md`, comandos `/spec` `/pr` `/stats`, `specs/` con plantilla |
+| 002 | 2026-11-13 | "vamos a empezar" | 4 (F: nombre/identificador, zoneless, prefijo/nombre app; W: aprobación de la spec) | Creada `specs/001-scaffolding/spec.md` (Borrador); esperando aprobación |
+| 003 | 2026-11-13 | "1-si, 2-si, 3-si" (nombre `task-manager`/`com.polyp.taskmanager`, zoneless, prefijo `app`) | 0 | Spec 001 aprobada. Generado esqueleto Angular 22 zoneless+Vitest en scratchpad y copiado (src, angular.json, tsconfig, package.json, configs de lint/prettier de la referencia). Interrumpido por el usuario |
+| 004 | 2026-11-13 | Reproche: "¿has copiado los agentes de SDD? specify, clarify, plan..." | 0 | No los había copiado. Ejecutado `specify init --ai claude` (Spec Kit 0.7.3): 9 skills `speckit-*` en `.claude/skills`, `.specify/`. Constitución rellena (TDD obligatorio), plantilla de tasks con tests obligatorios, CLAUDE.md documentado |
+| 005 | 2026-11-13 | "seguimos" | 0 | Scaffolding completado con TDD (Red→Green, 6 tests, 100 % cob.), lint/format/type-check/build OK, Husky, Tauri Android init, APK verificado en emulador (incidencia: ABI aarch64 vs x86_64 → pantalla en blanco, resuelto). Spec 001 marcada Implementada. Sin commit |
+| 006 | 2026-11-13 | "vale sí" (commit) + crear el repo en GitHub público | 2 W (¿commit? al cerrar el turno 005; ¿push? al cerrar este turno) | Creado `GonzaloCarmenado/task-manager` (público), remoto `origin`. Commit `b477c82` (85 ficheros), hook pre-commit OK. Sin push |
+| 007 | 2026-11-13 | "sí, sube a main y la dejamos como principal" | 0 | Push `HEAD:main` a `origin`; `main` es la rama por defecto del repo. Upstream de la rama local → `origin/main` |
+| 008 | 2026-11-13 | Apuntar en CLAUDE.md que es obligatorio revisar todos los diseños en el navegador con la extensión de Chrome sincronizada | 0 | Añadida sección "Revisión visual obligatoria en el navegador" en CLAUDE.md, paso 9 del ciclo y plantilla de spec actualizados |
+| 009 | 2026-11-13 | Descripción del producto (gestor de tareas gamificado, desenfadado, usuarios no profesionales) y petición de un prompt de guideline de estilo para Stitch, sin CSS/tamaños/fuentes | 1 W (¿commit? al cerrar el turno 008, sin respuesta explícita) | Entregado el prompt en el chat; sin cambios de código |
+| 010 | 2026-11-13 | "Podemos empezar con la primera spec: crear Supabase y conectarlo, solo vincular y poco más" | 2 (F: organización/gestión del límite de proyectos; W: aprobación de la spec). Nombre/región: valor por defecto, no se pregunta | Comprobada CLI Supabase (3.1.0, sesión iniciada, 3 proyectos ajenos). Creada `specs/002-supabase-setup/spec.md` (Borrador). Sin crear proyecto remoto |
+| 011 | 2026-11-13 | Respuesta a la pregunta F: "Lo creo yo y tú lo vinculas" | 0 | Decisión registrada en spec 002: el usuario crea el proyecto en el panel; Claude vincula. Pendiente: aprobación de la spec y ref/URL/clave del proyecto |
+| 012 | 2026-11-13 | Apuntar en CLAUDE.md que el proyecto usa una cuenta Supabase concreta del propietario (correo omitido por ser repo público); si la CLI no está en ella, avisar y abrir el SSO para cambiar (ahora mismo no lo está) | 0 | Añadida sección "Cuenta de Supabase (CRITICO)" en CLAUDE.md con verificación indirecta (`orgs list`) por no existir `whoami`. Pendiente: el usuario hace logout/login |
+| 013 | 2026-11-13 | Prefiere no dejar el correo en el repo público ("me gusta más eso, bien visto") | 0 | Correo sustituido por referencia genérica en CLAUDE.md, spec 002 y este log (nunca estuvo en commits). Guardado en la memoria local de Claude |
+| 014 | 2026-11-13 | Usuario ejecutó `npx supabase logout` (falló: pedía confirmación en modo no interactivo) | 0 | Repetido con `--yes`: token local eliminado, CLI sin sesión (`orgs list` → AccessTokenRequiredError). Pendiente: el usuario hace `supabase login` con la cuenta del propietario |
+| 015 | 2026-11-13 | Usuario ejecutó `npx supabase login` desde `!` (falló: entorno no TTY, no admite login automático) | 0 | Indicado que debe hacerlo en una terminal normal fuera de Claude (el token no pasa por el chat). Pendiente: login + verificación con `orgs list` |
+| 016 | 2026-11-13 | "ya está, mira a ver si funciona" (login hecho) | 1 F (¿es el proyecto por defecto de la cuenta el proyecto de la app, o creamos otro?) | Login OK: cuenta correcta (un proyecto por defecto, org distinta de la sesión anterior). Descubierto que el marcador "org Task-manager" era de la cuenta anterior → corregido en CLAUDE.md y memoria (ahora por id de org) |
+| 017 | 2026-11-13 | "He creado este" (URL del proyecto Supabase, coincide con el existente) | 1 W (aprobación explícita de la spec 002, aún no dada) | Proyecto confirmado como el de la app. Spec 002 y memoria actualizadas. No se ha vinculado ni implementado nada |
+| 018 | 2026-11-13 | Antes del commit: asegurar que no hay nada raro, que quien entre sepa que hay migraciones para crear tablas, y vigilar siempre que jamás se exponen URLs privadas, contraseñas ni tokens | 0 | Auditoría (sin secretos; ref de proyecto y rutas/nombre de proyecto privado en 3 ficheros ya publicados). Regla "Seguridad y secretos" en CLAUDE.md y constitución v1.1.0, `pnpm secrets:check` en pre-commit (Red/Green verificado), `.gitignore` reforzado, README creado, referencias privadas quitadas del árbol de trabajo |
