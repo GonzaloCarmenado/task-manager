@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 21 |
-| Preguntas `F` (funcionalidad) | 6 |
+| Turnos del usuario | 22 |
+| Preguntas `F` (funcionalidad) | 7 |
 | Preguntas `W` (flujo) | 10 |
-| **Total preguntas** | **16** |
+| **Total preguntas** | **17** |
 
 ## Log
 
@@ -36,3 +36,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 019 | 2026-11-13 | "Sí, hazlo" (reescribir el historial publicado y hacer el commit pendiente) | 1 F (correo de autor: noreply de GitHub vs. actual → noreply). Contadas además 2 W formuladas en el turno 018 (¿reescribir historial?, ¿commit?) | Historial reescrito (raíz vacía + 1 commit, autor noreply) y force push a `main` con `--force-with-lease`. Verificado: árbol sin datos privados, hook y tests OK. El commit antiguo sigue accesible por SHA en GitHub (objeto huérfano) |
 | 020 | 2026-11-13 | "vamos" (tomado como aprobación de la spec 002) | 1 W (¿commit?) | Implementada la spec 002 con TDD (13 tests, 100 %): SupabaseService, token de config, environment.example + env:init, regla ESLint, supabase init/link, scripts db:* con --remote, docs/supabase.md. Escáner de secretos afinado. Pendiente: clave publishable (la pega el usuario) y verificar conectividad |
 | 021 | 2026-11-13 | "sí, listo" (clave pegada + visto bueno al commit) | 1 W (¿push?) | Clave validada por tipo sin imprimirla. Conectividad verificada en navegador (extensión Chrome) y APK/emulador: `404 PGRST205`. Sonda temporal revertida. Spec 002 cerrada. Commit de la spec 002 |
+| 022 | 2026-11-13 | "lo dejamos todo listo y subimos" → interrumpido y corregido a "lo dejamos todo listo y seguimos" (se retira el push) | 1 F (método de autenticación para la spec 003) | Log al día y commit. **Sin push**: la orden de subir se retiró; el commit e5431dc y el del log quedan solo en local |
