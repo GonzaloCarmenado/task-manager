@@ -27,6 +27,8 @@ Cada carpeta tiene `screen.png` (captura) y `code.html` (maqueta).
 
 ## Decisiones sobre el contenido del diseño (resueltas el 2026-11-13)
 
+> Regla del proyecto: lo que Stitch añade y no está en la spec se ignora sin preguntar; solo se conserva lo pedido. No hace falta regenerar las pantallas (`../stitch-ajustes.md` es opcional).
+
 Se aplican en la spec (US-003-06, criterios 8 a 10) y se anotan en el `clarify.md`.
 
 | # | Dónde | Problema en el diseño | Decisión |

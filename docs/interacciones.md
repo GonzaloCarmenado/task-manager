@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 50 |
+| Turnos del usuario | 58 |
 | Preguntas `F` (funcionalidad) | 19 |
-| Preguntas `W` (flujo) | 25 |
-| **Total preguntas** | **44** |
+| Preguntas `W` (flujo) | 30 |
+| **Total preguntas** | **49** |
 
 ## Log
 
@@ -65,3 +65,11 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 048 | 2026-11-13 | "Sí" (push) | 0 | Push a `main` sin forzar; el hook de revisión del diff no bloqueó |
 | 049 | 2026-11-13 | "Dale, solo una pasada de DeepSeek, déjalo en el md" (clarify de la spec 004) | 2 F (dónde activar el bloqueo; vista previa de apps recientes) | Ambas recomendadas: solo oferta inicial (interruptor con la spec de ajustes) y cubrir al pasar a segundo plano sin FLAG_SECURE. Clarify 004 cerrado. **Una sola pasada** de DeepSeek: 5 hallazgos (1 grave), todos válidos, registrados en `specs/004-bloqueo-huella/review.md` y aplicados a la spec sin tocar el clarify. Creado `stitch-prompt.md` de la 004 |
 | 050 | 2026-11-13 | Entrega de los diseños de Stitch de la spec 004 (carpeta de descargas) y recordatorio de copiarlos a la app | 0 | Revisados como datos no confiables (sin scripts ejecutados; solo Google Fonts y Tailwind CDN; sin datos privados). Copiados con verificación por hash a `specs/004-bloqueo-huella/design/` (3 pantallas; el `DESIGN.md` es idéntico al versionado, no se duplica). Revisión vs spec: 7 puntos (D1-D7), entre ellos datos de la app en la pantalla de bloqueo (contradice US-004-02 CA 2) y afirmaciones falsas de cifrado. Creados `design/README.md` y `stitch-ajustes.md` |
+| 051 | 2026-11-13 | "Dale" (commit de la documentación de la 004) | 0 | Commit `34b3a37` tras auditoría del diff (13 ficheros, 888 líneas leídas, limpio). Sin push |
+| 052 | 2026-11-13 | Norma: si Stitch mete cosas que no están en las specs, se ignoran; se deja solo lo pedido | 0 | Fijada en `CLAUDE.md`, en `/stitch-prompt` y en los `design/README.md` de la 003 y la 004. No hace falta regenerar diseños |
+| 053 | 2026-11-13 | "Sigue" (→ `/sdd-plan` de la spec 004) | 0 | Plan de la 004 (Borrador). Verificado en el código del plugin (etiqueta fijada, vía API de GitHub, solo lectura): `AuthOptions` admite título, subtítulo, cancelTitle y `allowDeviceCredential` (sin parche nativo); `biometry:default` es solo `status` y `authenticate`; con credencial del móvil Android no admite botón de cancelar propio. D4 y D5 resueltas por defecto (reofrecer tras desactivarse; sin botón de PIN propio). Sin decisiones abiertas |
+| 054 | 2026-11-13 | "Sí" (aprobación del plan 004) | 1 W (¿apruebas las tareas?) | Plan aprobado. Creado `specs/004-bloqueo-huella/tasks.md` (52 tareas en 9 bloques, TDD, verificación en emulador con huella simulada). Corregido el encabezado de contadores del log, que se había quedado desactualizado desde el turno 050 (W contadas: commit, /sdd-plan, plan, tareas) |
+| 055 | 2026-11-13 | "Sigue" (→ `/implement` de la 004, bloques 1 a 7 y revisión en navegador) | 0 | Servicios, componentes, integración en `App`, parte nativa y ruta de vista previa con TDD. 209 tests de la app y 42 de scripts en verde |
+| 056 | 2026-11-13 | "¿Las ventanas de la huella están en español?" | 0 | Textos de la app en español; los fijos del sistema siguen el idioma del teléfono (verificado con `uiautomator`) |
+| 057 | 2026-11-13 | "Cambia lo de touch… en español" / "si es del emulador me da igual" | 0 | Son textos del sistema; se deja el idioma del emulador |
+| 058 | 2026-11-13 | "Sigue" (→ verificación en emulador y cierre de la 004) | 0 | Oferta, activar, desbloquear, cancelar, PIN tras intentos, 30 s, modo oscuro y desactivado automático verificados. Hallazgo: la miniatura de «apps recientes» no queda cubierta |

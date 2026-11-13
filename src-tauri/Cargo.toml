@@ -23,3 +23,6 @@ serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 tauri = { version = "2.12.5", features = [] }
 tauri-plugin-log = "2"
+
+[target.'cfg(target_os = "android")'.dependencies]
+tauri-plugin-biometry = "=0.3.0-rc.3"

@@ -1,10 +1,36 @@
-@if (showApp()) {
-<router-outlet />
-} @else {
-<app-session-status
-  [status]="auth.status()"
-  [reason]="auth.errorReason()"
-  [autoRetryPending]="auth.autoRetryPending()"
-  (retry)="auth.retry()"
-/>
-}
+<div
+  class="content"
+  data-testid="app-content"
+  [attr.inert]="overlay() ? '' : null"
+  [attr.aria-hidden]="overlay() ? 'true' : null"
+>
+  @if (showApp()) {
+  <router-outlet />
+  } @else {
+  <app-session-status
+    [status]="auth.status()"
+    [reason]="auth.errorReason()"
+    [autoRetryPending]="auth.autoRetryPending()"
+    (retry)="auth.retry()"
+  />
+  }
+</div>
+
+@switch (overlay()) { @case ('lock') {
+<div class="overlay">
+  <app-biometric-lock-screen [phase]="lock.phase()" (unlock)="lock.unlock()" />
+</div>
+} @case ('notice') {
+<div class="overlay">
+  <app-biometric-notice (acknowledge)="lock.acknowledgeNotice()" />
+</div>
+} @case ('offer') {
+<div class="overlay">
+  <app-biometric-offer
+    [activating]="lock.activating()"
+    (accept)="lock.acceptOffer()"
+    (later)="lock.later()"
+    (never)="lock.never()"
+  />
+</div>
+} }

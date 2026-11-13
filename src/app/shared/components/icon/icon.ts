@@ -1,6 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-export const ICON_NAMES = ['wifi-off', 'hourglass', 'server', 'clock', 'alert', 'refresh'] as const;
+export const ICON_NAMES = [
+  'wifi-off',
+  'hourglass',
+  'server',
+  'clock',
+  'alert',
+  'refresh',
+  'fingerprint',
+  'lock',
+  'shield',
+] as const;
 export type IconName = (typeof ICON_NAMES)[number];
 
 /** Iconos propios de trazo (viewBox 24×24). Sin fuentes de iconos ni recursos externos. */
@@ -53,6 +63,23 @@ export type IconName = (typeof ICON_NAMES)[number];
           @case ('refresh') {
             <path d="M20 11a8 8 0 1 0-2.3 5.7" />
             <path d="M20 5v6h-6" />
+          }
+          @case ('fingerprint') {
+            <path d="M12 3a8 8 0 0 0-8 8v1" />
+            <path d="M20 12v-1a8 8 0 0 0-5-7.4" />
+            <path d="M8 21c.6-1.7 1-3.4 1-5.5V11a3 3 0 0 1 6 0v4.5c0 2 .5 3.6 1.5 5" />
+            <path d="M12 11v5c0 1.8-.3 3.3-1 5" />
+            <path d="M5 15.5c-.4 1.5-.9 2.8-1.5 4" />
+            <path d="M19 12.5v3c0 1.8.3 3.2 1 4.5" />
+          }
+          @case ('lock') {
+            <rect x="5" y="11" width="14" height="10" rx="2" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+            <path d="M12 15.5V17" />
+          }
+          @case ('shield') {
+            <path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z" />
+            <path d="M9 12l2 2 4-4" />
           }
         }
       </svg>

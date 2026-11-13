@@ -1,0 +1,21 @@
+<section
+  class="screen"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="lock-title"
+  [attr.data-phase]="phase()"
+>
+  <div class="badge"><app-icon [name]="phaseCopy().waiting ? 'fingerprint' : 'lock'" /></div>
+  <h1 id="lock-title" class="title">{{ copy.title }}</h1>
+  @if (phaseCopy().waiting) {
+  <p class="message" role="status" aria-live="polite">{{ phaseCopy().message }}</p>
+  } @else if (phaseCopy().tone === 'error') {
+  <p class="message error" role="alert">{{ phaseCopy().message }}</p>
+  } @else {
+  <p class="message">{{ phaseCopy().message }}</p>
+  }
+  <button type="button" class="unlock" [disabled]="phaseCopy().waiting" (click)="unlock.emit()">
+    <app-icon name="fingerprint" />
+    <span>{{ copy.unlockLabel }}</span>
+  </button>
+</section>

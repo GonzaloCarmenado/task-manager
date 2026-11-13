@@ -11,7 +11,7 @@
 | [001](./001-scaffolding/spec.md) | Scaffolding Angular + Tauri Android | Implementada | Esqueleto Angular sin Material, lint/format/tests/hooks, Tauri 2 solo Android |
 | [002](./002-supabase-setup/spec.md) | Conexión con Supabase | Implementada | CLI, migraciones, cliente Angular y entorno sin secretos en git |
 | [003](./003-sesion-anonima/spec.md) | Sesión anónima con Supabase | Implementada | Identidad anónima persistente, abre sin red con sesión guardada, pantallas de carga y error |
-| [004](./004-bloqueo-huella/spec.md) | Bloqueo de la app con huella | Borrador | Bloqueo opcional con el lector de huellas de Android (solo pantalla), tras la 003 |
+| [004](./004-bloqueo-huella/spec.md) | Bloqueo de la app con huella | Implementada | Bloqueo opcional con el lector de huellas de Android (solo pantalla), tras la 003 |
 
 ---
 

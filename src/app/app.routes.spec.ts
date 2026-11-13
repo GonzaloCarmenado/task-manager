@@ -3,7 +3,10 @@ import { buildRoutes, routes } from './app.routes';
 import { Home } from './features/home/home';
 import { SessionStatusPreview } from './features/dev/session-status-preview';
 
+import { BiometricPreview } from './features/dev/biometric-preview';
+
 const DEV_PATH = '__dev/session-status/:state';
+const BIOMETRIC_DEV_PATH = '__dev/biometric/:state';
 
 describe('app.routes', () => {
   it('US-001-01 la ruta "" carga Home de forma lazy', async () => {
@@ -31,8 +34,18 @@ describe('app.routes', () => {
     expect(await route?.loadComponent?.()).toBe(SessionStatusPreview);
   });
 
+  it('US-004-01 en desarrollo existe la ruta de vista previa del bloqueo, lazy, y no en producción', async () => {
+    const route = buildRoutes(true).find((r) => r.path === BIOMETRIC_DEV_PATH);
+
+    expect(route).toBeDefined();
+    expect(route?.loadComponent).toBeTypeOf('function');
+    expect(await route?.loadComponent?.()).toBe(BiometricPreview);
+    expect(buildRoutes(false).some((r) => r.path === BIOMETRIC_DEV_PATH)).toBe(false);
+  });
+
   it('US-003-06 las rutas de la app dependen de isDevMode()', () => {
     expect(routes.some((r) => r.path === DEV_PATH)).toBe(isDevMode());
+    expect(routes.some((r) => r.path === BIOMETRIC_DEV_PATH)).toBe(isDevMode());
   });
 
   it('US-003-06 la ruta de desarrollo no sustituye a la ruta principal', () => {

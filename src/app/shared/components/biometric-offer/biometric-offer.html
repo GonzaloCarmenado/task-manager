@@ -1,0 +1,17 @@
+<section class="screen" role="dialog" aria-modal="true" aria-labelledby="offer-title">
+  <div class="badge"><app-icon name="fingerprint" /></div>
+  <h1 id="offer-title" class="title">{{ copy.title }}</h1>
+  <p class="description">{{ copy.description }}</p>
+
+  <div class="actions">
+    <button type="button" class="primary" [disabled]="activating()" (click)="accept.emit()">
+      {{ copy.actions.accept }}
+    </button>
+    <button type="button" class="secondary" [disabled]="activating()" (click)="later.emit()">
+      {{ copy.actions.later }}
+    </button>
+    <button type="button" class="link" [disabled]="activating()" (click)="never.emit()">
+      {{ copy.actions.never }}
+    </button>
+  </div>
+</section>

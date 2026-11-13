@@ -26,9 +26,15 @@ importers:
       '@angular/router':
         specifier: ^22.0.0
         version: 22.2.6(@angular/common@22.2.6(@angular/core@22.2.6(@angular/compiler@22.2.6)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.6(@angular/compiler@22.2.6)(rxjs@7.8.2))(@angular/platform-browser@22.2.6(@angular/common@22.2.6(@angular/core@22.2.6(@angular/compiler@22.2.6)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.2.6(@angular/compiler@22.2.6)(rxjs@7.8.2)))(rxjs@7.8.2)
+      '@choochmeque/tauri-plugin-biometry-api':
+        specifier: 0.3.0-rc.3
+        version: 0.3.0-rc.3
       '@supabase/supabase-js':
         specifier: ^2.119.0
         version: 2.119.0
+      '@tauri-apps/api':
+        specifier: ~2.12.4
+        version: 2.12.4
       rxjs:
         specifier: ~7.8.0
         version: 7.8.2
@@ -344,6 +350,9 @@ packages:
 
   '@cacheable/utils@2.5.0':
     resolution: {integrity: sha512-buipgOVDkkPXNR5+xBpDw7Zk2n1EvU7qBJCNUcL7rhQ//kfpOXPAvQ511Os0vpLYJ1pZnvudNytkQt2hst3wqA==}
+
+  '@choochmeque/tauri-plugin-biometry-api@0.3.0-rc.3':
+    resolution: {integrity: sha512-Xv5aQXKoPZNKQLD/y25SjnbQu184vKAmrxQzmZZ5iJw4MwOsaEqqUYJ/n96l1HkPWGr7pa4c0VQhObJ/CmMtvw==}
 
   '@csstools/color-helpers@6.1.2':
     resolution: {integrity: sha512-grhRy3OKmniaAEKXMjua5z/EODX0MSqBGjunw8+j/3HQjOnahs2AGhvEOIYVUWcU6ScApbhLhVrQTX8XqrMrow==}
@@ -1525,6 +1534,9 @@ packages:
     peerDependenciesMeta:
       '@opentelemetry/api':
         optional: true
+
+  '@tauri-apps/api@2.12.4':
+    resolution: {integrity: sha512-pVmfis+4zT8H0Qhp3xPZx9Ju7kpzvA6rr/PSJPyuwfvucTQ8sVt61NYU9KMkK703UFlYadFmjKA4HhybOtN0gg==}
 
   '@tauri-apps/cli-darwin-arm64@2.12.4':
     resolution: {integrity: sha512-OxqKSckIkoJ6vX2AjifIJpTasFC0Hbdoo7gEiCmAjauABO3U8m2MRsLWe+QTiBwDx1mIrvgA+rvI7tvDnbnHVg==}
@@ -3375,6 +3387,10 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
+  '@choochmeque/tauri-plugin-biometry-api@0.3.0-rc.3':
+    dependencies:
+      '@tauri-apps/api': 2.12.4
+
   '@csstools/color-helpers@6.1.2': {}
 
   '@csstools/css-calc@3.4.3(@csstools/css-parser-algorithms@4.0.2(@csstools/css-tokenizer@4.0.2))(@csstools/css-tokenizer@4.0.2)':
@@ -4132,6 +4148,8 @@ snapshots:
       '@supabase/postgrest-js': 2.119.0
       '@supabase/realtime-js': 2.119.0
       '@supabase/storage-js': 2.119.0
+
+  '@tauri-apps/api@2.12.4': {}
 
   '@tauri-apps/cli-darwin-arm64@2.12.4':
     optional: true

@@ -2,7 +2,7 @@
 
 **Rama**: `interaction-logging-claude-md` (actual)
 **Creada**: 2026-11-13
-**Estado**: Borrador
+**Estado**: Implementada
 **Ciclo**: completo
 **Frontal**: sí (oferta de activación y pantalla de bloqueo)
 
@@ -49,7 +49,7 @@ Que el usuario pueda proteger la app con el lector de huellas de Android (o el d
 - Con el bloqueo activado, al abrir la app se muestra una **pantalla de bloqueo** y se lanza automáticamente el aviso biométrico, **una sola vez por apertura**; si se cancela queda el botón «Desbloquear con huella» para repetirlo.
 - Hasta superar la autenticación no se muestra **ningún dato** de la app, ni siquiera parcial. La vista previa de «apps recientes» se trata aparte, como mejor esfuerzo (CA 7).
 - Al volver de segundo plano tras **más de 30 segundos** se vuelve a pedir; antes de eso no.
-- El aviso del sistema está en español (título, subtítulo y botón de cancelar).
+- El aviso del sistema está en español: título y subtítulo siempre; el botón «Cancelar» en español solo en el aviso de **activar**. En el de desbloquear, con el PIN del móvil permitido, Android no admite botón propio y el sistema usa sus textos (comprobado en el plugin, ver `plan.md`).
 - La pantalla de carga y la sesión anónima (spec 003) siguen su curso mientras la app está bloqueada.
 - No hay bucles de aviso: cancelar repetidamente no relanza el aviso solo.
 - **Apps recientes**: al pasar la app a segundo plano con el bloqueo activo se muestra la pantalla de bloqueo, para que la miniatura de «apps recientes» salga cubierta. No es garantizado al 100 % (Android hace la captura al pausar) y **no se usa `FLAG_SECURE`**, para no bloquear las capturas de pantalla del usuario ni exigir código nativo en un proyecto Android que se regenera. Queda documentado como limitación conocida.

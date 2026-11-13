@@ -9,6 +9,7 @@ import { provideRouter } from '@angular/router';
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { AuthAccessService } from './core/services/auth.access.service';
+import { BiometricLockService } from './core/services/biometric-lock.service';
 import { SUPABASE_CONFIG } from './core/services/supabase.config';
 
 export const appConfig: ApplicationConfig = {
@@ -19,6 +20,8 @@ export const appConfig: ApplicationConfig = {
       provide: SUPABASE_CONFIG,
       useValue: { url: environment.supabaseUrl, key: environment.supabaseKey },
     },
+    // El bloqueo va primero: con la huella activa la app arranca ya tapada, sin esperar a nada.
+    provideAppInitializer(() => inject(BiometricLockService).initialize()),
     // Decide el estado inicial de la identidad (síncrono, sin esperar a la red) antes del primer render.
     provideAppInitializer(() => inject(AuthAccessService).initialize()),
   ],

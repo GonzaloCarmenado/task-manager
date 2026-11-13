@@ -6,3 +6,16 @@
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
 }
+
+.content {
+  min-height: 100dvh;
+}
+
+// Superposición a pantalla completa: opaca, para que no se vea nada de la app detrás.
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  overflow-y: auto;
+  background: var(--color-bg);
+}

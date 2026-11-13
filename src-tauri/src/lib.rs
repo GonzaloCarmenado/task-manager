@@ -1,6 +1,12 @@
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-  tauri::Builder::default()
+  let builder = tauri::Builder::default();
+
+  // Bloqueo con huella (spec 004): el plugin solo existe en Android.
+  #[cfg(target_os = "android")]
+  let builder = builder.plugin(tauri_plugin_biometry::init());
+
+  builder
     .setup(|app| {
       if cfg!(debug_assertions) {
         app.handle().plugin(

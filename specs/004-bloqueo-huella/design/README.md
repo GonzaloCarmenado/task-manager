@@ -26,6 +26,8 @@ Referencia visual y funcional, **no código a copiar**: `code.html` se apoya en 
 
 ## Contenido a corregir antes del plan (decisiones D1 a D7)
 
+> Regla del proyecto: lo que Stitch añade y no está en la spec se **ignora sin preguntar**; solo se conserva lo pedido. Por tanto, todo lo marcado «quitar» se ignora al implementar y **no hace falta regenerar las pantallas** (`../stitch-ajustes.md` es opcional). Solo D4 y D5 son decisiones reales que resuelve el plan.
+
 | # | Dónde | Problema | Decisión propuesta |
 |---|---|---|---|
 | D1 | Bloqueo, oferta y aviso | Muestran datos de la app: «Racha de 14 días protegida», «+25 XP listos», «+50 XP», «tus metas, notas y rachas», «Racha, experiencia y misiones a salvo». Contradice US-004-02 CA 2: **la pantalla de bloqueo no puede mostrar ningún dato de la app**, y en la oferta inventan progreso que aún no existe. | **Quitar** toda mención a XP, rachas, niveles y misiones. |

@@ -72,6 +72,12 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - Una feature no está "hecha" hasta comprobarla en Android (emulador o dispositivo) con `pnpm tauri android dev`.
 - APIs nativas (ficheros, notificaciones, etc.) se acceden mediante plugins de Tauri detrás de un servicio; en navegador el servicio debe degradar con gracia.
 
+### Bloqueo con huella (spec 004)
+
+- Es un **bloqueo de pantalla**, no cifra nada: ningún texto promete cifrado ni seguridad fuerte.
+- Solo `BiometricAccessService` toca el plugin (carga diferida, solo Android); el estado vive en `BiometricLockService`. El plugin y su crate van con **versión exacta** y el permiso es solo `biometry:default` en `capabilities/mobile.json`.
+- La pantalla de bloqueo no muestra datos de la app. Los textos del aviso del sistema siguen el idioma del teléfono.
+
 ### Revisión visual obligatoria en el navegador (CRITICO)
 
 - **OBLIGATORIO**: todo diseño (pantalla, componente, estilo, estado visual) se revisa en el navegador con la **extensión de Claude en Chrome sincronizada** (`mcp__claude-in-chrome__*`; invocar antes la skill `claude-in-chrome`).
@@ -190,6 +196,7 @@ Para cualquier feature con 2+ ficheros afectados: **spec primero, tests después
    - **Nada de estilos**: ni colores, tipografías, tamaños, espaciados, radios ni CSS; eso lo decide Stitch con la guía de estilo ya compartida.
    - Una pantalla = qué datos muestra, qué acciones permite y qué ocurre tras cada una.
    - El usuario pasa el prompt a Stitch y trae el resultado; Claude lo incorpora al plan y a la spec. Sin frontal este paso se omite.
+   - **La spec manda; el diseño de Stitch es solo referencia.** Todo lo que Stitch añada y no esté en la spec o en el prompt (datos, textos, afirmaciones, elementos de prototipo, funcionalidad inventada) se **ignora sin preguntar**: solo se conserva lo que se pidió. Lo ignorado se anota en `design/README.md` de la spec. No hace falta pedirle a Stitch que regenere las pantallas.
 6. **Plan**: diseño técnico (`plan.md`) a partir de spec + clarify + diseño de Stitch; aprobación explícita.
 7. **Red** — escribir los tests derivados de los criterios de aceptación y ver que fallan por el motivo correcto.
 8. **Green** — implementar lo mínimo para que pasen.

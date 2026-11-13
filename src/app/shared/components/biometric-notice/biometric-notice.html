@@ -1,0 +1,8 @@
+<section class="screen" role="dialog" aria-modal="true" aria-labelledby="notice-title">
+  <div class="badge"><app-icon name="shield" /></div>
+  <h1 id="notice-title" class="title">{{ copy.title }}</h1>
+  <p class="description">{{ copy.description }}</p>
+  <button type="button" class="ack" (click)="acknowledge.emit()">
+    {{ copy.acknowledgeLabel }}
+  </button>
+</section>

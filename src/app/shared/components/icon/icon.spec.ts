@@ -18,7 +18,17 @@ describe('Icon', () => {
 
   it('US-003-06 define los iconos que usan las pantallas de sesión', () => {
     expect([...ICON_NAMES].sort()).toEqual(
-      ['alert', 'clock', 'hourglass', 'refresh', 'server', 'wifi-off'].sort()
+      [
+        'alert',
+        'clock',
+        'fingerprint',
+        'hourglass',
+        'lock',
+        'refresh',
+        'server',
+        'shield',
+        'wifi-off',
+      ].sort()
     );
   });
 

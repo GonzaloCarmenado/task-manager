@@ -3,7 +3,9 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AuthErrorReason, AuthStatus } from './core/models/auth-status';
+import { LockPhase } from './core/models/biometric';
 import { AuthAccessService } from './core/services/auth.access.service';
+import { BiometricLockService } from './core/services/biometric-lock.service';
 import { App } from './app';
 
 type ComponentDef = { ɵcmp: { onPush: boolean } };
@@ -116,5 +118,149 @@ describe('App', () => {
   it('US-003-06 una ruta normal no se salta la pantalla de sesión', () => {
     const { el } = setup('loading', { path: '/tareas' });
     expect(el.querySelector('router-outlet')).toBeNull();
+  });
+});
+
+function setupLock(authStatus: AuthStatus = 'ready') {
+  const lock = {
+    overlayVisible: signal(false),
+    phase: signal<LockPhase>('prompting'),
+    noticeVisible: signal(false),
+    offerVisible: signal(false),
+    activating: signal(false),
+    unlock: vi.fn(),
+    acceptOffer: vi.fn(),
+    later: vi.fn(),
+    never: vi.fn(),
+    acknowledgeNotice: vi.fn(),
+  };
+  const auth = {
+    status: signal<AuthStatus>(authStatus),
+    errorReason: signal<AuthErrorReason | null>(null),
+    autoRetryPending: signal(false),
+    retry: vi.fn(),
+    initialize: vi.fn(),
+  };
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    imports: [App],
+    providers: [
+      provideRouter([]),
+      { provide: AuthAccessService, useValue: auth },
+      { provide: BiometricLockService, useValue: lock },
+      { provide: Location, useValue: { path: () => '/' } },
+    ],
+  });
+  const fixture = TestBed.createComponent(App);
+  fixture.detectChanges();
+  const el = fixture.nativeElement as HTMLElement;
+  const content = () => el.querySelector<HTMLElement>('[data-testid="app-content"]');
+  return { fixture, el, lock, auth, content };
+}
+
+describe('App · bloqueo con huella', () => {
+  it('US-004-02 sin bloqueo no hay superposiciones y el contenido es interactivo', () => {
+    const { el, content } = setupLock();
+    expect(el.querySelector('app-biometric-lock-screen')).toBeNull();
+    expect(el.querySelector('app-biometric-notice')).toBeNull();
+    expect(el.querySelector('app-biometric-offer')).toBeNull();
+    expect(content()?.hasAttribute('inert')).toBe(false);
+    expect(content()?.getAttribute('aria-hidden')).toBeNull();
+    expect(el.querySelector('router-outlet')).not.toBeNull();
+  });
+
+  it('US-004-02 con el bloqueo pinta la pantalla encima, deja el contenido inerte y oculto', () => {
+    const { fixture, el, lock, content } = setupLock();
+    lock.phase.set('cancelled');
+    lock.overlayVisible.set(true);
+    fixture.detectChanges();
+
+    expect(el.querySelector('app-biometric-lock-screen')).not.toBeNull();
+    expect(el.querySelector('app-biometric-lock-screen [data-phase="cancelled"]')).not.toBeNull();
+    expect(content()?.hasAttribute('inert')).toBe(true);
+    expect(content()?.getAttribute('aria-hidden')).toBe('true');
+    // el contenido sigue montado: conserva su estado al desbloquear
+    expect(el.querySelector('router-outlet')).not.toBeNull();
+  });
+
+  it('US-004-02 «Desbloquear con huella» llama a unlock() del servicio', () => {
+    const { fixture, el, lock } = setupLock();
+    lock.phase.set('cancelled');
+    lock.overlayVisible.set(true);
+    fixture.detectChanges();
+
+    el.querySelector<HTMLButtonElement>('app-biometric-lock-screen button')?.click();
+
+    expect(lock.unlock).toHaveBeenCalledTimes(1);
+  });
+
+  it('US-004-02 al desbloquear desaparece la superposición y el contenido vuelve a ser interactivo', () => {
+    const { fixture, el, lock, content } = setupLock();
+    lock.overlayVisible.set(true);
+    fixture.detectChanges();
+    lock.overlayVisible.set(false);
+    fixture.detectChanges();
+
+    expect(el.querySelector('app-biometric-lock-screen')).toBeNull();
+    expect(content()?.hasAttribute('inert')).toBe(false);
+  });
+
+  it('US-004-02 la precedencia es bloqueo > aviso > oferta (solo una a la vez)', () => {
+    const { fixture, el, lock } = setupLock();
+    lock.offerVisible.set(true);
+    lock.noticeVisible.set(true);
+    lock.overlayVisible.set(true);
+    fixture.detectChanges();
+    expect(el.querySelector('app-biometric-lock-screen')).not.toBeNull();
+    expect(el.querySelector('app-biometric-notice')).toBeNull();
+    expect(el.querySelector('app-biometric-offer')).toBeNull();
+
+    lock.overlayVisible.set(false);
+    fixture.detectChanges();
+    expect(el.querySelector('app-biometric-notice')).not.toBeNull();
+    expect(el.querySelector('app-biometric-offer')).toBeNull();
+
+    lock.noticeVisible.set(false);
+    fixture.detectChanges();
+    expect(el.querySelector('app-biometric-offer')).not.toBeNull();
+  });
+
+  it('US-004-01 la oferta emite sus tres respuestas al servicio y bloquea las acciones al activar', () => {
+    const { fixture, el, lock } = setupLock();
+    lock.offerVisible.set(true);
+    fixture.detectChanges();
+
+    const buttons = Array.from(
+      el.querySelectorAll<HTMLButtonElement>('app-biometric-offer button')
+    );
+    buttons[0].click();
+    buttons[1].click();
+    buttons[2].click();
+    expect(lock.acceptOffer).toHaveBeenCalledTimes(1);
+    expect(lock.later).toHaveBeenCalledTimes(1);
+    expect(lock.never).toHaveBeenCalledTimes(1);
+
+    lock.activating.set(true);
+    fixture.detectChanges();
+    buttons.forEach((b) => expect(b.disabled).toBe(true));
+  });
+
+  it('US-004-03 el aviso se cierra con «Entendido» llamando a acknowledgeNotice()', () => {
+    const { fixture, el, lock } = setupLock();
+    lock.noticeVisible.set(true);
+    fixture.detectChanges();
+
+    el.querySelector<HTMLButtonElement>('app-biometric-notice button')?.click();
+
+    expect(lock.acknowledgeNotice).toHaveBeenCalledTimes(1);
+  });
+
+  it('US-004-02 el bloqueo también tapa la pantalla de sesión mientras carga', () => {
+    const { fixture, el, lock, content } = setupLock('loading');
+    lock.overlayVisible.set(true);
+    fixture.detectChanges();
+
+    expect(el.querySelector('app-biometric-lock-screen')).not.toBeNull();
+    expect(content()?.hasAttribute('inert')).toBe(true);
   });
 });

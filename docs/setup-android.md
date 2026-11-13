@@ -43,3 +43,17 @@ APK debug: `src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-univ
 
 Lista tus AVD con `emulator -list-avds`; crea uno con Android Studio o `avdmanager`.
 `src-tauri/gen/` está en `.gitignore` (se regenera con `pnpm tauri android init`).
+
+## Bloqueo con huella (spec 004)
+
+El plugin `tauri-plugin-biometry` (versión exacta fijada) solo se compila y se registra en Android. Permisos mínimos: `capabilities/mobile.json` concede únicamente `biometry:default` (estado y autenticación), con plataforma `android` y ventana `main`; no se da acceso al almacenamiento del plugin. `scripts/capabilities.test.mjs` lo comprueba.
+
+Para probarlo en el emulador:
+
+1. Configurar un bloqueo de pantalla: `adb shell locksettings set-pin <PIN de prueba>` (solo en el emulador).
+2. Registrar una huella: abrir `android.settings.BIOMETRIC_ENROLL`, introducir el PIN y simular el dedo con `adb emu finger touch 1`.
+3. Instalar el APK x86_64 (paquete debug con sufijo `.debug`), activar el bloqueo desde la oferta y reiniciar la app.
+4. `adb emu finger touch 1` desbloquea; un id distinto simula una huella no reconocida y, tras varios intentos, Android pasa al PIN del móvil.
+5. Para ver el desactivado automático: `adb shell locksettings clear --old <PIN>` y relanzar la app.
+
+Notas: el aviso del sistema es una ventana protegida (las capturas salen en negro; sus textos se leen con `uiautomator dump`). Los textos fijos del sistema («Touch the fingerprint sensor», «Use PIN») siguen el idioma del teléfono. En «apps recientes» la miniatura puede mostrar el contenido: la cubierta es de mejor esfuerzo y no se usa `FLAG_SECURE` por decisión de la spec.
