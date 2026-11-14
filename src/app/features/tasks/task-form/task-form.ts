@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TITLE_MAX, Task, TaskInput } from '../../../core/models/task';
@@ -6,14 +7,20 @@ import { CLOCK } from '../../../core/services/clock';
 import { Icon } from '../../../shared/components/icon/icon';
 import { AlarmPermissionPrompt } from '../alarms/alarm-permission-prompt/alarm-permission-prompt';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
+import {
+  PostponeConstructorService,
+  PostponeTarget,
+} from '../postpone/postpone.constructor.service';
+import { PostponeSheet } from '../postpone/postpone-sheet/postpone-sheet';
 import { TasksAccessService } from '../tasks.access.service';
 import { TasksConstructorService } from '../tasks.constructor.service';
+import { TasksNoticeService } from '../tasks-notice.service';
 
 /** Formulario de tarea: crear (`/nueva`) y editar (`/:id`), con borrado confirmado dentro de la pantalla. */
 @Component({
   selector: 'app-task-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon, AlarmPermissionPrompt],
+  imports: [Icon, AlarmPermissionPrompt, PostponeSheet],
   templateUrl: './task-form.html',
   styleUrl: './task-form.scss',
 })
@@ -24,6 +31,9 @@ export class TaskForm {
   private readonly alarms = inject(AlarmsAccessService);
   private readonly alarmsCopy = inject(AlarmsConstructorService);
   private readonly clock = inject(CLOCK);
+  private readonly postponeRules = inject(PostponeConstructorService);
+  private readonly notices = inject(TasksNoticeService);
+  private readonly document = inject(DOCUMENT);
   private readonly taskId = inject(ActivatedRoute).snapshot.paramMap.get('id');
 
   protected readonly max = TITLE_MAX;
@@ -39,6 +49,8 @@ export class TaskForm {
   protected readonly confirmingDelete = signal(false);
   protected readonly promptVisible = signal(false);
   protected readonly promptBusy = signal(false);
+  /** Tarea que se está posponiendo (hoja abierta). */
+  protected readonly postponing = signal<Task | null>(null);
 
   private readonly trimmed = computed(() => this.title().trim());
   /** Lo que se guarda: sin los espacios de los extremos (el contador y la validación coinciden). */
@@ -139,8 +151,43 @@ export class TaskForm {
       dueTime: input.dueTime,
       completedAt: null,
       createdAt: '',
+      postponedCount: 0,
     };
     return this.alarmsCopy.hasAlarm(probe, this.clock());
+  }
+
+  protected startPostpone(): void {
+    const task = this.taskId === null ? undefined : this.access.get(this.taskId);
+    if (task) this.postponing.set(task);
+  }
+
+  /** Pospone y vuelve a la lista con el aviso; si falla, se queda y avisa. */
+  protected async postpone(task: Task, target: PostponeTarget): Promise<void> {
+    this.postponing.set(null);
+    this.error.set(null);
+    const result = await this.access.postpone(task.id, target);
+    if (!result.ok) {
+      this.error.set(this.postponeRules.failNotice);
+      return;
+    }
+    this.notices.show(this.postponeRules.noticeText(target, this.clock()), false);
+    await this.sheetHistorySettled();
+    void this.router.navigate(['/']);
+  }
+
+  /** Al cerrar la hoja se retira su entrada del historial: se espera a que termine antes de navegar. */
+  private sheetHistorySettled(): Promise<void> {
+    const view = this.document.defaultView;
+    if (!view) return Promise.resolve();
+    return new Promise((resolve) => {
+      const done = () => {
+        view.removeEventListener('popstate', done);
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(done, 150);
+      view.addEventListener('popstate', done);
+    });
   }
 
   protected cancel(): void {

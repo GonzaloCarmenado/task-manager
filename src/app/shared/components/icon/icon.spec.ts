@@ -35,6 +35,7 @@ describe('Icon', () => {
         'refresh',
         'server',
         'shield',
+        'snooze',
         'wifi-off',
       ].sort()
     );

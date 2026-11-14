@@ -1,0 +1,47 @@
+<div class="backdrop" (click)="dismiss.emit()">
+  <section
+    class="sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="postpone-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="head">
+      <div class="badge"><app-icon name="snooze" /></div>
+      <div>
+        <h2 id="postpone-title" class="title">{{ rules.sheet.title }}</h2>
+        <p class="task-title">{{ task().title }}</p>
+      </div>
+    </header>
+
+    <ul class="options">
+      @for (choice of choices(); track choice.option) {
+      <li>
+        <button type="button" class="option" (click)="choose.emit(choice.target)">
+          <span class="label">{{ choice.label }}</span>
+          <span class="detail">{{ choice.detail }}</span>
+        </button>
+      </li>
+      }
+      <li class="custom">
+        <label class="custom-label" for="postpone-date">
+          <span class="label">{{ rules.sheet.custom }}</span>
+          <span class="detail">{{ rules.sheet.customDetail }}</span>
+        </label>
+        <input
+          id="postpone-date"
+          class="date"
+          type="date"
+          [min]="min()"
+          [attr.aria-invalid]="invalidDate()"
+          (change)="pickDate($event)"
+        />
+        @if (invalidDate()) {
+        <p class="invalid" role="alert">{{ rules.sheet.customPast }}</p>
+        }
+      </li>
+    </ul>
+
+    <button type="button" class="close" (click)="dismiss.emit()">{{ rules.sheet.close }}</button>
+  </section>
+</div>

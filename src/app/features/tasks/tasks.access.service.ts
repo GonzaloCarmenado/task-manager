@@ -4,6 +4,10 @@ import { AuthAccessService } from '../../core/services/auth.access.service';
 import { CLOCK } from '../../core/services/clock';
 import { SupabaseService } from '../../core/services/supabase';
 import { formatTime } from '../../core/utils/local-date';
+import {
+  PostponeConstructorService,
+  PostponeTarget,
+} from './postpone/postpone.constructor.service';
 
 export type TasksStatus = 'idle' | 'loading' | 'ready' | 'error';
 export type TasksErrorReason = 'network' | 'unknown';
@@ -27,6 +31,7 @@ function isRow(value: unknown): value is TaskRow {
     typeof v['id'] === 'string' &&
     typeof v['title'] === 'string' &&
     typeof v['created_at'] === 'string' &&
+    typeof v['postponed_count'] === 'number' &&
     (v['due_date'] === null || typeof v['due_date'] === 'string') &&
     (v['due_time'] === null || typeof v['due_time'] === 'string') &&
     (v['completed_at'] === null || typeof v['completed_at'] === 'string')
@@ -41,6 +46,7 @@ function toTask(row: TaskRow): Task {
     dueTime: formatTime(row.due_time),
     completedAt: row.completed_at,
     createdAt: row.created_at,
+    postponedCount: row.postponed_count,
   };
 }
 
@@ -75,6 +81,7 @@ export class TasksAccessService {
   private readonly supabase = inject(SupabaseService);
   private readonly auth = inject(AuthAccessService);
   private readonly clock = inject(CLOCK);
+  private readonly postponeRules = inject(PostponeConstructorService);
 
   private readonly cache = signal<ReadonlyMap<string, readonly Task[]>>(new Map());
   private readonly states = signal<ReadonlyMap<string, UserState>>(new Map());
@@ -173,6 +180,38 @@ export class TasksAccessService {
       this.supabase.client
         .from('tasks')
         .update({ completed_at: completedAt })
+        .eq('id', id)
+        .abortSignal(signal)
+    );
+    if (outcome.ok) return { ok: true };
+
+    this.replaceTask(uid, id, previous);
+    return { ok: false, reason: outcome.reason };
+  }
+
+  /** Optimista: cambia fecha y hora al instante y vuelve atrás si el servidor falla. */
+  async postpone(id: string, target: PostponeTarget): Promise<TaskOpResult> {
+    const uid = this.auth.userId();
+    const previous = this.get(id);
+    if (uid === null || previous === undefined) return { ok: false, reason: 'unknown' };
+
+    const postponedCount =
+      previous.postponedCount + (this.postponeRules.countsAsPostponed(previous, target) ? 1 : 0);
+    this.replaceTask(uid, id, {
+      ...previous,
+      dueDate: target.dueDate,
+      dueTime: target.dueTime,
+      postponedCount,
+    });
+
+    const outcome = await this.runMutation((signal) =>
+      this.supabase.client
+        .from('tasks')
+        .update({
+          due_date: target.dueDate,
+          due_time: target.dueTime,
+          postponed_count: postponedCount,
+        })
         .eq('id', id)
         .abortSignal(signal)
     );

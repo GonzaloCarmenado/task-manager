@@ -7,6 +7,7 @@ import { CLOCK } from '../../../core/services/clock';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import { TaskOpResult, TasksAccessService } from '../tasks.access.service';
 import { TasksConstructorService } from '../tasks.constructor.service';
+import { TasksNoticeService } from '../tasks-notice.service';
 import { TaskForm } from './task-form';
 
 type ComponentDef = { ɵcmp: { onPush: boolean } };
@@ -18,6 +19,7 @@ const EXISTING: Task = {
   dueTime: '09:30',
   completedAt: null,
   createdAt: '2026-11-01T10:00:00.000Z',
+  postponedCount: 0,
 };
 
 const flush = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
@@ -50,6 +52,11 @@ function setup(
     }),
     remove: vi.fn((id: string) => {
       void id;
+      return ok();
+    }),
+    postpone: vi.fn((id: string, target: unknown) => {
+      void id;
+      void target;
       return ok();
     }),
   };
@@ -563,5 +570,51 @@ describe('TaskForm · aviso previo de alarmas', () => {
     await f.save();
 
     expect(promptOf(f.el)).toBeNull();
+  });
+});
+
+describe('TaskForm · posponer', () => {
+  const openSheet = (f: ReturnType<typeof setup>) => {
+    f.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    f.detect();
+  };
+
+  it('US-007-01 el botón Posponer solo aparece al editar', () => {
+    expect(setup({ id: 'abc' }).el.querySelector('button.postpone')).not.toBeNull();
+    expect(setup().el.querySelector('button.postpone')).toBeNull();
+  });
+
+  it('US-007-01 abre la hoja de la tarea que se edita', () => {
+    const f = setup({ id: 'abc' });
+    openSheet(f);
+    expect(f.el.querySelector('app-postpone-sheet')).not.toBeNull();
+    expect(f.text()).toContain('Comprar pan');
+  });
+
+  it('US-007-01 al elegir, pospone, deja el aviso en el servicio compartido y vuelve a la lista', async () => {
+    const f = setup({ id: 'abc' });
+    openSheet(f);
+    f.el.querySelector<HTMLButtonElement>('app-postpone-sheet button.option')?.click();
+    await vi.waitFor(() => expect(f.navigate).toHaveBeenCalledWith(['/']));
+
+    expect(f.access.postpone).toHaveBeenCalledTimes(1);
+    expect(f.access.postpone.mock.calls[0][0]).toBe('abc');
+    expect(TestBed.inject(TasksNoticeService).notice()).toEqual({
+      text: expect.stringContaining('Tarea pospuesta'),
+      error: false,
+    });
+  });
+
+  it('US-007-01 si falla, se queda en el formulario y avisa', async () => {
+    const f = setup({ id: 'abc' });
+    f.access.postpone.mockResolvedValueOnce({ ok: false, reason: 'network' });
+    openSheet(f);
+    f.el.querySelector<HTMLButtonElement>('app-postpone-sheet button.option')?.click();
+    await flush();
+    f.detect();
+
+    expect(f.navigate).not.toHaveBeenCalled();
+    expect(f.text()).toContain('No se pudo posponer la tarea. Inténtalo de nuevo.');
+    expect(f.el.querySelector('app-postpone-sheet')).toBeNull();
   });
 });

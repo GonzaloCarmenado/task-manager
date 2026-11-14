@@ -106,6 +106,7 @@ Migración `*_tasks.sql`. Una fila por tarea de un usuario:
 | `due_time` | `time` | opcional y **solo con `due_date`** |
 | `completed_at` | `timestamptz` | `null` = pendiente |
 | `created_at` | `timestamptz` | por defecto `now()` |
+| `postponed_count` | `integer` | spec 007: veces pospuesta (por defecto 0, nunca negativa). Rollback: `alter table public.tasks drop column postponed_count;` |
 
 **RLS**: una política por operación (`select`, `insert`, `update`, `delete`), todas `to authenticated` y con `user_id = (select auth.uid())`. Las sesiones anónimas usan el rol `authenticated`. Se revoca todo a `anon`. La app solo accede desde `TasksAccessService`.
 

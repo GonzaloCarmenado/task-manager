@@ -209,6 +209,7 @@
   text-align: center;
 }
 
+.postpone,
 .delete,
 .keep {
   display: inline-flex;
@@ -224,6 +225,10 @@
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+}
+
+.postpone {
+  color: var(--color-on-primary-soft);
 }
 
 .keep {

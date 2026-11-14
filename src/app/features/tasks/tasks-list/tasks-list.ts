@@ -15,21 +15,20 @@ import { Icon } from '../../../shared/components/icon/icon';
 import { AlarmsBanner } from '../alarms/alarms-banner/alarms-banner';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import { ExactAlarmSheet } from '../alarms/exact-alarm-sheet/exact-alarm-sheet';
+import {
+  PostponeConstructorService,
+  PostponeTarget,
+} from '../postpone/postpone.constructor.service';
+import { PostponeSheet } from '../postpone/postpone-sheet/postpone-sheet';
 import { TasksAccessService } from '../tasks.access.service';
 import { TasksConstructorService } from '../tasks.constructor.service';
-
-const NOTICE_MS = 3_000;
-
-interface Notice {
-  readonly text: string;
-  readonly error: boolean;
-}
+import { TasksNoticeService } from '../tasks-notice.service';
 
 /** Lista de tareas agrupadas por fecha. Solo orquesta la UI: los datos vienen del servicio de acceso. */
 @Component({
   selector: 'app-tasks-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon, AlarmsBanner, ExactAlarmSheet],
+  imports: [Icon, AlarmsBanner, ExactAlarmSheet, PostponeSheet],
   templateUrl: './tasks-list.html',
   styleUrl: './tasks-list.scss',
 })
@@ -38,7 +37,10 @@ export class TasksList {
   protected readonly copy = inject(TasksConstructorService);
   protected readonly alarms = inject(AlarmsAccessService);
   private readonly alarmsCopy = inject(AlarmsConstructorService);
+  private readonly postponeRules = inject(PostponeConstructorService);
   private readonly clock = inject(CLOCK);
+  private readonly notices = inject(TasksNoticeService);
+  protected readonly notice = this.notices.notice;
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
@@ -51,9 +53,9 @@ export class TasksList {
     return this.copy.group(this.access.tasks());
   });
   protected readonly expanded = signal(false);
-  protected readonly notice = signal<Notice | null>(null);
+  /** Tarea cuya hoja de posponer está abierta. */
+  protected readonly postponing = signal<Task | null>(null);
 
-  private noticeTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly onVisibility = () => {
     if (this.document.visibilityState !== 'visible') return;
     this.day.set(this.copy.todayDay());
@@ -63,10 +65,9 @@ export class TasksList {
   constructor() {
     void this.access.load();
     this.document.addEventListener('visibilitychange', this.onVisibility);
-    this.destroyRef.onDestroy(() => {
-      this.document.removeEventListener('visibilitychange', this.onVisibility);
-      clearTimeout(this.noticeTimer);
-    });
+    this.destroyRef.onDestroy(() =>
+      this.document.removeEventListener('visibilitychange', this.onVisibility)
+    );
   }
 
   protected retry(): void {
@@ -89,9 +90,23 @@ export class TasksList {
     const done = task.completedAt === null;
     const result = await this.access.setCompleted(task.id, done);
     if (result.ok) {
-      this.showNotice(done ? this.copy.list.doneNotice : this.copy.list.undoneNotice, false);
+      this.notices.show(done ? this.copy.list.doneNotice : this.copy.list.undoneNotice, false);
     } else {
-      this.showNotice(this.copy.list.failNotice, true);
+      this.notices.show(this.copy.list.failNotice, true);
+    }
+  }
+
+  protected startPostpone(task: Task): void {
+    this.postponing.set(task);
+  }
+
+  protected async postpone(task: Task, target: PostponeTarget): Promise<void> {
+    this.postponing.set(null);
+    const result = await this.access.postpone(task.id, target);
+    if (result.ok) {
+      this.notices.show(this.postponeRules.noticeText(target, this.clock()), false);
+    } else {
+      this.notices.show(this.postponeRules.failNotice, true);
     }
   }
 
@@ -125,11 +140,5 @@ export class TasksList {
 
   protected dayLabel(day: string | null): string {
     return day === null ? '' : this.copy.dayLabel(day);
-  }
-
-  private showNotice(text: string, error: boolean): void {
-    clearTimeout(this.noticeTimer);
-    this.notice.set({ text, error });
-    this.noticeTimer = setTimeout(() => this.notice.set(null), NOTICE_MS);
   }
 }

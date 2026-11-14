@@ -26,6 +26,7 @@ function row(over: Partial<TaskRow> = {}): TaskRow {
     due_time: '09:30:00',
     completed_at: null,
     created_at: '2026-11-01T10:00:00.000Z',
+    postponed_count: 0,
     ...over,
   };
 }
@@ -100,7 +101,7 @@ describe('TasksAccessService · carga', () => {
 
   it('US-005-02 mapea la fila: la hora llega como HH:MM y los nombres a camelCase', async () => {
     const { service, next } = setup();
-    next(() => ok([row({ completed_at: '2026-11-12T09:00:00.000Z' })]));
+    next(() => ok([row({ completed_at: '2026-11-12T09:00:00.000Z', postponed_count: 2 })]));
 
     await service.load();
 
@@ -112,6 +113,7 @@ describe('TasksAccessService · carga', () => {
         dueTime: '09:30',
         completedAt: '2026-11-12T09:00:00.000Z',
         createdAt: '2026-11-01T10:00:00.000Z',
+        postponedCount: 2,
       },
     ]);
   });
@@ -590,5 +592,108 @@ describe('TasksAccessService · editar y borrar', () => {
 
     expect(result).toEqual({ ok: false, reason: 'network' });
     expect(service.get('t1')).toBeDefined();
+  });
+});
+
+describe('TasksAccessService · posponer', () => {
+  const target = { dueDate: '2026-11-15', dueTime: '09:30' };
+
+  async function loaded(over: Partial<TaskRow> = {}) {
+    const ctx = setup();
+    ctx.next(() => ok([row(over)]));
+    await ctx.service.load();
+    return ctx;
+  }
+
+  it('US-007-01 cambia fecha y hora al instante y guarda fecha, hora y contador', async () => {
+    const { service, next, called } = await loaded();
+    let release: (r: Result) => void = () => undefined;
+    next(() => new Promise<Result>((resolve) => (release = resolve)));
+
+    const pending = service.postpone('t1', target);
+    expect(service.get('t1')?.dueDate).toBe('2026-11-15');
+    expect(service.get('t1')?.dueTime).toBe('09:30');
+    expect(service.get('t1')?.postponedCount).toBe(1);
+
+    await flush();
+    release(ok(null));
+    expect(await pending).toEqual({ ok: true });
+    expect(called('update')[0]).toEqual([
+      { due_date: '2026-11-15', due_time: '09:30', postponed_count: 1 },
+    ]);
+    expect(called('eq').at(-1)).toEqual(['id', 't1']);
+  });
+
+  it('US-007-02 el contador suma sobre el que ya tenía', async () => {
+    const { service, next, called } = await loaded({ postponed_count: 3 });
+    next(() => ok(null));
+    await service.postpone('t1', target);
+    expect(service.get('t1')?.postponedCount).toBe(4);
+    expect(called('update')[0]).toEqual([
+      { due_date: '2026-11-15', due_time: '09:30', postponed_count: 4 },
+    ]);
+  });
+
+  it('US-007-02 ponerle fecha a una tarea sin fecha no sube el contador', async () => {
+    const { service, next, called } = await loaded({ due_date: null, due_time: null });
+    next(() => ok(null));
+    await service.postpone('t1', { dueDate: '2026-11-15', dueTime: null });
+    expect(service.get('t1')?.dueDate).toBe('2026-11-15');
+    expect(service.get('t1')?.postponedCount).toBe(0);
+    expect(called('update')[0]).toEqual([
+      { due_date: '2026-11-15', due_time: null, postponed_count: 0 },
+    ]);
+  });
+
+  it('US-007-02 editar a mano, completar y desmarcar no tocan el contador', async () => {
+    const { service, next, called } = await loaded({ postponed_count: 2 });
+    next(() => ok(row({ postponed_count: 2, due_date: '2026-11-20' })));
+    await service.update('t1', { title: 'Comprar pan', dueDate: '2026-11-20', dueTime: null });
+    expect(called('update')[0]).toEqual([
+      { title: 'Comprar pan', due_date: '2026-11-20', due_time: null },
+    ]);
+    next(() => ok(null));
+    await service.setCompleted('t1', true);
+    next(() => ok(null));
+    await service.setCompleted('t1', false);
+    expect(service.get('t1')?.postponedCount).toBe(2);
+  });
+
+  it('US-007-01 si falla, la tarea vuelve a su sitio con su contador', async () => {
+    const { service, next } = await loaded({ postponed_count: 1 });
+    next(() => fail(new Error('Failed to fetch')));
+
+    const result = await service.postpone('t1', target);
+
+    expect(result).toEqual({ ok: false, reason: 'network' });
+    expect(service.get('t1')?.dueDate).toBe('2026-11-13');
+    expect(service.get('t1')?.dueTime).toBe('09:30');
+    expect(service.get('t1')?.postponedCount).toBe(1);
+  });
+
+  it('US-007-01 una recarga lanzada antes y resuelta después de posponer no lo deshace', async () => {
+    const { service, next } = await loaded();
+    let releaseLoad: (r: Result) => void = () => undefined;
+    next(() => new Promise<Result>((resolve) => (releaseLoad = resolve)));
+    const reloading = service.load();
+    next(() => ok(null));
+    await service.postpone('t1', target);
+    await flush();
+
+    releaseLoad(ok([row()])); // respuesta anterior al cambio
+    await reloading;
+
+    expect(service.get('t1')?.dueDate).toBe('2026-11-15');
+  });
+
+  it('US-007-01 sin identidad o con una tarea desconocida no consulta y devuelve unknown', async () => {
+    const { service, from } = setup({ userId: null });
+    expect(await service.postpone('t1', target)).toEqual({ ok: false, reason: 'unknown' });
+    const loadedCtx = await loaded();
+    expect(await loadedCtx.service.postpone('nope', target)).toEqual({
+      ok: false,
+      reason: 'unknown',
+    });
+    expect(from).not.toHaveBeenCalled();
   });
 });

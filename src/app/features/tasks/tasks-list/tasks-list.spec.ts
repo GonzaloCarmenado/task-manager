@@ -26,6 +26,7 @@ function task(over: Partial<Task> = {}): Task {
     dueTime: null,
     completedAt: null,
     createdAt: `2026-11-01T10:${String(seq % 60).padStart(2, '0')}:00.000Z`,
+    postponedCount: 0,
     ...over,
   };
 }
@@ -64,8 +65,9 @@ function setup(
   const statusSig = signal<TasksStatus>(status);
   const errorReason = signal<TasksErrorReason | null>(null);
   const setCompleted = vi.fn(async (): Promise<TaskOpResult> => ({ ok: true }));
+  const postpone = vi.fn(async (): Promise<TaskOpResult> => ({ ok: true }));
   const load = vi.fn(async () => undefined);
-  const access = { tasks, status: statusSig, errorReason, load, setCompleted };
+  const access = { tasks, status: statusSig, errorReason, load, setCompleted, postpone };
 
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -91,6 +93,7 @@ function setup(
     status: statusSig,
     errorReason,
     setCompleted,
+    postpone,
     load,
     navigate,
     alarms,
@@ -427,5 +430,74 @@ describe('TasksList · alarmas', () => {
 
     expect(t.alarms.openExactAlarmSettings).toHaveBeenCalledTimes(1);
     expect(t.alarms.skipExact).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('TasksList · posponer', () => {
+  const pending = () => task({ id: 'a', title: 'Regar', dueDate: '2026-11-13' });
+
+  it('US-007-01 cada tarea pendiente tiene un botón Posponer con nombre accesible', () => {
+    const t = setup([pending()]);
+    const button = t.el.querySelector<HTMLButtonElement>('button.postpone');
+    expect(button).not.toBeNull();
+    expect(button?.getAttribute('type')).toBe('button');
+    expect(button?.getAttribute('aria-label')).toBe('Posponer: Regar');
+  });
+
+  it('US-007-01 las tareas completadas no tienen Posponer', () => {
+    const t = setup([task({ id: 'c', completedAt: '2026-11-12T09:00:00.000Z' })]);
+    t.el.querySelector<HTMLButtonElement>('.completed-toggle')?.click();
+    t.detect();
+    expect(t.el.querySelector('.task.done')).not.toBeNull();
+    expect(t.el.querySelector('button.postpone')).toBeNull();
+  });
+
+  it('US-007-01 el botón abre la hoja con la tarea y no abre el formulario', () => {
+    const t = setup([pending()]);
+    expect(t.el.querySelector('app-postpone-sheet')).toBeNull();
+    t.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    t.detect();
+
+    expect(t.el.querySelector('app-postpone-sheet')).not.toBeNull();
+    expect(t.text()).toContain('Posponer tarea');
+    expect(t.navigate).not.toHaveBeenCalled();
+  });
+
+  it('US-007-01 elegir una opción pospone, cierra la hoja y avisa con la nueva fecha', async () => {
+    const t = setup([pending()]);
+    t.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    t.detect();
+    t.el.querySelector<HTMLButtonElement>('app-postpone-sheet button.option')?.click();
+    await flush();
+    t.detect();
+
+    expect(t.postpone).toHaveBeenCalledWith('a', { dueDate: '2026-11-14', dueTime: null });
+    expect(t.el.querySelector('app-postpone-sheet')).toBeNull();
+    expect(t.text()).toContain('Tarea pospuesta a Mañana');
+    expect(t.el.querySelector('.notice[role="status"]')).not.toBeNull();
+  });
+
+  it('US-007-01 si falla el guardado, avisa como alerta', async () => {
+    const t = setup([pending()]);
+    t.postpone.mockResolvedValueOnce({ ok: false, reason: 'network' });
+    t.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    t.detect();
+    t.el.querySelector<HTMLButtonElement>('app-postpone-sheet button.option')?.click();
+    await flush();
+    t.detect();
+
+    expect(t.text()).toContain('No se pudo posponer la tarea. Inténtalo de nuevo.');
+    expect(t.el.querySelector('.notice[role="alert"]')).not.toBeNull();
+  });
+
+  it('US-007-01 cerrar la hoja sin elegir no cambia nada', () => {
+    const t = setup([pending()]);
+    t.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    t.detect();
+    t.el.querySelector<HTMLButtonElement>('app-postpone-sheet button.close')?.click();
+    t.detect();
+
+    expect(t.el.querySelector('app-postpone-sheet')).toBeNull();
+    expect(t.postpone).not.toHaveBeenCalled();
   });
 });

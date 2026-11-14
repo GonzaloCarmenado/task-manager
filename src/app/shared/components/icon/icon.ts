@@ -18,6 +18,7 @@ export const ICON_NAMES = [
   'calendar',
   'bell',
   'bell-off',
+  'snooze',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -120,6 +121,12 @@ export type IconName = (typeof ICON_NAMES)[number];
             <path d="M17 17H3s3-2 3-9c0-.8.1-1.5.4-2.2" />
             <path d="M10.3 21a1.9 1.9 0 0 0 3.4 0" />
             <path d="M3 3l18 18" />
+          }
+          @case ('snooze') {
+            <circle cx="12" cy="13" r="8" />
+            <path d="M12 9v4l2.5 1.5" />
+            <path d="M4 4.5 7 2" />
+            <path d="M20 4.5 17 2" />
           }
           @case ('shield') {
             <path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z" />

@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 84 |
+| Turnos del usuario | 89 |
 | Preguntas `F` (funcionalidad) | 28 |
-| Preguntas `W` (flujo) | 39 |
-| **Total preguntas** | **67** |
+| Preguntas `W` (flujo) | 42 |
+| **Total preguntas** | **70** |
 
 ## Log
 
@@ -101,3 +101,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 092 | 2026-11-14 | "Sí" (aprobación de los 3 planes) → `/task` | 1 W (¿apruebas las tareas?) | Planes 006, 007 y 008 aprobados. Creados los 3 `tasks.md` (48, 46 y 46 tareas; TDD; `db push` de la 007 y la 008 con confirmación) |
 | 093 | 2026-11-14 | "Sí" (aprobación de las tareas) → `/implement` de la 006 | 1 W (¿cómo tratamos el reinicio?) | Bloques 1 a 5 hechos con TDD (plugins, plan de alarmas, servicio de acceso, componentes, integración, vista previa) y verificación en emulador. Hallazgos: el evento del plugin llega sin datos (resuelto con el plugin local) y el plugin no restaura alarmas tras reiniciar (fallo suyo). Parada para decidir; sin commit |
 | 094 | 2026-11-14 | "B" (reinicio: programación nativa propia) | 0 | Programación, restauración tras reinicio (`BootReceiver`) y publicación nativas en el plugin local. Verificado en emulador: alarma exacta, reinicio sin abrir la app, notificación a la hora y toque en frío abre la tarea. Docs, review, tasks y estado de la 006 cerrados; sin commit |
+| 095 | 2026-11-14 | "Si" y "Dale" (commit y push de la 006; `/implement` de la 007) | 3 W (¿commit de las correcciones?, ¿push?, ¿login de Supabase?) | 006 subida (`3d12bd5`, `b7e4da6`). 007: bloques 1 a 6 y revisión de la hoja en navegador hechos. La CLI de Supabase estaba en otra cuenta: `logout`; el usuario no puede hacer `login` ahora, así que `db push`, `verify:rls` y Android quedan pendientes |

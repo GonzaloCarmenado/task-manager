@@ -64,7 +64,14 @@
           </span>
           }
         </button>
-        <app-icon class="chevron" name="chevron-right" />
+        <button
+          type="button"
+          class="postpone"
+          [attr.aria-label]="copy.list.postpone + ': ' + task.title"
+          (click)="startPostpone(task)"
+        >
+          <app-icon name="snooze" />
+        </button>
       </li>
       }
     </ul>
@@ -113,7 +120,13 @@
     <span>{{ copy.list.newTask }}</span>
   </button>
 
-  @if (alarms.shouldOfferExact()) {
+  @if (postponing(); as target) {
+  <app-postpone-sheet
+    [task]="target"
+    (choose)="postpone(target, $event)"
+    (dismiss)="postponing.set(null)"
+  />
+  } @if (alarms.shouldOfferExact()) {
   <app-exact-alarm-sheet (openSettings)="openExactAlarmSettings()" (skip)="alarms.skipExact()" />
   }
 </main>

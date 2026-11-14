@@ -12,6 +12,8 @@ export interface Task {
   /** Instante ISO; `null` = pendiente. */
   readonly completedAt: string | null;
   readonly createdAt: string;
+  /** Veces que se ha pospuesto una tarea que ya tenía fecha. */
+  readonly postponedCount: number;
 }
 
 export interface TaskInput {
@@ -29,4 +31,5 @@ export interface TaskRow {
   due_time: string | null;
   completed_at: string | null;
   created_at: string;
+  postponed_count: number;
 }
