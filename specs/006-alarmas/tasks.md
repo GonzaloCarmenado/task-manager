@@ -88,10 +88,10 @@
 
 ## Checklist de cierre
 
-- [ ] `pnpm lint:fix && pnpm format` sin errores
-- [ ] `pnpm secrets:check` sin hallazgos
-- [ ] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar
-- [ ] Criterios P1 de `spec.md` verificados (US-006-01 y 02)
-- [ ] Revisión visual en navegador con la extensión de Chrome
-- [ ] Comprobado en el emulador (aviso con la app cerrada y tras reiniciar)
-- [ ] Confirmación del usuario antes de cada commit y push
+- [x] `pnpm lint:fix && pnpm format` sin errores
+- [x] `pnpm secrets:check` sin hallazgos
+- [x] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar
+- [x] Criterios P1 de `spec.md` verificados (US-006-01 y 02)
+- [x] Revisión visual en navegador con la extensión de Chrome
+- [x] Comprobado en el emulador (aviso con la app cerrada y tras reiniciar)
+- [x] Confirmación del usuario antes de cada commit y push

@@ -90,17 +90,17 @@
 - [x] T-008-43: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` en verde
 - [x] T-008-44 *(parcial: resumen, racha viva, pantalla, celebración, subida de nivel y error en navegador; tema oscuro y la lista con datos reales, pendientes del emulador)*: revisión visual en navegador con la extensión de Chrome (claro y oscuro): resumen, celebración, progreso, subida de nivel, usuario nuevo, tope, racha viva y rota; área táctil, sin scroll horizontal, consola limpia
 - [x] T-008-45 *(manual, hecho en el emulador el 2026-11-14; la racha entre días y el tope de 100 XP no se repitieron en el emulador: los cubren `verify:progress` y las e2e)*: emulador Android: completar, desmarcar, tope de 100 XP, subir de nivel, racha entre días (cambiando la fecha del emulador) y persistencia al reabrir
-- [ ] T-008-46: `docs/supabase.md`, `CLAUDE.md` (comandos `verify:progress`), marcar la spec como Implementada, actualizar `specs/README.md` y el log
+- [x] T-008-46: `docs/supabase.md`, `CLAUDE.md` (comandos `verify:progress`), marcar la spec como Implementada, actualizar `specs/README.md` y el log
 
 ---
 
 ## Checklist de cierre
 
-- [ ] `pnpm lint:fix && pnpm format` sin errores
-- [ ] `pnpm secrets:check` sin hallazgos
-- [ ] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar
-- [ ] Criterios P1 de `spec.md` verificados (US-008-01, 02 y 03)
-- [ ] Revisión visual en navegador con la extensión de Chrome
+- [x] `pnpm lint:fix && pnpm format` sin errores
+- [x] `pnpm secrets:check` sin hallazgos
+- [x] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar
+- [x] Criterios P1 de `spec.md` verificados (US-008-01, 02 y 03)
+- [x] Revisión visual en navegador con la extensión de Chrome
 - [x] Comprobado en el emulador Android
-- [ ] `verify:progress` y `verify:rls` contra el remoto
-- [ ] Confirmación del usuario antes de `db push`, de cada commit y de cada push
+- [x] `verify:progress` y `verify:rls` contra el remoto
+- [x] Confirmación del usuario antes de `db push`, de cada commit y de cada push

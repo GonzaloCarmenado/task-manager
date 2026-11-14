@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 99 |
+| Turnos del usuario | 102 |
 | Preguntas `F` (funcionalidad) | 28 |
-| Preguntas `W` (flujo) | 48 |
-| **Total preguntas** | **76** |
+| Preguntas `W` (flujo) | 51 |
+| **Total preguntas** | **79** |
 
 ## Log
 
@@ -108,3 +108,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 099 | 2026-11-14 | "Instala Cypress y dale… completas, sin tonterías de solo navegación" | 0 | Cypress 16 con Supabase simulado y con estado (sesión, CRUD, XP, tope, racha, fallos). 42 pruebas en 5 ficheros, `pnpm e2e` (28 s). Spec 009 en ciclo simple; sin commit |
 | 100 | 2026-11-14 | "Ya estoy en casa, puedo hacer lo que me digas" | 1 W (¿commit de la 009?) | Pedido el `npx supabase login` en terminal normal; pendiente verificar la organización, `db:push:dry`, `db push` y `verify:*` |
 | 101 | 2026-11-14 | "Listo" + proyecto, "dale" (aplicar migraciones), "aplica" (corrección), "si" (commits), "si" (Android) | 3 W (¿aplico las migraciones?, ¿aplico la corrección?, ¿commits?) | Migraciones 007, 008 y `progress_best_streak` aplicadas; `verify:rls` 16/16 y `verify:progress` 27/27. Commits `614170c` y `02183bd`. Verificación en emulador de la 007 y la 008 (claro y oscuro); dos arreglos de CSS |
+| 102 | 2026-11-14 | "si" (commit de los fixes), "si" (auditoría y push), "si" (PR con `/pr-review`) | 3 W (¿commit?, ¿push?, ¿abro la PR?) | Commit `1b6f4d6` y push (la revisión cruzada no dejó informe). `/pr-review`: coherencia de las specs 006 a 009 correcta, listas de cierre marcadas, `review.md` de la 009 creado; pendiente confirmar título y cuerpo de la PR |
