@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 125 |
+| Turnos del usuario | 128 |
 | Preguntas `F` (funcionalidad) | 43 |
-| Preguntas `W` (flujo) | 58 |
-| **Total preguntas** | **101** |
+| Preguntas `W` (flujo) | 59 |
+| **Total preguntas** | **102** |
 
 ## Log
 
@@ -131,3 +131,6 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 122 | 2026-11-14 | "deja eso como está y vamos con la de cuenta de usuario etc" (`/specify` de la 011) | 2 F (ciclo; alcance extra) | Borde del check se deja como está. Ciclo completo. Alcance: pantalla Cuenta, cambiar contraseña, borrar cuenta y cambiar correo. Spec 011 en Borrador con 6 decisiones para `/clarify` |
 | 123 | 2026-11-14 | "si" (aprobación de la spec 011) | 0 | Spec 011 aprobada; siguiente paso `/clarify` |
 | 124 | 2026-11-14 | "daleç" (`/clarify` de la 011) | 6 F (verificación, datos anónimos, envío de correo, recordatorio, identificador, recuperación) | El usuario eligió sin verificación ni envío de correo → nombre de usuario y contraseña, sin recuperación; preguntar al entrar con tareas anónimas; aviso discreto. US-011-04 sin trabajo; cambiar correo pasa a cambiar nombre de usuario. 7 decisiones por defecto. `clarify.md` CERRADO |
+| 125 | 2026-11-14 | "si" (commit de la spec 011 y revisión cruzada) | 1 W (¿commit de la spec 011?) | Commit `680b7f2`. La revisión cruzada no pudo ejecutarse: la cuenta de la API de DeepSeek no tiene saldo («Insufficient Balance»); el flujo continúa sin ella (explica también la ausencia de informes en los pushes anteriores) |
+| 126 | 2026-11-14 | "si" (`/stitch-prompt` de la 011) | 0 | `stitch-prompt.md` con 10 pantallas y componentes de cuenta, flujos, estados y reglas, sin estilos. Espera el resultado de Stitch |
+| 127 | 2026-11-14 | Export de Stitch de la 011 (ruta de descargas) | 0 | Revisado como datos no confiables (sin correos, rutas ni ids; URLs solo de fuentes/CDN del prototipo y un avatar de ejemplo). 4 pantallas copiadas con hashes a `specs/011-cuenta-usuario/design/` y `README.md` con lo conservado, lo ignorado y lo inexacto. Faltan en el export: cambiar contraseña, cambiar usuario, borrar cuenta y los estados con cuenta/cargando |
