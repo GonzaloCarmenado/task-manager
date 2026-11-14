@@ -2,7 +2,7 @@
 
 **Rama**: `interaction-logging-claude-md` (actual)
 **Creada**: 2026-11-14
-**Estado**: Implementada en el cliente (pendiente de aplicar la migración y de verificar en Android)
+**Estado**: Implementada en el cliente (migraciones aplicadas y verificadas; pendiente de verificar en Android)
 **Ciclo**: completo
 **Frontal**: sí (celebración al completar, resumen de progreso, subida de nivel y rachas)
 

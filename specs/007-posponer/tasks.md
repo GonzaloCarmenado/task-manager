@@ -78,10 +78,10 @@
 
 ## Bloque 7 — Base de datos remota *(efecto en el remoto: requiere confirmación del usuario)*
 
-- [ ] T-007-39: verificar la cuenta de Supabase (organización por **id**, `supabase orgs list`); si no coincide, parar
-- [ ] T-007-40: `pnpm db:push:dry` y revisar la migración
-- [ ] T-007-41: `pnpm db:push --yes` — **requiere confirmación del usuario**
-- [ ] T-007-42: `pnpm verify:rls` (ampliado: `postponed_count` no admite negativos) y borrar datos de prueba
+- [x] T-007-39: verificar la cuenta de Supabase (organización por **id**, `supabase orgs list`); si no coincide, parar
+- [x] T-007-40: `pnpm db:push:dry` y revisar la migración
+- [x] T-007-41: `pnpm db:push --yes` — **requiere confirmación del usuario**
+- [x] T-007-42: `pnpm verify:rls` (ampliado: `postponed_count` no admite negativos) y borrar datos de prueba
 
 ---
 

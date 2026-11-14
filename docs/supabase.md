@@ -124,8 +124,8 @@ El progreso lo calcula la **base de datos**: el cliente solo envía el **día lo
 - **Racha**: se deriva de los días con alguna tarea completada (`streak_ending`); la mejor racha solo sube.
 - Solo `get_progress(date)` es ejecutable desde el cliente; las demás funciones no.
 - Las tareas completadas antes de esta migración conservan su día (en UTC) y no dan XP.
-- Rollback: ver el final de la migración `<marca>_progress.sql`.
+- Rollback: ver el final de la migración `<marca>_progress.sql`. La migración `<marca>_progress_best_streak.sql` corrige la mejor racha (cuenta la racha completa que contiene el día completado).
 
 ## Estado
 
-Migraciones: `tasks` (spec 005), `tasks_postponed_count` (007) y `progress` (008; las dos últimas, pendientes de aplicar al remoto). El resto del modelo (XP, rachas…) llegará con las siguientes specs. La identidad anónima ya existe (spec 003).
+Migraciones: `tasks` (spec 005), `tasks_postponed_count` (007), `progress` y `progress_best_streak` (008), todas aplicadas al remoto y verificadas con `verify:rls` y `verify:progress`. La identidad anónima ya existe (spec 003).

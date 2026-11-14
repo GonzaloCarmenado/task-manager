@@ -78,10 +78,10 @@
 ## Bloque 7 — Base de datos remota *(efecto en el remoto: requiere confirmación del usuario)*
 
 - [x] T-008-38 (Red): `scripts/verify-progress.mjs` escrito (prueba real, manual) con los escenarios del plan; se ejecuta tras el `db push`
-- [ ] T-008-39: verificar la cuenta de Supabase (organización por **id**); si no coincide, parar
-- [ ] T-008-40: `pnpm db:push:dry`, revisar la migración con el usuario
-- [ ] T-008-41: `pnpm db:push --yes` — **requiere confirmación del usuario**
-- [ ] T-008-42 (Green): `pnpm verify:progress` y `pnpm verify:rls` en verde: XP, tope, desmarcar, racha, borrar, aislamiento y escrituras denegadas; borrar los datos de prueba
+- [x] T-008-39: verificar la cuenta de Supabase (organización por **id**); si no coincide, parar
+- [x] T-008-40: `pnpm db:push:dry`, revisar la migración con el usuario
+- [x] T-008-41: `pnpm db:push --yes` — **requiere confirmación del usuario**
+- [x] T-008-42 (Green): `pnpm verify:progress` y `pnpm verify:rls` en verde: XP, tope, desmarcar, racha, borrar, aislamiento y escrituras denegadas; borrar los datos de prueba
 
 ---
 

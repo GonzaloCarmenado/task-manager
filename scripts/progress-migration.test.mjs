@@ -98,3 +98,18 @@ test('US-008-01 las tareas ya completadas reciben su día antes de añadir la re
   assert.ok(backfill >= 0, 'falta rellenar completed_day de las tareas existentes');
   assert.ok(backfill < constraint, 'el relleno va antes de la restricción');
 });
+
+// Corrección de la mejor racha (verify:progress): completar días anteriores a otros ya completados
+// debe contar la racha completa, no solo la parte que termina en ese día.
+const fixFile = readdirSync(dir).find((f) => /_progress_best_streak\.sql$/.test(f));
+const fixSql = fixFile ? readFileSync(resolve(dir, fixFile), 'utf8') : '';
+const fixCode = fixSql.replace(/--.*$/gm, '');
+
+test('US-008-04 la mejor racha cuenta la racha completa que contiene el día completado', () => {
+  assert.ok(fixFile, 'falta supabase/migrations/<marca>_progress_best_streak.sql');
+  assert.match(fixCode, /create\s+function\s+public\.streak_run\s*\(/i);
+  assert.match(fixCode, /create\s+or\s+replace\s+function\s+public\.tasks_progress_after\s*\(/i);
+  assert.match(fixCode, /streak_run\s*\(\s*new\.user_id\s*,\s*new\.completed_day\s*\)/i);
+  assert.match(fixCode, /revoke\s+execute\s+on\s+function\s+public\.streak_run/i);
+  assert.doesNotMatch(fixCode, /drop\s+table|truncate/i);
+});

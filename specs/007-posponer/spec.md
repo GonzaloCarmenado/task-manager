@@ -2,7 +2,7 @@
 
 **Rama**: `interaction-logging-claude-md` (actual)
 **Creada**: 2026-11-14
-**Estado**: Implementada en el cliente (pendiente de aplicar la migración y de verificar en Android)
+**Estado**: Implementada (migración aplicada y verificada con `verify:rls`; pendiente de verificar en Android)
 **Ciclo**: completo
 **Frontal**: sí (hoja de opciones para posponer desde la lista y desde el formulario)
 
