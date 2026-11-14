@@ -126,6 +126,14 @@ El progreso lo calcula la **base de datos**: el cliente solo envía el **día lo
 - Las tareas completadas antes de esta migración conservan su día (en UTC) y no dan XP.
 - Rollback: ver el final de la migración `<marca>_progress.sql`. La migración `<marca>_progress_best_streak.sql` corrige la mejor racha (cuenta la racha completa que contiene el día completado).
 
+## Cuenta de usuario (spec 011)
+
+- Registro e inicio de sesión con **nombre de usuario + contraseña**, sin correo, sin verificación y sin recuperación. Internamente el nombre se guarda como `<usuario>@cuenta.invalid` (TLD reservado: nunca resuelve ni recibe correo); la persona no lo ve.
+- Vincular la sesión anónima (`updateUser`) conserva el mismo `user_id`: tareas y progreso siguen siendo suyos.
+- **Configuración remota (panel de Supabase, la hace el propietario; no se versiona)**: Authentication → Providers → Email: desactivar «Confirm email» y fijar longitud mínima de contraseña en 8. Sin esto, vincular deja la cuenta pendiente de verificar.
+- Migración `<marca>_account.sql`: `delete_my_account()` (security definer, solo `authenticated` y no anónimo; borra `auth.users` y las tablas de datos caen en cascada). Rollback al final del fichero.
+- Verificación real (manual): `pnpm verify:account` crea una cuenta de prueba aleatoria, la vincula, cambia nombre y contraseña, la borra y comprueba que una sesión anónima no puede borrar. Solo imprime booleanos.
+
 ## Estado
 
 Migraciones: `tasks` (spec 005), `tasks_postponed_count` (007), `progress` y `progress_best_streak` (008), todas aplicadas al remoto y verificadas con `verify:rls` y `verify:progress`. La identidad anónima ya existe (spec 003).

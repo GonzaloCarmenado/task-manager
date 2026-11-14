@@ -8,8 +8,8 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 |---|---|
 | Turnos del usuario | 133 |
 | Preguntas `F` (funcionalidad) | 43 |
-| Preguntas `W` (flujo) | 59 |
-| **Total preguntas** | **102** |
+| Preguntas `W` (flujo) | 60 |
+| **Total preguntas** | **103** |
 
 ## Log
 
@@ -138,3 +138,5 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 129 | 2026-11-14 | "vamos" (aprobación del plan de la 011) | 0 | Plan aprobado; siguiente paso `/task` |
 | 130 | 2026-11-14 | "task" (`/task` de la 011) | 0 | `tasks.md` con 134 tareas en 9 bloques: núcleo y spike con paradas de confirmación para el remoto, base visual, y un bloque por historia con tareas de medidas y comparación lado a lado con cada `screen.png` |
 | 131 | 2026-11-14 | "si dake" (aprobación de las tareas de la 011) | 0 | Tareas aprobadas; siguiente paso `/implement` |
+| 132 | 2026-11-14 | "commitea y luego seguimos" | 0 | Commit `0546d41` (plan y tareas de la 011) |
+| 133 | 2026-11-14 | `/implement 011` | 1 W | Bloque 1 hecho en local (identidad, cambio de contraseña/nombre, cierre, borrado, migración `account`, `verify:account`, docs). Cadena en verde. Pendiente: ajustes del panel y subida de la migración (requieren confirmación). Pregunta W: commit del bloque. |

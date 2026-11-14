@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { DestroyRef, Injectable, InjectionToken, computed, inject, signal } from '@angular/core';
+import { AccountErrorReason, AccountResult } from '../models/account';
 import { AuthSession } from '../models/auth-session';
 import {
   ATTEMPT_TIMEOUT_MS,
@@ -9,8 +10,18 @@ import {
   AuthErrorReason,
   AuthStatus,
 } from '../models/auth-status';
-import { mapAuthError } from './auth-error.util';
+import { fromInternalIdentifier, normalizeUsername, toInternalIdentifier } from '../utils/username';
+import { mapAccountError, mapAuthError } from './auth-error.util';
 import { AUTH_STORAGE_KEY, SupabaseService } from './supabase';
+
+/** Plazo de una operación de cuenta: sin red o con el token caducado las llamadas no vuelven solas. */
+const ACCOUNT_TIMEOUT_MS = 15_000;
+/** Cuánto vale una comprobación de credenciales a la espera de que la persona decida. */
+const PENDING_SIGN_IN_MS = 10 * 60 * 1000;
+
+type Guarded<T> =
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false; readonly reason: AccountErrorReason };
 
 /** Almacenamiento donde `supabase-js` guarda la sesión; se inyecta para poder simularlo. */
 export const AUTH_STORAGE = new InjectionToken<Pick<Storage, 'getItem'>>('AUTH_STORAGE', {
@@ -78,6 +89,246 @@ export class AuthAccessService {
     this.attempt();
   }
 
+  /** Hay una operación de cuenta en curso; solo puede haber una a la vez. */
+  private accountBusy = false;
+  /** Credenciales ya comprobadas con el cliente sonda, a la espera de decidir. Solo en memoria; nunca salen del servicio. */
+  private pendingSignIn: { accessToken: string; refreshToken: string; at: number } | null = null;
+
+  /**
+   * Primera fase del inicio de sesión: comprueba las credenciales con un cliente sonda **sin tocar la
+   * sesión real**, así que cancelar después no destruye la sesión anónima.
+   */
+  async checkCredentials(username: string, password: string): Promise<AccountResult> {
+    const current = this._session();
+    if (current === null || !current.user.isAnonymous) return { ok: false, reason: 'unauthorized' };
+    this.pendingSignIn = null;
+    return this.exclusive(async () => {
+      const outcome = await this.guarded(() =>
+        this.supabase
+          .createProbeClient()
+          .auth.signInWithPassword({ email: toInternalIdentifier(username), password })
+      );
+      if (!outcome.ok) return outcome;
+      const { data, error } = outcome.value;
+      if (error) return { ok: false, reason: mapAccountError(error) };
+      const session = data.session;
+      if (!session?.access_token || !session.refresh_token) return { ok: false, reason: 'unknown' };
+      this.pendingSignIn = {
+        accessToken: session.access_token,
+        refreshToken: session.refresh_token,
+        at: Date.now(),
+      };
+      return { ok: true };
+    });
+  }
+
+  /** Segunda fase: aplica la sesión comprobada y cambia la identidad. Solo vale una vez. */
+  async completeSignIn(): Promise<AccountResult> {
+    const pending = this.pendingSignIn;
+    if (pending === null || Date.now() - pending.at > PENDING_SIGN_IN_MS) {
+      this.pendingSignIn = null;
+      return { ok: false, reason: 'unauthorized' };
+    }
+    return this.exclusive(async () => {
+      const outcome = await this.guarded(() =>
+        this.supabase.client.auth.setSession({
+          access_token: pending.accessToken,
+          refresh_token: pending.refreshToken,
+        })
+      );
+      if (!outcome.ok) {
+        // Sin red se puede reintentar con lo ya comprobado; en otro caso hay que volver a comprobar.
+        if (outcome.reason !== 'network' && outcome.reason !== 'timeout') this.pendingSignIn = null;
+        return outcome;
+      }
+      this.pendingSignIn = null;
+      const { data, error } = outcome.value;
+      if (error) return { ok: false, reason: mapAccountError(error) };
+      const session = toAuthSession(data.session, false);
+      if (!session) return { ok: false, reason: 'unknown' };
+      this.clearRetryTimer();
+      this.retryCount = 0;
+      this._session.set(session);
+      this._errorReason.set(null);
+      this._status.set('ready');
+      return { ok: true };
+    });
+  }
+
+  /** Nombre de usuario de la cuenta abierta; `null` si la sesión es anónima o no hay sesión. */
+  private accountUsername(): string | null {
+    const current = this._session();
+    return current !== null && !current.user.isAnonymous ? current.user.username : null;
+  }
+
+  /** Comprueba la contraseña actual con un cliente sonda: no toca la sesión real. */
+  private async reauthenticate(username: string, password: string): Promise<AccountResult> {
+    const outcome = await this.guarded(() =>
+      this.supabase
+        .createProbeClient()
+        .auth.signInWithPassword({ email: toInternalIdentifier(username), password })
+    );
+    if (!outcome.ok) return outcome;
+    return outcome.value.error
+      ? { ok: false, reason: mapAccountError(outcome.value.error) }
+      : { ok: true };
+  }
+
+  /** Cambia la contraseña tras comprobar la actual. No cambia nada a medias. */
+  async changePassword(current: string, next: string): Promise<AccountResult> {
+    const username = this.accountUsername();
+    if (username === null) return { ok: false, reason: 'unauthorized' };
+    if (next === current) return { ok: false, reason: 'same-password' };
+    return this.exclusive(async () => {
+      const verified = await this.reauthenticate(username, current);
+      if (!verified.ok) return verified;
+      const outcome = await this.guarded(() =>
+        this.supabase.client.auth.updateUser({ password: next })
+      );
+      if (!outcome.ok) return outcome;
+      if (outcome.value.error) return { ok: false, reason: mapAccountError(outcome.value.error) };
+      return { ok: true };
+    });
+  }
+
+  /** Cambia el nombre de usuario tras comprobar la contraseña; el `user_id` y los datos no cambian. */
+  async changeUsername(next: string, password: string): Promise<AccountResult> {
+    const username = this.accountUsername();
+    if (username === null) return { ok: false, reason: 'unauthorized' };
+    const target = normalizeUsername(next);
+    if (target === username) return { ok: false, reason: 'username-taken' };
+    return this.exclusive(async () => {
+      const verified = await this.reauthenticate(username, password);
+      if (!verified.ok) return verified;
+      const outcome = await this.guarded(() =>
+        this.supabase.client.auth.updateUser({ email: toInternalIdentifier(target) })
+      );
+      if (!outcome.ok) return outcome;
+      const { data, error } = outcome.value;
+      if (error) return { ok: false, reason: mapAccountError(error) };
+      // Si el servicio dejara el cambio pendiente de verificar, el identificador no habría cambiado.
+      if (fromInternalIdentifier(data.user?.email) !== target)
+        return { ok: false, reason: 'unknown' };
+      this._session.update((session) =>
+        session === null ? session : { ...session, user: { ...session.user, username: target } }
+      );
+      return { ok: true };
+    });
+  }
+
+  /** Cierre de sesión pedido por la persona: su `SIGNED_OUT` no es un rechazo del servidor. */
+  private expectedSignOut = false;
+
+  /**
+   * Cierra **solo esta sesión** (`scope: 'local'`: las de otros móviles de la cuenta siguen) y deja una
+   * sesión anónima nueva y vacía. Sin red no se cierra nada: la app nunca se queda sin identidad.
+   */
+  async signOut(): Promise<AccountResult> {
+    const current = this._session();
+    if (current === null || current.user.isAnonymous) return { ok: false, reason: 'unauthorized' };
+    return this.exclusive(async () => {
+      this.expectedSignOut = true;
+      const outcome = await this.guarded(() =>
+        this.supabase.client.auth.signOut({ scope: 'local' })
+      );
+      this.expectedSignOut = false;
+      if (!outcome.ok) return outcome;
+      if (outcome.value.error) return { ok: false, reason: mapAccountError(outcome.value.error) };
+      this.pendingSignIn = null;
+      this._session.set(null);
+      this.clearRetryTimer();
+      this.retryCount = 0;
+      this.attempt();
+      return { ok: true };
+    });
+  }
+
+  /**
+   * Borra la cuenta y todos sus datos (función de servidor `delete_my_account`) tras comprobar la
+   * contraseña. Si algo falla antes de borrar no cambia nada; una vez borrada, el móvil siempre
+   * acaba con una sesión anónima nueva, aunque el cierre local no pueda completarse.
+   */
+  async deleteOwnAccount(password: string): Promise<AccountResult> {
+    const username = this.accountUsername();
+    if (username === null) return { ok: false, reason: 'unauthorized' };
+    return this.exclusive(async () => {
+      const verified = await this.reauthenticate(username, password);
+      if (!verified.ok) return verified;
+      const outcome = await this.guarded(() => this.supabase.client.rpc('delete_my_account'));
+      if (!outcome.ok) return outcome;
+      if (outcome.value.error) return { ok: false, reason: mapAccountError(outcome.value.error) };
+      this.expectedSignOut = true;
+      await this.guarded(() => this.supabase.client.auth.signOut({ scope: 'local' }));
+      this.expectedSignOut = false;
+      this.pendingSignIn = null;
+      this._session.set(null);
+      this.clearRetryTimer();
+      this.retryCount = 0;
+      this.attempt();
+      return { ok: true };
+    });
+  }
+
+  /** Descarta lo comprobado: la sesión anónima sigue intacta. */
+  cancelSignIn(): void {
+    this.pendingSignIn = null;
+  }
+
+  /**
+   * Vincula la sesión anónima a un nombre de usuario y una contraseña. Conserva el mismo `user_id`,
+   * así que las tareas y el progreso siguen siendo suyos. Nunca lanza ni escribe en consola.
+   */
+  async linkAccount(username: string, password: string): Promise<AccountResult> {
+    const current = this._session();
+    if (current === null || !current.user.isAnonymous) return { ok: false, reason: 'unauthorized' };
+    return this.exclusive(async () => {
+      const outcome = await this.guarded(() =>
+        this.supabase.client.auth.updateUser({ email: toInternalIdentifier(username), password })
+      );
+      if (!outcome.ok) return outcome;
+      const { data, error } = outcome.value;
+      if (error) return { ok: false, reason: mapAccountError(error) };
+      const user = data.user;
+      // Si el servicio exigiera verificar el identificador, la cuenta seguiría anónima: no es un éxito.
+      if (!user || user.is_anonymous === true) return { ok: false, reason: 'unknown' };
+      this._session.set({
+        user: {
+          id: current.user.id,
+          isAnonymous: false,
+          username: fromInternalIdentifier(user.email),
+        },
+        expiresAt: current.expiresAt,
+      });
+      return { ok: true };
+    });
+  }
+
+  private async exclusive(operation: () => Promise<AccountResult>): Promise<AccountResult> {
+    if (this.accountBusy) return { ok: false, reason: 'unknown' };
+    this.accountBusy = true;
+    try {
+      return await operation();
+    } finally {
+      this.accountBusy = false;
+    }
+  }
+
+  /** Ejecuta una llamada de la librería con plazo propio y sin dejar escapar excepciones. */
+  private async guarded<T>(call: () => PromiseLike<T>): Promise<Guarded<T>> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<'timeout'>((resolve) => {
+      timer = setTimeout(() => resolve('timeout'), ACCOUNT_TIMEOUT_MS);
+    });
+    try {
+      const result = await Promise.race([Promise.resolve(call()), timeout]);
+      return result === 'timeout' ? { ok: false, reason: 'timeout' } : { ok: true, value: result };
+    } catch (error) {
+      return { ok: false, reason: mapAccountError(error) };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   /** Reintento manual. Si ya hay una llamada en vuelo se une a ella en lugar de lanzar otra. */
   retry(): void {
     this.clearRetryTimer();
@@ -86,6 +337,7 @@ export class AuthAccessService {
   }
 
   private dispose(): void {
+    this.pendingSignIn = null;
     this.unsubscribe?.();
     this.unsubscribe = null;
     this.clearAttemptTimer();
@@ -108,7 +360,7 @@ export class AuthAccessService {
    * inicio de sesión anónimo lo gestiona `attempt()`.
    */
   private onAuthEvent(event: string, session: unknown): void {
-    if (event === 'TOKEN_REFRESHED') {
+    if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
       const refreshed = toAuthSession(session, false);
       if (refreshed) this._session.set(refreshed);
     } else if (event === 'SIGNED_OUT') {
@@ -121,7 +373,7 @@ export class AuthAccessService {
    * (`supabase-js` retira la sesión por sí mismo). Se crea una identidad nueva pasando por `loading`.
    */
   private onServerSignOut(): void {
-    if (this._session() === null) return; // ya se está obteniendo una identidad
+    if (this._session() === null || this.expectedSignOut) return; // ya se obtiene una identidad, o lo pidió la persona
     console.warn('[auth] La sesión fue rechazada por el servidor: se crea una identidad nueva.');
     this._session.set(null);
     this.clearRetryTimer();
@@ -236,7 +488,7 @@ function toAuthSession(value: unknown, requireRefreshToken: boolean): AuthSessio
   const v = value as {
     refresh_token?: unknown;
     expires_at?: unknown;
-    user?: { id?: unknown; is_anonymous?: unknown } | null;
+    user?: { id?: unknown; is_anonymous?: unknown; email?: unknown } | null;
   };
   const id = v.user?.id;
   if (typeof id !== 'string' || id === '') return null;
@@ -244,7 +496,14 @@ function toAuthSession(value: unknown, requireRefreshToken: boolean): AuthSessio
     return null;
   }
   return {
-    user: { id, isAnonymous: v.user?.is_anonymous === true },
+    user: {
+      id,
+      isAnonymous: v.user?.is_anonymous === true,
+      username:
+        v.user?.is_anonymous === true
+          ? null
+          : fromInternalIdentifier(v.user?.email as string | undefined),
+    },
     expiresAt: typeof v.expires_at === 'number' ? v.expires_at : null,
   };
 }

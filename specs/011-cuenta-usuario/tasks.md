@@ -10,32 +10,32 @@
 
 ## Bloque 1 — Núcleo de identidad y spike (US-011-01, 02, 03, 05, 06, 07: parte técnica)
 
-- [ ] T-011-01: `core/models/account.ts` (`AccountErrorReason`, `AccountResult`, límites, `RuleView`, `LocalTasksSnapshot`) y `username` en `AuthSession` (`core/models/auth-session.ts`) *(solo tipos)*
-- [ ] T-011-02 (Red): `core/utils/username.spec.ts`: normaliza (minúsculas, recorta), `toInternalIdentifier`, `fromInternalIdentifier` (dominio ajeno, vacío, `null`, mayúsculas)
-- [ ] T-011-03 (Green): `core/utils/username.ts`
-- [ ] T-011-04 (Red): `core/services/auth-error.util.spec.ts`: `mapAccountError` por código (`invalid_credentials`, `user_already_exists`/`email_exists`, `weak_password`, `same_password`, 429, red, plazo, 401, desconocido) sin mensajes técnicos
-- [ ] T-011-05 (Green): `mapAccountError` en `core/services/auth-error.util.ts`
-- [ ] T-011-06 (Red): `auth.access.service.spec.ts`: `toAuthSession` rellena `username` desde el identificador interno (y `null` en anónimas o con dominio ajeno); el evento `USER_UPDATED` actualiza la sesión; un `SIGNED_OUT` esperado no escribe el aviso de «sesión rechazada» pero crea la sesión anónima
-- [ ] T-011-07 (Green): `auth.access.service.ts`: derivar `username`, manejar `USER_UPDATED` y la marca de cierre esperado
-- [ ] T-011-08 (Red): `auth.access.service.spec.ts` · `linkAccount`: llama a `updateUser` con el identificador interno y la contraseña, conserva el `user_id`, deja `isAnonymous = false` y `username`; mapea nombre ocupado, contraseña débil, red y plazo; no escribe en consola ni guarda la contraseña
-- [ ] T-011-09 (Green): `linkAccount` (si la vinculación exigiera dos llamadas, el spike lo decide)
-- [ ] T-011-10 (Red): `auth.access.service.spec.ts` · inicio de sesión en dos fases: `checkCredentials` usa un cliente sonda de la fábrica (`SUPABASE_CLIENT_FACTORY`) con almacenamiento en memoria y **no cambia la sesión**; `completeSignIn` aplica `setSession` y cambia `userId`; `cancelSignIn` descarta lo comprobado; credenciales incorrectas → `invalid-credentials`; los tokens no salen del servicio ni se loguean
-- [ ] T-011-11 (Green): `checkCredentials`, `completeSignIn`, `cancelSignIn`
-- [ ] T-011-12 (Red): `auth.access.service.spec.ts` · `signOut`: cierra, deja una sesión anónima nueva, `ready` vuelve a `true`, sin aviso de rechazo; fallo de red no deja la app sin identidad
-- [ ] T-011-13 (Green): `signOut`
-- [ ] T-011-14 (Red): `auth.access.service.spec.ts` · `changePassword` y `changeUsername`: re-autentican con la contraseña actual en la sonda y solo entonces actualizan; contraseña actual incorrecta no cambia nada; nombre ocupado; igual a la actual
-- [ ] T-011-15 (Green): `changePassword` y `changeUsername`
-- [ ] T-011-16 (Red): `auth.access.service.spec.ts` · `deleteOwnAccount`: re-autentica, llama a `rpc('delete_my_account')` y, solo si va bien, cierra y crea sesión anónima nueva; si falla no cambia nada; una sesión anónima se rechaza sin llamar al servidor
-- [ ] T-011-17 (Green): `deleteOwnAccount`
-- [ ] T-011-18 (Red): `scripts/account-migration.test.mjs`: `delete_my_account` existe, `security definer`, `set search_path`, comprueba usuario anónimo y nulo, sin parámetros, `revoke … from public, anon`, `grant … to authenticated`, sin `drop table` ni `truncate`, rollback documentado
-- [ ] T-011-19 (Green): `supabase/migrations/<marca>_account.sql` *(solo local; no se sube todavía)*
-- [ ] T-011-20: `scripts/verify-account.mjs` y script `verify:account` en `package.json` (manual, remoto; usuarios de prueba con prefijo propio que se borran al terminar; solo imprime nombres de comprobación y OK/FALLO)
-- [ ] T-011-21 (Refactor): limpiar `AuthAccessService` con los tests en verde; cobertura ≥ 80 %
-- [ ] T-011-22: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` en verde
+- [x] T-011-01: `core/models/account.ts` (`AccountErrorReason`, `AccountResult`, límites, `RuleView`, `LocalTasksSnapshot`) y `username` en `AuthSession` (`core/models/auth-session.ts`) *(solo tipos)*
+- [x] T-011-02 (Red): `core/utils/username.spec.ts`: normaliza (minúsculas, recorta), `toInternalIdentifier`, `fromInternalIdentifier` (dominio ajeno, vacío, `null`, mayúsculas)
+- [x] T-011-03 (Green): `core/utils/username.ts`
+- [x] T-011-04 (Red): `core/services/auth-error.util.spec.ts`: `mapAccountError` por código (`invalid_credentials`, `user_already_exists`/`email_exists`, `weak_password`, `same_password`, 429, red, plazo, 401, desconocido) sin mensajes técnicos
+- [x] T-011-05 (Green): `mapAccountError` en `core/services/auth-error.util.ts`
+- [x] T-011-06 (Red): `auth.access.service.spec.ts`: `toAuthSession` rellena `username` desde el identificador interno (y `null` en anónimas o con dominio ajeno); el evento `USER_UPDATED` actualiza la sesión; un `SIGNED_OUT` esperado no escribe el aviso de «sesión rechazada» pero crea la sesión anónima
+- [x] T-011-07 (Green): `auth.access.service.ts`: derivar `username`, manejar `USER_UPDATED` y la marca de cierre esperado
+- [x] T-011-08 (Red): `auth.access.service.spec.ts` · `linkAccount`: llama a `updateUser` con el identificador interno y la contraseña, conserva el `user_id`, deja `isAnonymous = false` y `username`; mapea nombre ocupado, contraseña débil, red y plazo; no escribe en consola ni guarda la contraseña
+- [x] T-011-09 (Green): `linkAccount` (si la vinculación exigiera dos llamadas, el spike lo decide)
+- [x] T-011-10 (Red): `auth.access.service.spec.ts` · inicio de sesión en dos fases: `checkCredentials` usa un cliente sonda de la fábrica (`SUPABASE_CLIENT_FACTORY`) con almacenamiento en memoria y **no cambia la sesión**; `completeSignIn` aplica `setSession` y cambia `userId`; `cancelSignIn` descarta lo comprobado; credenciales incorrectas → `invalid-credentials`; los tokens no salen del servicio ni se loguean
+- [x] T-011-11 (Green): `checkCredentials`, `completeSignIn`, `cancelSignIn`
+- [x] T-011-12 (Red): `auth.access.service.spec.ts` · `signOut`: cierra, deja una sesión anónima nueva, `ready` vuelve a `true`, sin aviso de rechazo; fallo de red no deja la app sin identidad
+- [x] T-011-13 (Green): `signOut`
+- [x] T-011-14 (Red): `auth.access.service.spec.ts` · `changePassword` y `changeUsername`: re-autentican con la contraseña actual en la sonda y solo entonces actualizan; contraseña actual incorrecta no cambia nada; nombre ocupado; igual a la actual
+- [x] T-011-15 (Green): `changePassword` y `changeUsername`
+- [x] T-011-16 (Red): `auth.access.service.spec.ts` · `deleteOwnAccount`: re-autentica, llama a `rpc('delete_my_account')` y, solo si va bien, cierra y crea sesión anónima nueva; si falla no cambia nada; una sesión anónima se rechaza sin llamar al servidor
+- [x] T-011-17 (Green): `deleteOwnAccount`
+- [x] T-011-18 (Red): `scripts/account-migration.test.mjs`: `delete_my_account` existe, `security definer`, `set search_path`, comprueba usuario anónimo y nulo, sin parámetros, `revoke … from public, anon`, `grant … to authenticated`, sin `drop table` ni `truncate`, rollback documentado
+- [x] T-011-19 (Green): `supabase/migrations/<marca>_account.sql` *(solo local; no se sube todavía)*
+- [x] T-011-20: `scripts/verify-account.mjs` y script `verify:account` en `package.json` (manual, remoto; usuarios de prueba con prefijo propio que se borran al terminar; solo imprime nombres de comprobación y OK/FALLO)
+- [x] T-011-21 (Refactor): limpiar `AuthAccessService` con los tests en verde; cobertura ≥ 80 %
+- [x] T-011-22: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` en verde
 - [ ] T-011-23 *(requiere confirmación del usuario)*: el propietario ajusta en el panel de Supabase **«Confirm email» desactivado** y **longitud mínima de contraseña 8** (no se usa `config push`); documentar los pasos sin ids ni URLs
 - [ ] T-011-24 *(requiere confirmación del usuario)*: verificar la cuenta de la CLI por **id de organización**, `pnpm db:push:dry`, mostrar la migración y `pnpm db:push --yes`
 - [ ] T-011-25 *(requiere confirmación del usuario)*: ejecutar `pnpm verify:account` (spike): identificador interno aceptado, vincular conserva el `user_id`, entrar en otro cliente, cambiar contraseña y nombre, borrar y fallo de anónimo. **Si algo falla, parar y revisar el plan antes de seguir**
-- [ ] T-011-26: `docs/supabase.md`: sección de cuenta (identificador interno, ajustes remotos, `delete_my_account`, sin recuperación) y estado de migraciones
+- [x] T-011-26: `docs/supabase.md`: sección de cuenta (identificador interno, ajustes remotos, `delete_my_account`, sin recuperación) y estado de migraciones
 
 ---
 

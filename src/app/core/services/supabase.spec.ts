@@ -74,4 +74,56 @@ describe('SupabaseService', () => {
       /environment/i
     );
   });
+
+  it('US-011-02 el cliente sonda no persiste nada: sin sesión guardada, sin refresco y con almacenamiento en memoria', () => {
+    const service = setup(valid);
+    mocks.createClient.mockClear();
+
+    const probe = service.createProbeClient();
+
+    expect(mocks.createClient).toHaveBeenCalledTimes(1);
+    expect(mocks.createClient.mock.calls[0][0]).toBe(valid.url);
+    expect(mocks.createClient.mock.calls[0][1]).toBe(valid.key);
+    const options = mocks.createClient.mock.calls[0][2] as {
+      auth: {
+        persistSession: boolean;
+        autoRefreshToken: boolean;
+        detectSessionInUrl: boolean;
+        storageKey: string;
+        storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+      };
+    };
+    expect(options.auth.persistSession).toBe(false);
+    expect(options.auth.autoRefreshToken).toBe(false);
+    expect(options.auth.detectSessionInUrl).toBe(false);
+    expect(options.auth.storageKey).not.toBe(AUTH_STORAGE_KEY);
+    expect(probe).toBe(mocks.createClient.mock.results[0].value);
+  });
+
+  it('US-011-02 el almacenamiento del cliente sonda vive en memoria y no toca localStorage', () => {
+    const service = setup(valid);
+    mocks.createClient.mockClear();
+    window.localStorage.removeItem('sonda-prueba');
+
+    service.createProbeClient();
+    const storage = (mocks.createClient.mock.calls[0][2] as { auth: { storage: Storage } }).auth
+      .storage;
+    storage.setItem('sonda-prueba', 'valor');
+
+    expect(storage.getItem('sonda-prueba')).toBe('valor');
+    expect(window.localStorage.getItem('sonda-prueba')).toBeNull();
+    storage.removeItem('sonda-prueba');
+    expect(storage.getItem('sonda-prueba')).toBeNull();
+  });
+
+  it('US-011-02 cada llamada crea un cliente sonda nuevo y distinto del principal', () => {
+    const service = setup(valid);
+    mocks.createClient.mockImplementation(() => ({ auth: {} }));
+
+    const a = service.createProbeClient();
+    const b = service.createProbeClient();
+
+    expect(a).not.toBe(b);
+    expect(a).not.toBe(service.client);
+  });
 });
