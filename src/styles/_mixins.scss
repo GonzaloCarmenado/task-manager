@@ -1,0 +1,117 @@
+// Patrones de componente de «Playful Momentum». Las pantallas los usan con
+// `@use 'mixins';` (stylePreprocessorOptions.includePaths apunta a src/styles).
+@use 'type';
+
+// Tarjeta de nivel 1: fondo de tarjeta, radio de 1 rem, relleno de 16 px y sombra cromática
+@mixin card {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+// Botón primario: píldora de 52 px, sombra tintada y escala 0,97 al pulsar
+@mixin pill-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-height);
+  padding: 0 var(--space-6);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-button);
+  cursor: pointer;
+  transition: transform 150ms ease;
+  @include type.label-lg;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    box-shadow: none;
+    cursor: default;
+    transform: none;
+  }
+}
+
+// Chip de 36 px; activo (`aria-pressed="true"`) en índigo suave con texto en negrita y sin contorno
+@mixin chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--chip-height);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  @include type.label-md;
+
+  &[aria-pressed='true'] {
+    border-color: transparent;
+    background: var(--color-primary-soft);
+    color: var(--color-on-primary-soft);
+    font-weight: 700;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}
+
+// Campo en píldora continua con anillo de foco de 2 px
+@mixin field {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-low);
+  color: var(--color-text);
+  @include type.body-lg;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+// Velo de modales y hojas: oscurece y desenfoca el contenido (opaco si no hay `backdrop-filter`)
+@mixin scrim {
+  background: var(--scrim);
+  -webkit-backdrop-filter: blur(var(--scrim-blur));
+  backdrop-filter: blur(var(--scrim-blur));
+}
+
+// Hoja inferior / modal de nivel 3
+@mixin sheet {
+  padding: var(--space-6);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-modal);
+}
+
+// Etiqueta en píldora (hora, atraso, aviso, racha)
+@mixin pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 1.5rem;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-full);
+  @include type.label-md;
+}

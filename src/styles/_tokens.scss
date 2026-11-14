@@ -1,46 +1,92 @@
 // Tokens de diseño: sistema «Playful Momentum» (specs/_design/playful-momentum/DESIGN.md).
-// Solo lo que usan las pantallas existentes; se amplía cuando haga falta. Sin fuentes externas.
+// Tema claro = cabecera del DESIGN.md (decisión de /clarify de la spec 010); oscuro = tonos del texto del diseño.
+// `scripts/design-tokens.test.mjs` comprueba estos valores contra el propio DESIGN.md y el contraste AA.
 :root {
   color-scheme: light dark;
 
   // Color (claro)
   --color-bg: #fcf8ff;
   --color-surface: #ffffff;
+  --color-surface-low: #f6f2ff;
   --color-surface-soft: #efebff;
+  --color-surface-high: #e9e5ff;
   --color-text: #181445;
   --color-text-muted: #464554;
   --color-outline: #c7c4d7;
+  --color-outline-strong: #767586;
+
   --color-primary: #4648d4;
+  --color-primary-text: #4648d4; // texto e iconos de color primario (en oscuro es más claro)
   --color-on-primary: #ffffff;
+  --color-primary-container: #6063ee;
+  --color-on-primary-container: #fffbff;
   --color-primary-soft: #e1e0ff;
   --color-on-primary-soft: #2f2ebe;
-  --color-accent: #fea619;
-  --color-success: #006c49;
-  --color-error: #ba1a1a;
-  --color-error-soft: #ffdad6;
 
-  // Espaciado
+  --color-secondary: #855300;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fea619;
+  --color-on-secondary-container: #684000;
+  --color-secondary-soft: #ffddb8;
+  --color-on-secondary-soft: #2a1700;
+
+  --color-tertiary: #006c49;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #00885d;
+  --color-tertiary-soft: #6ffbbe;
+  --color-on-tertiary-soft: #002113;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-soft: #ffdad6;
+  --color-on-error-soft: #93000a;
+
+  // Alias de los nombres anteriores (las pantallas migran a los tokens con rol)
+  --color-accent: var(--color-secondary-container);
+  --color-success: var(--color-tertiary);
+
+  // Espaciado (space-xs…space-xl del diseño)
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-6: 24px;
   --space-8: 36px;
+  --space-margin: 1.25rem;
+  --space-gutter: 1rem;
 
   // Radios
   --radius-sm: 0.5rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
   --radius-xl: 2rem;
+  --radius-2xl: 3rem;
   --radius-full: 9999px;
 
-  // Interacción
+  // Controles
   --tap-target: 44px;
-  --shadow-card: 0 4px 20px -2px rgba(99, 102, 241, 0.08);
-  --shadow-button: 0 10px 25px -5px rgba(70, 72, 212, 0.4);
+  --control-height: 52px;
+  --chip-height: 36px;
+  --check-size: 28px;
 
-  // Tipografía (pila del sistema por ahora; ver plan 003, decisión 1)
-  --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  // Profundidad: 0 plano · 1 tarjetas · 2 halos de color (racha, XP) · 3 modales y hojas
+  --shadow-card: 0 4px 20px -2px rgba(99, 102, 241, 0.08);
+  --shadow-streak: 0 8px 24px -4px rgba(245, 158, 11, 0.22);
+  --shadow-xp: 0 8px 24px -4px rgba(99, 102, 241, 0.25);
+  --shadow-modal: 0 20px 40px -8px rgba(15, 14, 23, 0.35);
+  --shadow-button: 0 10px 25px -5px rgba(70, 72, 212, 0.4);
+  --scrim: rgba(15, 14, 23, 0.55);
+  --scrim-blur: 8px;
+
+  // Barra de nivel: pista y relleno en degradado primario → esmeralda
+  --gradient-progress: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-tertiary-container)
+  );
+
+  // Tipografía (Plus Jakarta Sans empaquetada; pila del sistema como respaldo)
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-size-label: 0.75rem;
   --font-size-body: 0.875rem;
   --font-size-body-lg: 1rem;
@@ -53,18 +99,40 @@
   :root {
     --color-bg: #0f0e17;
     --color-surface: #1b1a2e;
+    --color-surface-low: #151425;
     --color-surface-soft: #2e2a56;
+    --color-surface-high: #383366;
     --color-text: #e2e8f0;
     --color-text-muted: #a8a6c0;
     --color-outline: #464554;
+    --color-outline-strong: #8a88a0;
+
     --color-primary: #6366f1;
+    --color-primary-text: #c0c1ff;
     --color-on-primary: #ffffff;
+    --color-primary-container: #4648d4;
+    --color-on-primary-container: #ffffff;
     --color-primary-soft: #2e2a56;
     --color-on-primary-soft: #c0c1ff;
-    --color-accent: #f59e0b;
-    --color-success: #10b981;
+
+    --color-secondary: #ffb95f;
+    --color-on-secondary: #2a1700;
+    --color-secondary-container: #f59e0b;
+    --color-on-secondary-container: #2a1700;
+    --color-secondary-soft: #3d2c0f;
+    --color-on-secondary-soft: #ffddb8;
+
+    --color-tertiary: #4edea3;
+    --color-on-tertiary: #002113;
+    --color-tertiary-container: #10b981;
+    --color-tertiary-soft: #0f3d2f;
+    --color-on-tertiary-soft: #6ffbbe;
+
     --color-error: #ffb4ab;
+    --color-on-error: #690005;
     --color-error-soft: #93000a;
+    --color-on-error-soft: #ffdad6;
+
     --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
     --shadow-button: 0 10px 25px -5px rgba(99, 102, 241, 0.45);
   }

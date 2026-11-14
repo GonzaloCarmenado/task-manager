@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 105 |
-| Preguntas `F` (funcionalidad) | 29 |
+| Turnos del usuario | 116 |
+| Preguntas `F` (funcionalidad) | 35 |
 | Preguntas `W` (flujo) | 52 |
-| **Total preguntas** | **81** |
+| **Total preguntas** | **87** |
 
 ## Log
 
@@ -112,3 +112,13 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 103 | 2026-11-14 | "seguimos" | 1 F (¿por qué spec seguimos?) | Propuestas: cerrar la 006, cuenta de usuario, tareas repetidas, logros |
 | 104 | 2026-11-14 | Los tres pendientes de la PR (006 sin verificar, revisar/merge, datos de prueba) | 1 W (¿commit y editar el cuerpo de la PR?) | 006 verificada en emulador (60 alarmas, zona horaria, toque con huella); 69 tareas de prueba borradas del servidor; sin merge |
 | 105 | 2026-11-14 | "si investigalo" (fallo intermitente de `supabase.spec.ts`) | 0 | Reproducido (1 de cada 3 ejecuciones completas). Causa: `vi.mock` de `@supabase/supabase-js` dependía del orden de carga con otros specs que lo importan real. Corregido inyectando el constructor del cliente (`SUPABASE_CLIENT_FACTORY`); 8/8 ejecuciones limpias. Regla añadida a `CLAUDE.md` |
+| 106 | 2026-11-14 | "si sube y hacemos una spec intermedia" | 1 F (¿qué spec intermedia?) | Push de `f2481ac` hecho. El usuario respondió con el sistema de diseño de Stitch (`DESIGN.md`) para adaptar toda la interfaz |
+| 107 | 2026-11-14 | `/specify` de la spec 010 (interfaz fiel al diseño de Stitch) | 1 F (¿ciclo completo o simple?) | Elegido ciclo simple. `DESIGN.md` aportado es idéntico al del repo: la brecha está en cómo se aplica. Spec 010 en Borrador con 4 decisiones para `/clarify` |
+| 108 | 2026-11-14 | "dale" (aprobación de la spec 010) | 0 | Spec 010 aprobada; siguiente paso `/clarify` |
+| 109 | 2026-11-14 | "clarify" (spec 010) | 4 F (crear tarea, estados vacíos, paleta clara, barra de estado) | Decidido: mantener pantalla, SVG propios, paleta de la cabecera, ajuste nativo de la barra de estado. 5 decisiones por defecto. `clarify.md` CERRADO; spec actualizada |
+| 110 | 2026-11-14 | "vamos" (`/sdd-plan` de la 010) | 0 | `plan.md` en borrador. Hallazgo: la barra de estado ya es correcta con arranque en frío en oscuro (artefacto del cambio en caliente) y `src-tauri/gen` no se versiona: se retira el ajuste nativo de la spec. Fuente por `@fontsource-variable` con versión exacta y solo los `woff2` latin y latin-ext |
+| 111 | 2026-11-14 | "si" (aprobación del plan de la 010) | 0 | Plan aprobado; siguiente paso `/task` |
+| 112 | 2026-11-14 | "task" (`/task` de la 010) | 0 | `tasks.md` con 64 tareas en 6 bloques (base, lista, gamificación, formulario y hojas, sistema, cierre), Red antes que Green y revisión visual en cada bloque |
+| 113 | 2026-11-14 | "si dale" (aprobación de las tareas de la 010) | 0 | Tareas aprobadas; siguiente paso `/implement` |
+| 114 | 2026-11-14 | "me parece bien" (avanzar por bloques) | 0 | `/implement` de la 010, bloque 1: `design-tokens.test.mjs` (15 tests) en rojo y luego en verde; fuente 5.3.0 empaquetada, tokens, tipografía y mixins. Cadena completa en verde. La revisión visual (T-010-18) queda parada: la extensión de Chrome espera que se pulse «Permitir» |
+| 115 | 2026-11-14 | "no veo ese permitir" | 1 W (¿commit del bloque 1?) | La extensión respondió al reintentar. T-010-18: fuente cargada (200), sin desborde, consola limpia. Bloque 1 listo para commit |
