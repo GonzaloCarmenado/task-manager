@@ -443,6 +443,51 @@ describe('TasksAccessService · completar', () => {
     expect(service.get('t1')).toBeUndefined();
   });
 
+  it('US-005-03 una recarga lanzada antes del cambio y resuelta después de confirmarse no lo deshace', async () => {
+    const { service, next } = await loaded();
+    let releaseLoad: (r: Result) => void = () => undefined;
+    next(() => new Promise<Result>((resolve) => (releaseLoad = resolve)));
+    const reloading = service.load();
+    next(() => ok(null));
+    await service.setCompleted('t1', true); // el cambio ya está confirmado
+    await flush();
+
+    releaseLoad(ok([row()])); // respuesta de una consulta anterior al cambio
+    await reloading;
+
+    expect(service.get('t1')?.completedAt).toBe(NOW.toISOString());
+  });
+
+  it('US-005-04 una recarga lanzada antes del borrado y resuelta después de confirmarse no lo deshace', async () => {
+    const { service, next } = await loaded();
+    let releaseLoad: (r: Result) => void = () => undefined;
+    next(() => new Promise<Result>((resolve) => (releaseLoad = resolve)));
+    const reloading = service.load();
+    next(() => ok(null));
+    await service.remove('t1');
+    await flush();
+
+    releaseLoad(ok([row()]));
+    await reloading;
+
+    expect(service.get('t1')).toBeUndefined();
+  });
+
+  it('US-005-01 una recarga lanzada antes de crear y resuelta después no hace desaparecer la tarea nueva', async () => {
+    const { service, next } = await loaded();
+    let releaseLoad: (r: Result) => void = () => undefined;
+    next(() => new Promise<Result>((resolve) => (releaseLoad = resolve)));
+    const reloading = service.load();
+    next(() => ok(row({ id: 'n1', title: 'Nueva' })));
+    await service.create({ title: 'Nueva', dueDate: null, dueTime: null });
+    await flush();
+
+    releaseLoad(ok([row()]));
+    await reloading;
+
+    expect(service.get('n1')).toBeDefined();
+  });
+
   it('US-005-03 desmarcar vuelve a pendiente (completed_at null)', async () => {
     const { service, next, called } = await loaded();
     next(() => ok(null));
