@@ -90,6 +90,12 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - **Orden de despliegue**: las migraciones `tasks_postponed_count` (007) y `progress` (008) se aplican **antes** de ejecutar el cliente contra el remoto (el cliente exige `postponed_count` y envía `completed_day`).
 - Pruebas reales (manuales, contra el remoto): `pnpm verify:rls` y `pnpm verify:progress`.
 
+### Pruebas e2e (spec 009)
+
+- `pnpm e2e` ejecuta Cypress contra la app con la configuración `e2e` (entorno ficticio, puerto 4300). Toda la red a Supabase se simula con estado en `cypress/support/backend.ts`: **nunca** toca el remoto.
+- Un flujo nuevo o un cambio de comportamiento visible debe añadir o actualizar su prueba e2e (comprobar lo que se ve **y** lo que llega al servidor). Si cambian las reglas de los disparadores, actualizar también el simulador.
+- No sustituyen a `verify:*` (migraciones reales) ni a la comprobación en Android.
+
 ### Revisión visual obligatoria en el navegador (CRITICO)
 
 - **OBLIGATORIO**: todo diseño (pantalla, componente, estilo, estado visual) se revisa en el navegador con la **extensión de Claude en Chrome sincronizada** (`mcp__claude-in-chrome__*`; invocar antes la skill `claude-in-chrome`).
@@ -145,6 +151,8 @@ pnpm test:ci               # Vitest sin watch
 pnpm test:scripts          # tests de los scripts de ayuda (node --test)
 pnpm lint:fix && pnpm format
 pnpm secrets:check        # escaneo de secretos (también en pre-commit)
+pnpm e2e                   # pruebas e2e con Cypress (arranca la app en :4300 con el entorno ficticio; sin red real)
+pnpm e2e:open              # Cypress en modo interactivo
 pnpm verify:rls            # prueba REAL de RLS de `tasks` con dos sesiones anónimas (manual, contra el remoto)
 pnpm env:init              # crea src/environments/environment.ts (ignorado) desde el ejemplo
 pnpm db:new <nombre>       # nueva migración SQL

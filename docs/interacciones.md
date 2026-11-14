@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 91 |
+| Turnos del usuario | 95 |
 | Preguntas `F` (funcionalidad) | 28 |
-| Preguntas `W` (flujo) | 42 |
-| **Total preguntas** | **70** |
+| Preguntas `W` (flujo) | 45 |
+| **Total preguntas** | **73** |
 
 ## Log
 
@@ -103,3 +103,7 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 094 | 2026-11-14 | "B" (reinicio: programación nativa propia) | 0 | Programación, restauración tras reinicio (`BootReceiver`) y publicación nativas en el plugin local. Verificado en emulador: alarma exacta, reinicio sin abrir la app, notificación a la hora y toque en frío abre la tarea. Docs, review, tasks y estado de la 006 cerrados; sin commit |
 | 095 | 2026-11-14 | "Si" y "Dale" (commit y push de la 006; `/implement` de la 007) | 3 W (¿commit de las correcciones?, ¿push?, ¿login de Supabase?) | 006 subida (`3d12bd5`, `b7e4da6`). 007: bloques 1 a 6 y revisión de la hoja en navegador hechos. La CLI de Supabase estaba en otra cuenta: `logout`; el usuario no puede hacer `login` ahora, así que `db push`, `verify:rls` y Android quedan pendientes |
 | 096 | 2026-11-14 | "No estoy en casa, no puedo hacer login" y "Dale" (commit de la 007 y cliente de la 008) | 0 | 007 commit `61fc338` (sin push) y docs de la 008 `673050a`. 008: migración con relleno de datos y sus tests, `ProgressConstructorService`, `setCompleted` con día local, `ProgressAccessService`, resumen, pantalla, celebración y subida de nivel, rutas, integración en la lista, `verify-progress.mjs`. Revisión visual en navegador. `db push`, `verify:*` y Android pendientes |
+| 097 | 2026-11-14 | "Si" (commit de la 008) | 1 W (¿commit de la 008?) | Commit `b57e9de` (sin push) tras auditar el diff |
+| 098 | 2026-11-14 | "Mientras llego a casa, ¿tenemos pruebas e2e?" | 1 W (¿abro la spec 009?) | No había e2e. Propuesta: framework contra `ng serve` con viewport 390×844 |
+| 099 | 2026-11-14 | "Instala Cypress y dale… completas, sin tonterías de solo navegación" | 0 | Cypress 16 con Supabase simulado y con estado (sesión, CRUD, XP, tope, racha, fallos). 42 pruebas en 5 ficheros, `pnpm e2e` (28 s). Spec 009 en ciclo simple; sin commit |
+| 100 | 2026-11-14 | "Ya estoy en casa, puedo hacer lo que me digas" | 1 W (¿commit de la 009?) | Pedido el `npx supabase login` en terminal normal; pendiente verificar la organización, `db:push:dry`, `db push` y `verify:*` |

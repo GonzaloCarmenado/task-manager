@@ -16,6 +16,7 @@
 | [006](./006-alarmas/spec.md) | Alarmas de tareas | Implementada | Aviso del móvil a la hora de la tarea (notificaciones locales de Android, permiso en contexto) |
 | [007](./007-posponer/spec.md) | Posponer tareas | Cliente hecho; falta migración y Android | Mover una tarea a otro día con opciones rápidas y contador de pospuestas |
 | [008](./008-gamificacion/spec.md) | Gamificación: XP, niveles y rachas | Cliente hecho; falta migración y Android | 10 XP por tarea completada, niveles, rachas de días y pantallas de progreso |
+| [009](./009-e2e-cypress/spec.md) | Pruebas e2e con Cypress | Implementada | 42 pruebas de flujos completos con Supabase simulado (`pnpm e2e`) |
 
 ---
 
