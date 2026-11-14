@@ -75,32 +75,6 @@ Denies the launch_notification_id command without any pre-configured scope.
 <tr>
 <td>
 
-`app-settings:allow-launch-task-id`
-
-</td>
-<td>
-
-Enables the launch_task_id command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`app-settings:deny-launch-task-id`
-
-</td>
-<td>
-
-Denies the launch_task_id command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
 `app-settings:allow-open-exact-alarm-settings`
 
 </td>

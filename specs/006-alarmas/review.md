@@ -65,3 +65,14 @@ Verificado en el emulador con la programación nativa:
 | Tocar la notificación tras el reinicio abre la tarea («Editar tarea») | OK |
 
 **Sin verificar en el emulador**: cambio de zona horaria, 60 avisos a la vez y toque con el bloqueo con huella activo (las dos primeras tienen tests unitarios del plan; la tercera depende de la superposición de la 004).
+
+---
+
+# Revisión cruzada del diff (DeepSeek) y correcciones
+
+| Hallazgo | Valoración | Resolución |
+|---|---|---|
+| Al retirar el permiso, `scheduled` quedaba obsoleto y el indicador «Avisará» mentía | Válido | `doReconcile` envía el conjunto vacío y vacía `scheduled` si había avisos; test US-006-03 |
+| Tocar el aviso con la app ya en primer plano no se leía | Válido (sin probar en emulador) | Se lee también al recuperar el foco de la ventana; test US-006-01 |
+| Restos `launch_task_id` en `reference.md` y `schema.json` | Válido | Eliminados |
+| Tras reiniciar se publican avisos atrasados, contra la decisión 6 del clarify | Parcial | Se mantiene (un aviso tardío es mejor que perderlo) pero con otro texto («Era a las HH:MM»). `clarify.md` está cerrado y no se edita: esta es la decisión vigente |

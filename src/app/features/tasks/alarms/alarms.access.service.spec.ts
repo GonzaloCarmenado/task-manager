@@ -400,6 +400,36 @@ describe('AlarmsAccessService · ciclo de vida', () => {
     expect(t.service.bannerVisible()).toBe(true);
   });
 
+  it('US-006-03 si el permiso se retira, cancela los avisos programados y deja de marcarlos', async () => {
+    const t = setup({ granted: true, tasks: [task()] });
+    await t.init();
+    const id = t.constructor.notificationId(t.tasks()[0].id);
+    expect(t.service.hasScheduled(t.tasks()[0].id)).toBe(true);
+    expect(t.last()).toHaveLength(1);
+
+    t.setGranted(false);
+    document.dispatchEvent(new Event('visibilitychange'));
+    await settle();
+
+    expect(t.last()).toEqual([]);
+    expect(t.service.hasScheduled(t.tasks()[0].id)).toBe(false);
+    expect(id).toBeTypeOf('number');
+  });
+
+  it('US-006-01 tocar el aviso con la app ya en primer plano abre la tarea al recuperar el foco', async () => {
+    const target = task();
+    const probe = setup();
+    const t = setup({ granted: true, tasks: [target] });
+    await t.init();
+    expect(t.navigate).not.toHaveBeenCalled();
+
+    t.setLaunch(probe.constructor.notificationId(target.id));
+    window.dispatchEvent(new Event('focus'));
+    await settle();
+
+    expect(t.navigate).toHaveBeenCalledWith(['/', target.id]);
+  });
+
   it('US-006-01 al volver a primer plano reconcilia de nuevo (cambio de hora o de zona)', async () => {
     const t = setup({ granted: true, tasks: [task({ dueTime: '12:00' })] });
     await t.init();

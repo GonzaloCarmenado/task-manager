@@ -86,14 +86,20 @@ export class AlarmsAccessService {
     void this.refresh();
   };
 
+  /** Con la app ya abierta, tocar el aviso no cambia la visibilidad: se lee al recuperar el foco. */
+  private readonly onFocus = () => void this.readLaunchNotification();
+
   initialize(): void {
     if (!this.supported || this.initialized) return;
     this.initialized = true;
     this.prefs.set(this.readPrefs());
+    const view = this.document.defaultView;
     this.document.addEventListener('visibilitychange', this.onVisibility);
-    this.destroyRef.onDestroy(() =>
-      this.document.removeEventListener('visibilitychange', this.onVisibility)
-    );
+    view?.addEventListener('focus', this.onFocus);
+    this.destroyRef.onDestroy(() => {
+      this.document.removeEventListener('visibilitychange', this.onVisibility);
+      view?.removeEventListener('focus', this.onFocus);
+    });
     effect(
       () => {
         this.tasks.tasks();
@@ -233,11 +239,14 @@ export class AlarmsAccessService {
    * lo que tiene guardado (programa lo nuevo, cancela lo que sobra) y lo restaura tras un reinicio.
    */
   private async doReconcile(): Promise<void> {
-    if (!this.supported || this._permission() !== 'granted') return;
+    if (!this.supported) return;
+    const granted = this._permission() === 'granted';
+    // Sin permiso no hay avisos: si quedaban programados, se cancelan y dejan de marcarse.
+    if (!granted && this.scheduled().size === 0) return;
     try {
       const now = this.clock();
       this.now.set(now);
-      const wanted = this.plan.plan(this.tasks.tasks(), now);
+      const wanted = granted ? this.plan.plan(this.tasks.tasks(), now) : [];
       const { invoke } = await import('@tauri-apps/api/core');
       await invoke('plugin:app-settings|schedule_alarms', {
         alarms: wanted.map((alarm) => ({

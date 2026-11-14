@@ -45,9 +45,13 @@ internal object AlarmScheduler {
         val now = System.currentTimeMillis()
         val (future, missed) = load(context).partition { it.at > now }
         future.forEach { schedule(context, it) }
-        missed.forEach { post(context, it) }
+        missed.forEach { post(context, it.copy(body = lateBody(it.at))) }
         save(context, future)
     }
+
+    /** Texto del aviso que llega tarde (móvil apagado a la hora de la tarea): no dice «es la hora». */
+    private fun lateBody(at: Long): String =
+        "Era a las " + java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(at))
 
     /** Al sonar: se publica y se quita del almacén. */
     fun fired(context: Context, alarm: Alarm) {
