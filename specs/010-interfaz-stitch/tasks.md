@@ -50,16 +50,16 @@
 
 ## Bloque 3 — US-010-03: gamificación con contraste y energía (P1)
 
-- [ ] T-010-31 (Red): `progress-summary.spec.ts` y `progress-screen.spec.ts`: la racha es una pastilla con icono y número; la barra conserva `role="progressbar"` y `aria-valuetext`; el aviso de racha viva se conserva
-- [ ] T-010-32 (Red): `celebration.spec.ts` y `level-up.spec.ts`: mantienen textos, `role="status"`, cierre automático y «Continuar»; incluyen destellos decorativos (`aria-hidden`)
-- [ ] T-010-33: ejecutar los tests y comprobar que fallan por el motivo correcto
-- [ ] T-010-34 (Green): `progress-summary`: tarjeta con relleno `space-lg`, nivel en `headline-md`, pastilla de racha ámbar con borde cálido y halo si hay racha viva, barra de 12 px con degradado primario → esmeralda
-- [ ] T-010-35 (Green): `progress-screen`: hero con número de nivel en `display-lg`, cifras en `label-lg`/`display-lg`, tarjetas de estadísticas con halo, notas en `body-sm`, estados de carga y error
-- [ ] T-010-36 (Green): `celebration.ts`: píldora flotante con halo (`--shadow-xp` o `--shadow-streak`) y destellos; mismo texto y cierre automático
-- [ ] T-010-37 (Green): `level-up.ts`: modal de nivel 3 con velo y desenfoque, sombra profunda, número grande, destellos y botón de 52 px
-- [ ] T-010-38 (Refactor): limpiar con los tests en verde
-- [ ] T-010-39: revisión visual en navegador (claro y oscuro) con las vistas previas `__dev/progress/*`: usuario nuevo, progreso, racha viva y rota, celebración, tope, subida de nivel, carga y error; sin desborde a 390 px
-- [ ] T-010-40: `pnpm lint:fix && pnpm format && pnpm test:ci` y `pnpm e2e` (`completar-xp`, `progreso`) en verde
+- [x] T-010-31 (Red): `progress-summary.spec.ts` y `progress-screen.spec.ts`: la racha es una pastilla con icono y número; la barra conserva `role="progressbar"` y `aria-valuetext`; el aviso de racha viva se conserva
+- [x] T-010-32 (Red): `celebration.spec.ts` y `level-up.spec.ts`: mantienen textos, `role="status"`, cierre automático y «Continuar»; incluyen destellos decorativos (`aria-hidden`)
+- [x] T-010-33: ejecutar los tests y comprobar que fallan por el motivo correcto
+- [x] T-010-34 (Green): `progress-summary`: tarjeta con relleno `space-lg`, nivel en `headline-md`, pastilla de racha ámbar con borde cálido y halo si hay racha viva, barra de 12 px con degradado primario → esmeralda
+- [x] T-010-35 (Green): `progress-screen`: hero con número de nivel en `display-lg`, cifras en `label-lg`/`display-lg`, tarjetas de estadísticas con halo, notas en `body-sm`, estados de carga y error
+- [x] T-010-36 (Green): `celebration.ts`: píldora flotante con halo (`--shadow-xp` o `--shadow-streak`) y destellos; mismo texto y cierre automático
+- [x] T-010-37 (Green): `level-up.ts`: modal de nivel 3 con velo y desenfoque, sombra profunda, número grande, destellos y botón de 52 px
+- [x] T-010-38 (Refactor): limpiar con los tests en verde
+- [x] T-010-39: revisión visual en navegador (claro y oscuro) con las vistas previas `__dev/progress/*`: usuario nuevo, progreso, racha viva y rota, celebración, tope, subida de nivel, carga y error; sin desborde a 390 px
+- [x] T-010-40: `pnpm lint:fix && pnpm format && pnpm test:ci` y `pnpm e2e` (`completar-xp`, `progreso`) en verde
 
 ---
 

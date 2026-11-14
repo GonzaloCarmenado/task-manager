@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 117 |
+| Turnos del usuario | 118 |
 | Preguntas `F` (funcionalidad) | 35 |
-| Preguntas `W` (flujo) | 54 |
-| **Total preguntas** | **89** |
+| Preguntas `W` (flujo) | 55 |
+| **Total preguntas** | **90** |
 
 ## Log
 
@@ -123,3 +123,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 114 | 2026-11-14 | "me parece bien" (avanzar por bloques) | 0 | `/implement` de la 010, bloque 1: `design-tokens.test.mjs` (15 tests) en rojo y luego en verde; fuente 5.3.0 empaquetada, tokens, tipografía y mixins. Cadena completa en verde. La revisión visual (T-010-18) queda parada: la extensión de Chrome espera que se pulse «Permitir» |
 | 115 | 2026-11-14 | "no veo ese permitir" | 1 W (¿commit del bloque 1?) | La extensión respondió al reintentar. T-010-18: fuente cargada (200), sin desborde, consola limpia. Bloque 1 listo para commit |
 | 116 | 2026-11-14 | "si" (commit del bloque 1 de la 010) | 1 W (¿commit del bloque 2?) | Commit `1cecf1e`. Bloque 2 (lista): componente `illustration` (3 SVG propios), tarjetas, check de 28 px (zona 44), píldoras, botón de 52 px, estados vacío/error/carga. 569 tests, 93 de scripts y 42 e2e en verde. Revisión visual en navegador con un Supabase falso fuera del repo |
+| 117 | 2026-11-14 | "si" (commit del bloque 2) | 1 W (¿commit del bloque 3?) | Commit `807fb9b`. Bloque 3 (gamificación): pastilla de racha ámbar con halo, barra con degradado, tarjetas de progreso, celebración con destellos y subida de nivel como modal. Destellos parametrizados para tener contraste sobre ámbar |

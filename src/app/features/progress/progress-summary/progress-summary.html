@@ -7,7 +7,10 @@
 >
   <span class="row">
     <span class="level"><app-icon name="star" />{{ rules.levelLabel(p.level) }}</span>
-    <span class="streak" [class.none]="p.currentStreak === 0"
+    <span
+      class="streak pill"
+      [class.none]="p.currentStreak === 0"
+      [class.alive]="p.currentStreak > 0"
       ><app-icon name="flame" />{{ rules.streakLabel(p.currentStreak) }}</span
     >
   </span>

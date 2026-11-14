@@ -41,13 +41,13 @@
       <dt>{{ rules.screen.today }}</dt>
       <dd>{{ rules.todayXp(p.xpToday) }}</dd>
     </div>
-    <div class="stat">
+    <div class="stat" [class.alive]="p.currentStreak > 0">
       <dt>{{ rules.screen.currentStreak }}</dt>
-      <dd>{{ rules.streakLabel(p.currentStreak) }}</dd>
+      <dd><app-icon name="flame" />{{ rules.streakLabel(p.currentStreak) }}</dd>
     </div>
     <div class="stat">
       <dt>{{ rules.screen.bestStreak }}</dt>
-      <dd>{{ rules.streakLabel(p.bestStreak) }}</dd>
+      <dd><app-icon name="trophy" />{{ rules.streakLabel(p.bestStreak) }}</dd>
     </div>
   </dl>
 
@@ -55,6 +55,7 @@
   <p class="note">{{ rules.screen.noGuilt }}</p>
   } @else if (access.status() === 'error') {
   <section class="state" role="alert">
+    <app-illustration kind="cloud" />
     <h2 class="state-title">{{ rules.screen.error }}</h2>
     <p class="state-text">{{ rules.screen.errorHint }}</p>
     <button type="button" class="retry" (click)="retry()">{{ rules.screen.retry }}</button>

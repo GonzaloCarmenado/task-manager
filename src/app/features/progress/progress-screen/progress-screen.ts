@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Icon } from '../../../shared/components/icon/icon';
+import { Illustration } from '../../../shared/components/illustration/illustration';
 import { ProgressAccessService } from '../progress.access.service';
 import { ProgressConstructorService } from '../progress.constructor.service';
 
@@ -8,7 +9,7 @@ import { ProgressConstructorService } from '../progress.constructor.service';
 @Component({
   selector: 'app-progress-screen',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon],
+  imports: [Icon, Illustration],
   templateUrl: './progress-screen.html',
   styleUrl: './progress-screen.scss',
 })

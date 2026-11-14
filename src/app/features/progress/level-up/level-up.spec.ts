@@ -68,3 +68,19 @@ describe('LevelUp', () => {
     expect((LevelUp as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });
 });
+
+describe('LevelUp · sistema de diseño (spec 010)', () => {
+  it('US-010-03 es un modal de nivel 3: tarjeta con destellos decorativos sobre el velo', () => {
+    const { el } = setup('4');
+    expect(el.querySelector('.card')).not.toBeNull();
+    const sparkles = el.querySelector('.card app-illustration');
+    expect(sparkles?.getAttribute('kind')).toBe('sparkles');
+    expect(sparkles?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('US-010-03 el nivel nuevo se anuncia y Continuar sigue siendo el botón principal', () => {
+    const { el } = setup('5');
+    expect(el.querySelector('.level')?.getAttribute('aria-live')).toBe('polite');
+    expect(el.querySelector('button.continue')?.textContent).toContain('Continuar');
+  });
+});

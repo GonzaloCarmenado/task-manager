@@ -58,18 +58,28 @@ export type IllustrationKind = 'hill' | 'cloud' | 'sparkles';
         @case ('sparkles') {
           <path
             d="M60 22 Q60 60 98 60 Q60 60 60 98 Q60 60 22 60 Q60 60 60 22 Z"
-            style="fill: var(--color-secondary-container)"
+            style="fill: var(--spark-1, var(--color-secondary-container))"
           />
           <path
             d="M94 16 Q94 30 108 30 Q94 30 94 44 Q94 30 80 30 Q94 30 94 16 Z"
-            style="fill: var(--color-primary-container)"
+            style="fill: var(--spark-2, var(--color-primary-container))"
           />
           <path
             d="M26 80 Q26 92 38 92 Q26 92 26 104 Q26 92 14 92 Q26 92 26 80 Z"
-            style="fill: var(--color-tertiary-container)"
+            style="fill: var(--spark-3, var(--color-tertiary-container))"
           />
-          <circle cx="22" cy="34" r="3" style="fill: var(--color-primary-container)" />
-          <circle cx="100" cy="86" r="3.5" style="fill: var(--color-secondary-container)" />
+          <circle
+            cx="22"
+            cy="34"
+            r="3"
+            style="fill: var(--spark-2, var(--color-primary-container))"
+          />
+          <circle
+            cx="100"
+            cy="86"
+            r="3.5"
+            style="fill: var(--spark-1, var(--color-secondary-container))"
+          />
         }
       }
     </svg>

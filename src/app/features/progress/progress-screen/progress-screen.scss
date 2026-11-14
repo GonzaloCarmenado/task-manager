@@ -1,3 +1,6 @@
+@use 'mixins';
+@use 'type';
+
 :host {
   display: block;
   min-height: 100dvh;
@@ -10,8 +13,8 @@
   gap: var(--space-4);
   max-width: 28rem;
   margin: 0 auto;
-  padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-4)
-    calc(var(--space-6) + env(safe-area-inset-bottom));
+  padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-margin)
+    calc(var(--space-8) + env(safe-area-inset-bottom));
   color: var(--color-text);
   font-family: var(--font-family);
 }
@@ -25,16 +28,15 @@
 .heading {
   flex: 1;
   margin: 0;
-  font-size: var(--font-size-headline);
-  font-weight: 700;
+  @include type.headline-lg;
 }
 
 .back,
 .close {
   display: grid;
   place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: var(--tap-target);
+  height: var(--tap-target);
   border: 0;
   border-radius: var(--radius-full);
   background: transparent;
@@ -43,7 +45,7 @@
 
   &:focus-visible,
   .retry:focus-visible {
-    outline: 3px solid var(--color-primary);
+    outline: 3px solid var(--color-primary-text);
     outline-offset: 2px;
   }
 }
@@ -56,15 +58,16 @@
   transform: rotate(45deg);
 }
 
+// Tarjeta de nivel: bloque principal de gamificación (relleno `space-lg`)
 .hero {
+  @include mixins.card;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-6) var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xp);
   text-align: center;
 }
 
@@ -81,8 +84,8 @@
 
 .level {
   margin: 0;
-  font-size: var(--font-size-display);
-  font-weight: 800;
+  color: var(--color-text);
+  @include type.display-lg;
 }
 
 .bar {
@@ -91,14 +94,14 @@
   height: 0.75rem;
   overflow: hidden;
   border-radius: var(--radius-full);
-  background: var(--color-surface-soft);
+  background: var(--color-primary-soft);
 }
 
 .fill {
   display: block;
   height: 100%;
   border-radius: var(--radius-full);
-  background: var(--color-primary);
+  background: var(--gradient-progress);
 }
 
 .remaining,
@@ -107,40 +110,62 @@
 .state-text {
   margin: 0;
   color: var(--color-text-muted);
-  line-height: var(--line-height-body);
+  @include type.body-md;
+}
+
+.remaining {
+  @include type.label-md;
 }
 
 .new-user {
   color: var(--color-text);
+  @include type.body-lg;
   font-weight: 600;
 }
 
 .stats {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
+  gap: var(--space-gutter);
   margin: 0;
 }
 
 .stat {
+  @include mixins.card;
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-3);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
 
   dt {
     color: var(--color-text-muted);
-    font-size: var(--font-size-body);
+    @include type.label-md;
   }
 
   dd {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
     margin: 0;
-    font-size: var(--font-size-headline);
-    font-weight: 700;
+    @include type.headline-md;
   }
+
+  // Racha actual viva: pastilla ámbar con halo de nivel 2
+  &.alive {
+    border-color: rgba(245, 158, 11, 0.3);
+    background: var(--color-secondary-soft);
+    box-shadow: var(--shadow-streak);
+
+    dt,
+    dd {
+      color: var(--color-on-secondary-soft);
+    }
+  }
+}
+
+.note {
+  @include type.body-sm;
 }
 
 .state {
@@ -154,7 +179,7 @@
 
 .state-title {
   margin: 0;
-  font-size: var(--font-size-headline);
+  @include type.headline-md;
 }
 
 .spinner {
@@ -164,10 +189,6 @@
   border-top-color: var(--color-primary);
   border-radius: var(--radius-full);
   animation: spin 900ms linear infinite;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
 }
 
 @keyframes spin {
@@ -177,13 +198,5 @@
 }
 
 .retry {
-  min-height: 2.75rem;
-  padding: 0 var(--space-4);
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
+  @include mixins.pill-button;
 }

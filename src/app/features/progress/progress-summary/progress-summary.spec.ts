@@ -122,3 +122,37 @@ describe('ProgressSummary', () => {
     expect((ProgressSummary as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });
 });
+
+describe('ProgressSummary · sistema de diseño (spec 010)', () => {
+  it('US-010-03 la racha es una pastilla con llama y número; con racha viva lleva halo (alive)', () => {
+    const { el } = setup(progress({ currentStreak: 6, lastCompletedDay: '2026-11-14' }));
+    const streak = el.querySelector('.streak');
+    expect(streak?.classList.contains('pill')).toBe(true);
+    expect(streak?.classList.contains('alive')).toBe(true);
+    expect(streak?.querySelector('app-icon')).not.toBeNull();
+    expect(streak?.textContent).toContain('6');
+  });
+
+  it('US-010-03 sin racha la pastilla es neutra y sin halo', () => {
+    const { el } = setup(progress({ currentStreak: 0 }));
+    const streak = el.querySelector('.streak');
+    expect(streak?.classList.contains('none')).toBe(true);
+    expect(streak?.classList.contains('alive')).toBe(false);
+  });
+
+  it('US-010-03 la barra conserva su semántica y el relleno es hijo de la pista', () => {
+    const { el, rules } = setup(progress({ xpIntoLevel: 75, xpForNextLevel: 150 }));
+    const bar = el.querySelector('.bar');
+    expect(bar?.getAttribute('role')).toBe('progressbar');
+    expect(bar?.getAttribute('aria-valuetext')).toBe(rules.xpBar(75, 150));
+    expect(bar?.querySelector('.fill')).not.toBeNull();
+  });
+
+  it('US-010-03 el aviso de racha viva se conserva dentro de la tarjeta', () => {
+    const { el, text, rules } = setup(
+      progress({ currentStreak: 3, lastCompletedDay: '2026-11-13' })
+    );
+    expect(text()).toContain(rules.summary.keepStreak);
+    expect(el.querySelector('.hint')).not.toBeNull();
+  });
+});

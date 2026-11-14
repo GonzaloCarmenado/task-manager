@@ -254,6 +254,7 @@ const pairs = [
   ['--color-on-primary-soft', '--color-primary-soft'],
   ['--color-on-secondary-soft', '--color-secondary-soft'],
   ['--color-on-secondary-container', '--color-secondary-container'],
+  ['--color-secondary', '--color-surface'],
   ['--color-on-tertiary', '--color-tertiary'],
   ['--color-on-tertiary-soft', '--color-tertiary-soft'],
   ['--color-tertiary', '--color-surface'],

@@ -66,3 +66,33 @@ describe('Celebration', () => {
     expect((Celebration as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });
 });
+
+describe('Celebration · sistema de diseño (spec 010)', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('US-010-03 lleva destellos decorativos y conserva el aviso anunciado', () => {
+    const { el } = render(data());
+    const sparkles = el.querySelector('.celebration app-illustration');
+    expect(sparkles?.getAttribute('kind')).toBe('sparkles');
+    expect(sparkles?.getAttribute('aria-hidden')).toBe('true');
+    expect(el.querySelector('.celebration')?.getAttribute('role')).toBe('status');
+  });
+
+  it('US-010-03 con racha el halo es ámbar (streak); solo con XP es el del XP', () => {
+    const withStreak = render(data({ streakDays: 3 }));
+    expect(withStreak.el.querySelector('.celebration')?.classList.contains('streak')).toBe(true);
+    const onlyXp = render(data());
+    expect(onlyXp.el.querySelector('.celebration')?.classList.contains('streak')).toBe(false);
+  });
+
+  it('US-010-03 al quitar XP no hay destellos (no es una celebración)', () => {
+    const { el } = render(data({ xpDelta: -10 }));
+    expect(el.querySelector('.celebration app-illustration')).toBeNull();
+  });
+
+  it('US-010-03 sigue sin botones ni captura de toques', () => {
+    const { el } = render(data({ streakDays: 2 }));
+    expect(el.querySelector('button')).toBeNull();
+  });
+});

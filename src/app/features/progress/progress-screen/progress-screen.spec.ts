@@ -114,3 +114,43 @@ describe('ProgressScreen', () => {
     expect((ProgressScreen as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });
 });
+
+describe('ProgressScreen · sistema de diseño (spec 010)', () => {
+  it('US-010-03 la tarjeta de nivel muestra la barra con su semántica accesible', () => {
+    const { el } = setup(progress());
+    const bar = el.querySelector('.hero .bar');
+    expect(bar?.getAttribute('role')).toBe('progressbar');
+    expect(bar?.getAttribute('aria-valuenow')).toBe('40');
+    expect(bar?.querySelector('.fill')).not.toBeNull();
+  });
+
+  it('US-010-03 las estadísticas de racha llevan llama y la racha actual viva lleva halo', () => {
+    const { el } = setup(progress({ currentStreak: 6 }));
+    const stats = Array.from(el.querySelectorAll('.stat'));
+    const current = stats.find((s) => s.textContent?.includes('Racha actual'));
+    expect(current?.querySelector('app-icon')).not.toBeNull();
+    expect(current?.classList.contains('alive')).toBe(true);
+    const total = stats.find((s) => s.textContent?.includes('XP total'));
+    expect(total?.classList.contains('alive')).toBe(false);
+  });
+
+  it('US-010-03 sin racha la estadística no brilla', () => {
+    const { el } = setup(progress({ currentStreak: 0 }));
+    const current = Array.from(el.querySelectorAll('.stat')).find((s) =>
+      s.textContent?.includes('Racha actual')
+    );
+    expect(current?.classList.contains('alive')).toBe(false);
+  });
+
+  it('US-010-03 el error muestra la ilustración de nube y conserva Reintentar', () => {
+    const { el, text } = setup(null, 'error');
+    expect(el.querySelector('.state app-illustration')?.getAttribute('kind')).toBe('cloud');
+    expect(text()).toContain('Reintentar');
+  });
+
+  it('US-010-03 cargando mantiene el indicador y no usa ilustración', () => {
+    const { el } = setup(null, 'loading');
+    expect(el.querySelector('.spinner')).not.toBeNull();
+    expect(el.querySelector('app-illustration')).toBeNull();
+  });
+});
