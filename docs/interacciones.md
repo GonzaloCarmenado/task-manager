@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 80 |
-| Preguntas `F` (funcionalidad) | 22 |
-| Preguntas `W` (flujo) | 36 |
-| **Total preguntas** | **58** |
+| Turnos del usuario | 84 |
+| Preguntas `F` (funcionalidad) | 28 |
+| Preguntas `W` (flujo) | 39 |
+| **Total preguntas** | **67** |
 
 ## Log
 
@@ -88,3 +88,16 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 076-077 | 2026-11-14 | "Sí, vamos" (commit) y "vamos" (push) | 0 | Commit `f045a53` tras auditar el diff staged (42 ficheros). Push a `main` tras auditar lo que viaja; sin hallazgos del hook |
 | 078 | 2026-11-14 | "Dale a review y al terminar empezamos con la siguiente spec" (→ `/pr-review` de la 005) | 1 W (¿commit de las correcciones?) | Coherencia verificada. El revisor del push dejó 2 hallazgos de gravedad baja, ambos válidos: corregidos con test primero (carrera entre recarga y cambio optimista; contador con espacios). `review.md` creado. Sin PR: la rama ya está en `main` |
 | 079-080 | 2026-11-14 | "Sí" (commit y push de las correcciones) y "arréglalo primero" | 1 W (¿commit y push de la corrección?) | El hook del push bloqueó `236a240`: la corrección de la carrera era incompleta (recarga lanzada antes del cambio y resuelta tras confirmarse). Válido: arreglado con test primero (3 tests nuevos) usando una época de cambios; sin subir aún |
+| 081 | 2026-11-14 | "Sí" (commit y push de la corrección de la carrera) | 0 | Commit `ecc404a` y push a `main` tras auditar lo que viajaba; el revisor aprobó la corrección (una observación baja aceptada) |
+| 082 | 2026-11-14 | "Lanza el servidor… vamos a hacer las 3 specify seguidas, me das los prompt" | 0 | Servidor `pnpm start` arrancado en el puerto 4200. Creadas las specs 006 (alarmas), 007 (posponer) y 008 (gamificación: XP, niveles y rachas) en Borrador, con ciclo completo y frontal, y sus 3 `stitch-prompt.md`. Orden elegido por defecto (alarmas → posponer → gamificación). Pendiente: aprobar cada spec y su `/clarify` (obligatorio) |
+| 083 | 2026-11-14 | "Dale" (aprobación de las specs 006 a 008) → `/clarify` de la 006 | 2 F (precisión de la alarma; insistir con el permiso) | Respuestas: exacta si se puede, y hasta 3 negativas. 8 decisiones por defecto. `clarify.md` (CERRADO) y spec 006 ajustada (reintentos del permiso, hora exacta con degradación, límite de 60, canal, indicador) |
+| 084 | 2026-11-14 | (hook de revisión cruzada del `clarify` de la 006) | 0 | 5 hallazgos: el principal (el plugin no programa) es falso, verificado en el código del plugin; 3 ya estaban resueltos; ajustado el contador del permiso y los ficheros afectados. `review.md` creado. Una sola pasada |
+| 085-086 | 2026-11-14 | "Dame los prompts para las 3 specs" y entrega del export de Stitch (006 a 008) | 0 | Entregados los 3 prompts (el de la 006 ya con el clarify). Export copiado a `specs/006…008/design/` (hashes verificados; `DESIGN.md` idéntico) con un `design/README.md` por spec: se ignora lo extra (simuladores, misiones, tienda, perfil, rangos con nombre, acciones en la notificación) y se anota lo que el plan debe resolver |
+| 087 | 2026-11-14 | "Vamos" (→ `/clarify` de la 007) | 2 F (opción «+1 hora»; Deshacer) | Respuestas: sí a «+1 hora» y sin Deshacer. 7 decisiones por defecto (+1 hora desde ahora, lunes siguiente, opciones ocultas, mínimo hoy, contador solo si ya tenía fecha…). `clarify.md` (CERRADO); spec, prompt de Stitch y README de diseño ajustados |
+| 088 | 2026-11-14 | (hook de revisión cruzada del `clarify` de la 007) | 0 | 6 hallazgos (el revisor leyó la spec antigua): 3 ya resueltos, 3 válidos corregidos (plan de tests, orden 006→007, mínimo de «Elegir fecha» posterior a la fecha actual). `review.md` creado. Una sola pasada |
+| 089 | 2026-11-14 | "Go" (→ `/clarify` de la 008) | 2 F (qué pasa al desmarcar; tope diario de XP) | Respuestas: se quita el XP al desmarcar (el nivel se recalcula y puede bajar) y tope de 100 XP al día. 7 decisiones por defecto (curva 25·N·(N−1), cálculo en BD, día local guardado, sin XP retroactivo…). Spec, prompt y README de diseño reescritos; `clarify.md` (CERRADO) |
+| 090 | 2026-11-14 | (hook de revisión cruzada del `clarify` de la 008) | 0 | 5 hallazgos: 3 válidos corregidos (columnas para el día local y el XP, tests de la lógica en BD como scripts, aviso con los XP realmente quitados), 1 válido como orden de implementación y 1 falso (leyó el repo sin versionar). `review.md` creado. Una sola pasada |
+| 091 | 2026-11-14 | "Vamos con todas" (→ `/sdd-plan` de la 006, la 007 y la 008) | 1 W (¿apruebas los 3 planes?) | Creados los 3 `plan.md` (Borrador). 006: plugin de notificaciones 2.8.1 (programa con AlarmManager, verificado) + plugin local para ajustes y permiso exacto + reconciliación. 007: reglas de opciones en un servicio puro, `postpone()` optimista y migración de `postponed_count`. 008: progreso calculado en la BD con disparadores, libro de XP, racha derivada y nivel en el cliente |
+| 092 | 2026-11-14 | "Sí" (aprobación de los 3 planes) → `/task` | 1 W (¿apruebas las tareas?) | Planes 006, 007 y 008 aprobados. Creados los 3 `tasks.md` (48, 46 y 46 tareas; TDD; `db push` de la 007 y la 008 con confirmación) |
+| 093 | 2026-11-14 | "Sí" (aprobación de las tareas) → `/implement` de la 006 | 1 W (¿cómo tratamos el reinicio?) | Bloques 1 a 5 hechos con TDD (plugins, plan de alarmas, servicio de acceso, componentes, integración, vista previa) y verificación en emulador. Hallazgos: el evento del plugin llega sin datos (resuelto con el plugin local) y el plugin no restaura alarmas tras reiniciar (fallo suyo). Parada para decidir; sin commit |
+| 094 | 2026-11-14 | "B" (reinicio: programación nativa propia) | 0 | Programación, restauración tras reinicio (`BootReceiver`) y publicación nativas en el plugin local. Verificado en emulador: alarma exacta, reinicio sin abrir la app, notificación a la hora y toque en frío abre la tarea. Docs, review, tasks y estado de la 006 cerrados; sin commit |

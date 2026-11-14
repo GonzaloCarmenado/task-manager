@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- Permite programar alarmas exactas (el usuario la concede desde los ajustes del sistema). -->
+  <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+  <application>
+    <!-- Suena la alarma de una tarea. Solo la dispara la propia app. -->
+    <receiver android:name="app.tauri.appsettings.AlarmReceiver" android:exported="false" />
+
+    <!-- Tras reiniciar el móvil se reprograman las alarmas guardadas. -->
+    <receiver android:name="app.tauri.appsettings.BootReceiver" android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+      </intent-filter>
+    </receiver>
+  </application>
+</manifest>

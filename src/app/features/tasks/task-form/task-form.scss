@@ -264,3 +264,12 @@
   margin: 0;
   color: var(--color-text-muted);
 }
+
+// Aviso previo del permiso de alarmas: a pantalla completa, sobre el formulario.
+.prompt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow-y: auto;
+  background: var(--color-bg);
+}

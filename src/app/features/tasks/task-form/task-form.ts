@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TITLE_MAX, Task } from '../../../core/models/task';
+import { TITLE_MAX, Task, TaskInput } from '../../../core/models/task';
+import { AlarmsConstructorService } from '../../../core/services/alarms.constructor.service';
+import { CLOCK } from '../../../core/services/clock';
 import { Icon } from '../../../shared/components/icon/icon';
+import { AlarmPermissionPrompt } from '../alarms/alarm-permission-prompt/alarm-permission-prompt';
+import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import { TasksAccessService } from '../tasks.access.service';
 import { TasksConstructorService } from '../tasks.constructor.service';
 
@@ -9,7 +13,7 @@ import { TasksConstructorService } from '../tasks.constructor.service';
 @Component({
   selector: 'app-task-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon],
+  imports: [Icon, AlarmPermissionPrompt],
   templateUrl: './task-form.html',
   styleUrl: './task-form.scss',
 })
@@ -17,6 +21,9 @@ export class TaskForm {
   protected readonly copy = inject(TasksConstructorService);
   private readonly access = inject(TasksAccessService);
   private readonly router = inject(Router);
+  private readonly alarms = inject(AlarmsAccessService);
+  private readonly alarmsCopy = inject(AlarmsConstructorService);
+  private readonly clock = inject(CLOCK);
   private readonly taskId = inject(ActivatedRoute).snapshot.paramMap.get('id');
 
   protected readonly max = TITLE_MAX;
@@ -30,6 +37,8 @@ export class TaskForm {
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly confirmingDelete = signal(false);
+  protected readonly promptVisible = signal(false);
+  protected readonly promptBusy = signal(false);
 
   private readonly trimmed = computed(() => this.title().trim());
   /** Lo que se guarda: sin los espacios de los extremos (el contador y la validación coinciden). */
@@ -95,8 +104,43 @@ export class TaskForm {
         ? await this.access.create(input)
         : await this.access.update(this.taskId, input);
     this.saving.set(false);
-    if (result.ok) void this.router.navigate(['/']);
-    else this.error.set(this.copy.form.saveError);
+    if (!result.ok) {
+      this.error.set(this.copy.form.saveError);
+      return;
+    }
+    if (this.shouldAskAlarmPermission(input)) this.promptVisible.set(true);
+    else void this.router.navigate(['/']);
+  }
+
+  /** Tras «Permitir»: pide el permiso del sistema y vuelve a la lista. */
+  protected async allowAlarms(): Promise<void> {
+    this.promptBusy.set(true);
+    await this.alarms.requestPermission();
+    this.promptBusy.set(false);
+    this.promptVisible.set(false);
+    void this.router.navigate(['/']);
+  }
+
+  /** «Ahora no»: se anota la negativa y se vuelve a la lista (queda el aviso discreto). */
+  protected skipAlarms(): void {
+    this.alarms.recordDenial();
+    this.promptVisible.set(false);
+    void this.router.navigate(['/']);
+  }
+
+  /** El aviso previo solo se ofrece al guardar una tarea con hora futura, y hasta 3 veces. */
+  private shouldAskAlarmPermission(input: TaskInput): boolean {
+    if (input.dueDate === null || input.dueTime === null) return false;
+    if (!this.alarms.shouldAskPermission()) return false;
+    const probe: Task = {
+      id: '',
+      title: input.title,
+      dueDate: input.dueDate,
+      dueTime: input.dueTime,
+      completedAt: null,
+      createdAt: '',
+    };
+    return this.alarmsCopy.hasAlarm(probe, this.clock());
   }
 
   protected cancel(): void {

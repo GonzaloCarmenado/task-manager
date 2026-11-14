@@ -44,6 +44,7 @@
     "@choochmeque/tauri-plugin-biometry-api": "0.3.0-rc.3",
     "@supabase/supabase-js": "^2.119.0",
     "@tauri-apps/api": "~2.12.4",
+    "@tauri-apps/plugin-notification": "2.8.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

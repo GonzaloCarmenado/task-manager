@@ -122,5 +122,13 @@
       <button type="button" class="keep" (click)="keepTask()">{{ copy.form.deleteCancel }}</button>
     </section>
   </div>
+  } @if (promptVisible()) {
+  <div class="prompt-overlay">
+    <app-alarm-permission-prompt
+      [busy]="promptBusy()"
+      (allow)="allowAlarms()"
+      (later)="skipAlarms()"
+    />
+  </div>
   }
 </main>

@@ -5,9 +5,11 @@ import { TasksList } from './features/tasks/tasks-list/tasks-list';
 import { SessionStatusPreview } from './features/dev/session-status-preview';
 
 import { BiometricPreview } from './features/dev/biometric-preview';
+import { AlarmsPreview } from './features/dev/alarms-preview';
 
 const DEV_PATH = '__dev/session-status/:state';
 const BIOMETRIC_DEV_PATH = '__dev/biometric/:state';
+const ALARMS_DEV_PATH = '__dev/alarms/:state';
 
 describe('app.routes', () => {
   it('US-005-02 la ruta "" carga la lista de tareas de forma lazy', async () => {
@@ -58,6 +60,15 @@ describe('app.routes', () => {
     expect(route?.loadComponent).toBeTypeOf('function');
     expect(await route?.loadComponent?.()).toBe(BiometricPreview);
     expect(buildRoutes(false).some((r) => r.path === BIOMETRIC_DEV_PATH)).toBe(false);
+  });
+
+  it('US-006-02 en desarrollo existe la ruta de vista previa de alarmas, lazy, y no en producción', async () => {
+    const route = buildRoutes(true).find((r) => r.path === ALARMS_DEV_PATH);
+
+    expect(route).toBeDefined();
+    expect(route?.loadComponent).toBeTypeOf('function');
+    expect(await route?.loadComponent?.()).toBe(AlarmsPreview);
+    expect(buildRoutes(false).some((r) => r.path === ALARMS_DEV_PATH)).toBe(false);
   });
 
   it('US-003-06 las rutas de la app dependen de isDevMode()', () => {

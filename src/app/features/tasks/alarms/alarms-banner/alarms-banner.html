@@ -1,0 +1,15 @@
+<section class="banner" role="status">
+  <app-icon class="icon" name="bell-off" />
+  <p class="message">{{ copy.banner.message }}</p>
+  <button type="button" class="activate" (click)="activate.emit()">
+    {{ copy.banner.activate }}
+  </button>
+  <button
+    type="button"
+    class="close"
+    [attr.aria-label]="copy.banner.dismiss"
+    (click)="dismiss.emit()"
+  >
+    <span aria-hidden="true">×</span>
+  </button>
+</section>

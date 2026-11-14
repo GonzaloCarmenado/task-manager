@@ -1,8 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
+import { AlarmPermission } from '../../../core/models/alarm';
 import { Task, TaskInput } from '../../../core/models/task';
 import { CLOCK } from '../../../core/services/clock';
+import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import { TaskOpResult, TasksAccessService } from '../tasks.access.service';
 import { TasksConstructorService } from '../tasks.constructor.service';
 import { TaskForm } from './task-form';
@@ -20,7 +22,14 @@ const EXISTING: Task = {
 
 const flush = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
 
-function setup(options: { id?: string; existing?: Task | null; lateLoad?: boolean } = {}) {
+function setup(
+  options: { id?: string; existing?: Task | null; lateLoad?: boolean; askPermission?: boolean } = {}
+) {
+  const alarms = {
+    shouldAskPermission: vi.fn(() => options.askPermission ?? false),
+    requestPermission: vi.fn(async (): Promise<AlarmPermission> => 'granted'),
+    recordDenial: vi.fn(),
+  };
   const existing = options.existing === undefined ? EXISTING : options.existing;
   let loaded = !options.lateLoad;
   const ok = async (): Promise<TaskOpResult> => ({ ok: true });
@@ -51,6 +60,7 @@ function setup(options: { id?: string; existing?: Task | null; lateLoad?: boolea
     providers: [
       provideRouter([]),
       { provide: TasksAccessService, useValue: access },
+      { provide: AlarmsAccessService, useValue: alarms },
       { provide: CLOCK, useValue: () => new Date(2026, 10, 13, 12, 0, 0) },
       {
         provide: ActivatedRoute,
@@ -73,6 +83,7 @@ function setup(options: { id?: string; existing?: Task | null; lateLoad?: boolea
     el,
     copy,
     access,
+    alarms,
     navigate,
     detect: () => fixture.detectChanges(),
     text: () => el.textContent?.replace(/\s+/g, ' ').trim() ?? '',
@@ -461,5 +472,96 @@ describe('TaskForm · accesibilidad', () => {
 
   it('US-005-01 usa ChangeDetectionStrategy.OnPush', () => {
     expect((TaskForm as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
+  });
+});
+
+describe('TaskForm · aviso previo de alarmas', () => {
+  const promptOf = (el: HTMLElement) => el.querySelector('app-alarm-permission-prompt');
+
+  it('US-006-02 el aviso previo nunca aparece al abrir el formulario', () => {
+    const f = setup({ askPermission: true });
+    expect(promptOf(f.el)).toBeNull();
+    expect(f.alarms.requestPermission).not.toHaveBeenCalled();
+  });
+
+  it('US-006-02 al guardar una tarea con hora aparece el aviso previo y la lista no se abre todavía', async () => {
+    const f = setup({ askPermission: true });
+    f.type('Llamar');
+    f.setDate('2026-11-14');
+    f.setTime('16:30');
+
+    await f.save();
+
+    expect(f.access.create).toHaveBeenCalled();
+    expect(promptOf(f.el)).not.toBeNull();
+    expect(f.navigate).not.toHaveBeenCalled();
+  });
+
+  it('US-006-02 Permitir pide el permiso del sistema y vuelve a la lista', async () => {
+    const f = setup({ askPermission: true });
+    f.type('Llamar');
+    f.setDate('2026-11-14');
+    f.setTime('16:30');
+    await f.save();
+
+    const allow = promptOf(f.el)?.querySelectorAll('button')[0] as HTMLButtonElement;
+    allow.click();
+    await flush();
+    f.detect();
+
+    expect(f.alarms.requestPermission).toHaveBeenCalledTimes(1);
+    expect(f.navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('US-006-02 Ahora no anota la negativa, no pide el permiso y vuelve a la lista', async () => {
+    const f = setup({ askPermission: true });
+    f.type('Llamar');
+    f.setDate('2026-11-14');
+    f.setTime('16:30');
+    await f.save();
+
+    const later = promptOf(f.el)?.querySelectorAll('button')[1] as HTMLButtonElement;
+    later.click();
+    await flush();
+    f.detect();
+
+    expect(f.alarms.recordDenial).toHaveBeenCalledTimes(1);
+    expect(f.alarms.requestPermission).not.toHaveBeenCalled();
+    expect(f.navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('US-006-02 no aparece sin hora, con la hora ya pasada ni cuando el servicio no lo pide', async () => {
+    const noTime = setup({ askPermission: true });
+    noTime.type('Sin hora');
+    await noTime.save();
+    expect(promptOf(noTime.el)).toBeNull();
+    expect(noTime.navigate).toHaveBeenCalledWith(['/']);
+
+    const past = setup({ askPermission: true });
+    past.type('Pasada');
+    past.setDate('2026-11-13');
+    past.setTime('08:00');
+    await past.save();
+    expect(promptOf(past.el)).toBeNull();
+
+    const notNeeded = setup({ askPermission: false });
+    notNeeded.type('Con hora');
+    notNeeded.setDate('2026-11-14');
+    notNeeded.setTime('16:30');
+    await notNeeded.save();
+    expect(promptOf(notNeeded.el)).toBeNull();
+    expect(notNeeded.navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('US-006-02 si falla el guardado no se muestra el aviso previo', async () => {
+    const f = setup({ askPermission: true });
+    f.access.create.mockResolvedValueOnce({ ok: false, reason: 'network' });
+    f.type('Llamar');
+    f.setDate('2026-11-14');
+    f.setTime('16:30');
+
+    await f.save();
+
+    expect(promptOf(f.el)).toBeNull();
   });
 });

@@ -61,3 +61,13 @@ Notas: el aviso del sistema es una ventana protegida (las capturas salen en negr
 ## Tareas (spec 005)
 
 Los selectores de fecha y hora del formulario son los **nativos** del sistema (`input type="date"` y `type="time"`); en el WebView de Android abren el selector de Android, en el idioma del teléfono. Comprobado en el emulador: el teclado virtual no tapa el campo ni el botón de guardar, y las tareas persisten al cerrar y abrir la app. Con una instalación nueva, la primera carga puede tardar unos segundos (se crea la sesión anónima).
+
+## Alarmas (spec 006)
+
+- **Permiso y canal**: `tauri-plugin-notification` (versión exacta `2.8.1`) solo para pedir el permiso de notificaciones y crear el canal «Recordatorios». **No programa los avisos**: su receptor de reinicio no puede restaurarlos (guarda cada aviso con `sourceJson` nulo, también en su rama principal).
+- **Programación, restauración y notificación**: las hace el plugin local `src-tauri/plugins/app-settings` (Kotlin): `AlarmManager` (exacta si el usuario concede «alarmas y recordatorios»; si no, aproximada), almacén de avisos en el dispositivo, `AlarmReceiver` (publica la notificación, también con la app cerrada) y `BootReceiver` (reprograma tras reiniciar el móvil). La app envía el conjunto **completo** de avisos con `schedule_alarms` y el plugin lo compara.
+- El mismo plugin declara `SCHEDULE_EXACT_ALARM`, abre los ajustes de notificaciones y de alarmas exactas, y entrega el id del aviso que abrió la app (`launch_notification_id`).
+- El permiso de notificaciones se pide al guardar una tarea con hora (hasta 3 negativas).
+- **Probar en el emulador**: guardar una tarea con hora a unos minutos, cerrar la app y esperar. `adb shell dumpsys alarm` muestra la alarma (etiqueta `app.tauri.appsettings.ALARM`, `window=0` si es exacta); `adb shell cmd statusbar expand-notifications` abre el panel; `adb reboot` comprueba la restauración.
+- **Limitación conocida**: si Android mata el proceso pero la tarea sigue en «recientes», el toque en el aviso abre la lista en vez de la tarea (Android no entrega el intent en ese caso). Con la app abierta, cerrada por el usuario o tras un reinicio, sí abre la tarea.
+- Al compilar con `pnpm tauri android build`, **no** definir `MSYS_NO_PATHCONV` en la misma sesión (rompe la ruta de `pnpm` y falla con `MODULE_NOT_FOUND`).

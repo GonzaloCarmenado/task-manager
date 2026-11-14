@@ -3,19 +3,22 @@ import { TestBed } from '@angular/core/testing';
 import { appConfig } from './app.config';
 import { AuthAccessService } from './core/services/auth.access.service';
 import { BiometricLockService } from './core/services/biometric-lock.service';
+import { AlarmsAccessService } from './features/tasks/alarms/alarms.access.service';
 
 function setup(order: string[] = []) {
   const initialize = vi.fn(() => order.push('auth'));
   const initializeLock = vi.fn(() => order.push('lock'));
+  const initializeAlarms = vi.fn(() => order.push('alarms'));
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       ...appConfig.providers,
       { provide: AuthAccessService, useValue: { initialize } },
       { provide: BiometricLockService, useValue: { initialize: initializeLock } },
+      { provide: AlarmsAccessService, useValue: { initialize: initializeAlarms } },
     ],
   });
-  return { initialize, initializeLock, order };
+  return { initialize, initializeLock, initializeAlarms, order };
 }
 
 describe('appConfig', () => {
@@ -40,6 +43,15 @@ describe('appConfig', () => {
 
     await TestBed.inject(ApplicationInitStatus).donePromise;
 
-    expect(order).toEqual(['lock', 'auth']);
+    expect(order.indexOf('lock')).toBeLessThan(order.indexOf('auth'));
+  });
+
+  it('US-006-01 arranca las alarmas una vez, sin esperar a la red y después de la identidad', async () => {
+    const { initializeAlarms, order } = setup();
+
+    await TestBed.inject(ApplicationInitStatus).donePromise;
+
+    expect(initializeAlarms).toHaveBeenCalledTimes(1);
+    expect(order.indexOf('alarms')).toBeGreaterThan(order.indexOf('auth'));
   });
 });

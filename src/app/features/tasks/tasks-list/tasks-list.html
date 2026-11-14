@@ -3,7 +3,9 @@
     <h1 class="heading">{{ copy.list.title }}</h1>
   </header>
 
-  @if (access.status() === 'loading' || access.status() === 'idle') {
+  @if (alarms.bannerVisible()) {
+  <app-alarms-banner (activate)="openNotificationSettings()" (dismiss)="alarms.dismissBanner()" />
+  } @if (access.status() === 'loading' || access.status() === 'idle') {
   <section class="state" role="status" aria-live="polite">
     <div class="spinner" aria-hidden="true"></div>
     <p class="state-text">{{ copy.list.loading }}</p>
@@ -54,6 +56,10 @@
             <span class="when">{{ dayLabel(task.dueDate) }}</span>
             } @if (task.dueTime) {
             <span class="when"><app-icon name="clock" />{{ task.dueTime }}</span>
+            } @if (alarmState(task); as state) {
+            <span class="alarm" [class.off]="state === 'off'">
+              <app-icon [name]="state === 'off' ? 'bell-off' : 'bell'" />{{ alarmLabel(task) }}
+            </span>
             }
           </span>
           }
@@ -106,4 +112,8 @@
     <app-icon name="plus" />
     <span>{{ copy.list.newTask }}</span>
   </button>
+
+  @if (alarms.shouldOfferExact()) {
+  <app-exact-alarm-sheet (openSettings)="openExactAlarmSettings()" (skip)="alarms.skipExact()" />
+  }
 </main>

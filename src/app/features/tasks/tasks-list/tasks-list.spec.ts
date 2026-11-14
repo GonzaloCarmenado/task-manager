@@ -1,8 +1,10 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { AlarmPermission } from '../../../core/models/alarm';
 import { Task } from '../../../core/models/task';
 import { CLOCK } from '../../../core/services/clock';
+import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import {
   TaskOpResult,
   TasksAccessService,
@@ -28,8 +30,36 @@ function task(over: Partial<Task> = {}): Task {
   };
 }
 
-function setup(initial: Task[] = [], status: TasksStatus = 'ready') {
+interface AlarmsMockOptions {
+  supported?: boolean;
+  permission?: AlarmPermission;
+  banner?: boolean;
+  offerExact?: boolean;
+  scheduled?: string[];
+}
+
+function alarmsMock(o: AlarmsMockOptions = {}) {
+  const scheduled = new Set(o.scheduled ?? []);
+  return {
+    supported: o.supported ?? false,
+    permission: signal<AlarmPermission>(o.permission ?? 'unsupported'),
+    bannerVisible: signal(o.banner ?? false),
+    hasScheduled: vi.fn((id: string) => scheduled.has(id)),
+    shouldOfferExact: vi.fn(() => o.offerExact ?? false),
+    skipExact: vi.fn(),
+    dismissBanner: vi.fn(),
+    openNotificationSettings: vi.fn(async () => undefined),
+    openExactAlarmSettings: vi.fn(async () => undefined),
+  };
+}
+
+function setup(
+  initial: Task[] = [],
+  status: TasksStatus = 'ready',
+  alarmOptions: AlarmsMockOptions = {}
+) {
   let now = new Date(2026, 10, 13, 12, 0, 0);
+  const alarms = alarmsMock(alarmOptions);
   const tasks = signal<readonly Task[]>(initial);
   const statusSig = signal<TasksStatus>(status);
   const errorReason = signal<TasksErrorReason | null>(null);
@@ -43,6 +73,7 @@ function setup(initial: Task[] = [], status: TasksStatus = 'ready') {
     providers: [
       provideRouter([]),
       { provide: TasksAccessService, useValue: access },
+      { provide: AlarmsAccessService, useValue: alarms },
       { provide: CLOCK, useValue: () => now },
     ],
   });
@@ -62,6 +93,7 @@ function setup(initial: Task[] = [], status: TasksStatus = 'ready') {
     setCompleted,
     load,
     navigate,
+    alarms,
     setNow: (d: Date) => (now = d),
     text: () => el.textContent?.replace(/\s+/g, ' ').trim() ?? '',
     detect: () => fixture.detectChanges(),
@@ -319,5 +351,81 @@ describe('TasksList · navegación y accesibilidad', () => {
 
   it('US-005-02 usa ChangeDetectionStrategy.OnPush', () => {
     expect((TasksList as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
+  });
+});
+
+describe('TasksList · alarmas', () => {
+  const timed = (over: Partial<Task> = {}) =>
+    task({ title: 'Llamar al fontanero', dueDate: '2026-11-14', dueTime: '11:00', ...over });
+
+  it('US-006-02 el aviso de alarmas desactivadas solo aparece cuando el servicio lo pide', () => {
+    const hidden = setup([timed()], 'ready', { supported: true, banner: false });
+    expect(hidden.el.querySelector('app-alarms-banner')).toBeNull();
+
+    const shown = setup([timed()], 'ready', {
+      supported: true,
+      banner: true,
+      permission: 'denied',
+    });
+    expect(shown.el.querySelector('app-alarms-banner')).not.toBeNull();
+  });
+
+  it('US-006-02 Activar alarmas abre los ajustes y cerrar oculta el aviso ese día', () => {
+    const t = setup([timed()], 'ready', { supported: true, banner: true, permission: 'denied' });
+    const [activate, close] = Array.from(
+      t.el.querySelectorAll<HTMLButtonElement>('app-alarms-banner button')
+    );
+
+    activate.click();
+    close.click();
+
+    expect(t.alarms.openNotificationSettings).toHaveBeenCalledTimes(1);
+    expect(t.alarms.dismissBanner).toHaveBeenCalledTimes(1);
+  });
+
+  it('US-006-03 una tarea con alarma programada muestra «Avisará a las HH:MM»', () => {
+    const a = timed();
+    const t = setup([a], 'ready', { supported: true, permission: 'granted', scheduled: [a.id] });
+    expect(t.el.querySelector('.alarm')?.textContent?.trim()).toBe('Avisará a las 11:00');
+  });
+
+  it('US-006-03 con hora pero sin permiso muestra «Sin alarma»; sin hora no muestra nada', () => {
+    const withTime = timed();
+    const withoutTime = task({ dueDate: '2026-11-14', dueTime: null });
+    const t = setup([withTime, withoutTime], 'ready', { supported: true, permission: 'denied' });
+
+    const labels = Array.from(t.el.querySelectorAll('.alarm')).map((e) => e.textContent?.trim());
+    expect(labels).toEqual(['Sin alarma']);
+  });
+
+  it('US-006-03 en navegador (sin alarmas) no se pinta ningún indicador ni aviso', () => {
+    const t = setup([timed()], 'ready', { supported: false });
+    expect(t.el.querySelector('.alarm')).toBeNull();
+    expect(t.el.querySelector('app-alarms-banner')).toBeNull();
+    expect(t.el.querySelector('app-exact-alarm-sheet')).toBeNull();
+  });
+
+  it('US-006-03 una tarea completada o pasada no lleva indicador', () => {
+    const done = timed({ completedAt: '2026-11-13T08:00:00.000Z' });
+    const past = timed({ dueDate: '2026-11-12' });
+    const t = setup([done, past], 'ready', { supported: true, permission: 'denied' });
+    expect(t.el.querySelector('.alarm')).toBeNull();
+  });
+
+  it('US-006-02 la hoja de alarmas exactas aparece si el servicio la ofrece; Ir a ajustes y Omitir actúan', () => {
+    const t = setup([timed()], 'ready', {
+      supported: true,
+      permission: 'granted',
+      offerExact: true,
+    });
+    const sheet = t.el.querySelector('app-exact-alarm-sheet');
+    expect(sheet).not.toBeNull();
+
+    const [open, skip] = Array.from(sheet?.querySelectorAll<HTMLButtonElement>('button') ?? []);
+    open.click();
+    skip.click();
+
+    expect(t.alarms.openExactAlarmSettings).toHaveBeenCalledTimes(1);
+    expect(t.alarms.skipExact).toHaveBeenCalledTimes(2);
   });
 });

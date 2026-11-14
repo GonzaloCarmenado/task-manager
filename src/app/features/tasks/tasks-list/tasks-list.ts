@@ -9,7 +9,12 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Task } from '../../../core/models/task';
+import { AlarmsConstructorService } from '../../../core/services/alarms.constructor.service';
+import { CLOCK } from '../../../core/services/clock';
 import { Icon } from '../../../shared/components/icon/icon';
+import { AlarmsBanner } from '../alarms/alarms-banner/alarms-banner';
+import { AlarmsAccessService } from '../alarms/alarms.access.service';
+import { ExactAlarmSheet } from '../alarms/exact-alarm-sheet/exact-alarm-sheet';
 import { TasksAccessService } from '../tasks.access.service';
 import { TasksConstructorService } from '../tasks.constructor.service';
 
@@ -24,13 +29,16 @@ interface Notice {
 @Component({
   selector: 'app-tasks-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon],
+  imports: [Icon, AlarmsBanner, ExactAlarmSheet],
   templateUrl: './tasks-list.html',
   styleUrl: './tasks-list.scss',
 })
 export class TasksList {
   protected readonly access = inject(TasksAccessService);
   protected readonly copy = inject(TasksConstructorService);
+  protected readonly alarms = inject(AlarmsAccessService);
+  private readonly alarmsCopy = inject(AlarmsConstructorService);
+  private readonly clock = inject(CLOCK);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
@@ -85,6 +93,30 @@ export class TasksList {
     } else {
       this.showNotice(this.copy.list.failNotice, true);
     }
+  }
+
+  /** `on` con aviso programado, `off` con hora futura pero sin permiso, y nada en navegador. */
+  protected alarmState(task: Task): 'on' | 'off' | null {
+    if (!this.alarms.supported) return null;
+    if (this.alarms.hasScheduled(task.id)) return 'on';
+    const withoutPermission = this.alarms.permission() !== 'granted';
+    return withoutPermission && this.alarmsCopy.hasAlarm(task, this.clock()) ? 'off' : null;
+  }
+
+  protected alarmLabel(task: Task): string {
+    const { indicator } = this.alarmsCopy.copy;
+    return this.alarmState(task) === 'on'
+      ? indicator.scheduled(task.dueTime ?? '')
+      : indicator.none;
+  }
+
+  protected openNotificationSettings(): void {
+    void this.alarms.openNotificationSettings();
+  }
+
+  protected openExactAlarmSettings(): void {
+    void this.alarms.openExactAlarmSettings();
+    this.alarms.skipExact();
   }
 
   protected isOverdue(task: Task): boolean {

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-launch-notification-id"
+description = "Enables the launch_notification_id command without any pre-configured scope."
+commands.allow = ["launch_notification_id"]
+
+[[permission]]
+identifier = "deny-launch-notification-id"
+description = "Denies the launch_notification_id command without any pre-configured scope."
+commands.deny = ["launch_notification_id"]

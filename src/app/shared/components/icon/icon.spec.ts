@@ -20,6 +20,8 @@ describe('Icon', () => {
     expect([...ICON_NAMES].sort()).toEqual(
       [
         'alert',
+        'bell',
+        'bell-off',
         'calendar',
         'check',
         'chevron-down',

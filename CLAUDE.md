@@ -78,6 +78,11 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - Solo `BiometricAccessService` toca el plugin (carga diferida, solo Android); el estado vive en `BiometricLockService`. El plugin y su crate van con **versión exacta** y el permiso es solo `biometry:default` en `capabilities/mobile.json`.
 - La pantalla de bloqueo no muestra datos de la app. Los textos del aviso del sistema siguen el idioma del teléfono.
 
+### Alarmas de tareas (spec 006)
+
+- Solo `AlarmsAccessService` (`features/tasks/alarms/`) habla con el plugin de avisos; envía siempre el conjunto **completo** de avisos (`schedule_alarms`).
+- La programación, restauración tras reinicio y publicación de la notificación son **código nativo propio** del plugin local `src-tauri/plugins/app-settings`; `tauri-plugin-notification` (versión exacta) solo pide el permiso y crea el canal. No programar avisos con el plugin oficial: no restaura tras reiniciar. Detalles en `docs/setup-android.md`.
+
 ### Revisión visual obligatoria en el navegador (CRITICO)
 
 - **OBLIGATORIO**: todo diseño (pantalla, componente, estilo, estado visual) se revisa en el navegador con la **extensión de Claude en Chrome sincronizada** (`mcp__claude-in-chrome__*`; invocar antes la skill `claude-in-chrome`).

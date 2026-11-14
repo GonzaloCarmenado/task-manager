@@ -28,6 +28,11 @@ export function buildRoutes(devMode: boolean): Routes {
               import('./features/dev/session-status-preview').then((m) => m.SessionStatusPreview),
           },
           {
+            path: '__dev/alarms/:state',
+            loadComponent: () =>
+              import('./features/dev/alarms-preview').then((m) => m.AlarmsPreview),
+          },
+          {
             path: '__dev/biometric/:state',
             loadComponent: () =>
               import('./features/dev/biometric-preview').then((m) => m.BiometricPreview),
