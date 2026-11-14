@@ -73,3 +73,11 @@ Los selectores de fecha y hora del formulario son los **nativos** del sistema (`
 - **`am force-stop`** (y «Forzar detención» en Ajustes) cancela todas las alarmas de la app: para cerrarla en pruebas, quitarla de «recientes».
 - **Limitación conocida**: si Android mata el proceso pero la tarea sigue en «recientes», el toque en el aviso abre la lista en vez de la tarea (Android no entrega el intent en ese caso). Con la app abierta, cerrada por el usuario o tras un reinicio, sí abre la tarea.
 - Al compilar con `pnpm tauri android build`, **no** definir `MSYS_NO_PATHCONV` en la misma sesión (rompe la ruta de `pnpm` y falla con `MODULE_NOT_FOUND`).
+
+## Interfaz y diseño (spec 010)
+
+- **Fuente empaquetada**: Plus Jakarta Sans (SIL OFL 1.1, `@fontsource-variable/plus-jakarta-sans` con versión exacta). `angular.json` copia solo los `woff2` `latin` y `latin-ext` a `/fonts/` y `src/styles/_fonts.scss` los declara con `font-display: swap`. Va dentro del APK: no se pide a ningún servicio externo y la app la aplica sin red.
+- **Probar la fuente sin red**: con `pnpm tauri android dev` la app se sirve desde el servidor de desarrollo, así que no vale. Compilar el APK (`pnpm tauri android build --debug --apk --target x86_64`), instalarlo, desactivar la red del emulador (`adb shell svc wifi disable` y `adb shell svc data disable`) y abrir en frío.
+- **Barra de estado en oscuro**: con arranque en frío en modo oscuro los iconos ya son claros. Cambiar el tema del teléfono **con la app abierta** (p. ej. `adb shell cmd uimode night yes`) no recrea la actividad y la barra conserva el color anterior hasta reabrir la app. Es un artefacto del cambio en caliente, no un fallo de la app.
+- `src-tauri/gen/` está ignorado por git (lo genera Tauri): no se versionan cambios ahí.
+

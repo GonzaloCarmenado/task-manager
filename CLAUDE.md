@@ -96,6 +96,14 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - Un flujo nuevo o un cambio de comportamiento visible debe añadir o actualizar su prueba e2e (comprobar lo que se ve **y** lo que llega al servidor). Si cambian las reglas de los disparadores, actualizar también el simulador.
 - No sustituyen a `verify:*` (migraciones reales) ni a la comprobación en Android.
 
+### Diseño y estilos (spec 010)
+
+- La referencia única es `specs/_design/playful-momentum/DESIGN.md`. **Los estilos nuevos usan los tokens (`src/styles/_tokens.scss`) y los mixins** (`_type.scss` para la escala tipográfica; `_mixins.scss` para `card`, `pill-button` de 52 px, `chip`, `field`, `scrim`, `sheet` y `pill`) con `@use mixins; @use type;`. Nada de tamaños, colores ni sombras sueltos, ni de `color-mix`.
+- `pnpm test:scripts` ejecuta `scripts/design-tokens.test.mjs`: compara los tokens con el propio `DESIGN.md`, comprueba el contraste AA en claro y oscuro (con una excepción documentada: botón primario oscuro, 4,47:1), la fuente local y que hojas y formularios usan los mixins. Una pantalla nueva con estilo propio debe añadir su comprobación ahí.
+- Texto e iconos de color primario: `--color-primary-text` (en oscuro es más claro); `--color-primary` es para rellenos.
+- La fuente (Plus Jakarta Sans) va empaquetada; nunca se pide a un servicio externo. «Reducir movimiento» lo resuelve una regla global en `styles.scss`.
+- Zona táctil ≥ 44 px aunque el elemento se vea más pequeño (check de 28 px, chips de 36 px).
+
 ### Revisión visual obligatoria en el navegador (CRITICO)
 
 - **OBLIGATORIO**: todo diseño (pantalla, componente, estilo, estado visual) se revisa en el navegador con la **extensión de Claude en Chrome sincronizada** (`mcp__claude-in-chrome__*`; invocar antes la skill `claude-in-chrome`).

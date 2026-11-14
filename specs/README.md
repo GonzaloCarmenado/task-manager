@@ -17,7 +17,7 @@
 | [007](./007-posponer/spec.md) | Posponer tareas | Implementada | Mover una tarea a otro día con opciones rápidas y contador de pospuestas |
 | [008](./008-gamificacion/spec.md) | Gamificación: XP, niveles y rachas | Implementada | 10 XP por tarea completada, niveles, rachas de días y pantallas de progreso |
 | [009](./009-e2e-cypress/spec.md) | Pruebas e2e con Cypress | Implementada | 42 pruebas de flujos completos con Supabase simulado (`pnpm e2e`) |
-| [010](./010-interfaz-stitch/spec.md) | Interfaz fiel al sistema de diseño de Stitch | Tareas aprobadas | Adoptar tipografía, paleta, formas, sombras y componentes de «Playful Momentum» en todas las pantallas, sin funcionalidad nueva |
+| [010](./010-interfaz-stitch/spec.md) | Interfaz fiel al sistema de diseño de Stitch | Implementada | Adoptar tipografía, paleta, formas, sombras y componentes de «Playful Momentum» en todas las pantallas, sin funcionalidad nueva |
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Spec**: [spec.md](./spec.md) | **Clarify**: [clarify.md](./clarify.md)
 **Diseño (Stitch)**: sistema «Playful Momentum» (`specs/_design/playful-momentum/DESIGN.md`). No hay pantallas nuevas, así que no hay `stitch-prompt.md`.
-**Estado**: Aprobado
+**Estado**: Implementado
 **Fecha**: 2026-11-14
 
 ---

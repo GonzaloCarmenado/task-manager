@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 120 |
+| Turnos del usuario | 121 |
 | Preguntas `F` (funcionalidad) | 35 |
-| Preguntas `W` (flujo) | 57 |
-| **Total preguntas** | **92** |
+| Preguntas `W` (flujo) | 58 |
+| **Total preguntas** | **93** |
 
 ## Log
 
@@ -126,3 +126,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 117 | 2026-11-14 | "si" (commit del bloque 2) | 1 W (¿commit del bloque 3?) | Commit `807fb9b`. Bloque 3 (gamificación): pastilla de racha ámbar con halo, barra con degradado, tarjetas de progreso, celebración con destellos y subida de nivel como modal. Destellos parametrizados para tener contraste sobre ámbar |
 | 118 | 2026-11-14 | "asi" (commit del bloque 3) | 1 W (¿commit del bloque 4?) | Commit `e7c04f9`. Bloque 4: formulario con campos en píldora de 52 px, chips de 36 px con zona de 44 px, hojas con velo desenfocado y sombra de nivel 3, banner ámbar. 8 tests estáticos nuevos |
 | 119 | 2026-11-14 | "si" (commit del bloque 4) | 1 W (¿commit del bloque 5?) | Commit `e967eac`. Bloque 5: oferta, bloqueo, aviso de huella y estado de sesión con insignia con halo, `headline-md` y botón de 52 px. 4 tests estáticos nuevos |
+| 120 | 2026-11-14 | "si" (commit del bloque 5) | 1 W (¿commit del cierre?) | Commit `8875ff2`. Bloque 6: build sin avisos (presupuesto de estilos 8/12 kB), emulador en frío claro y oscuro, APK sin red con la fuente aplicada, docs, `review.md` y spec 010 Implementada |

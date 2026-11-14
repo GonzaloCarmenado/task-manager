@@ -1,7 +1,7 @@
 # Tasks 010 — Interfaz fiel al sistema de diseño de Stitch
 
 **Plan**: [plan.md](./plan.md)
-**Estado**: Aprobado
+**Estado**: Implementada
 **Fecha**: 2026-11-14
 
 > Cada historia sigue TDD: la tarea **(Red)** va siempre antes que la **(Green)**. En Red se ejecutan los tests y se comprueba que fallan por el motivo correcto. Lo que solo es estilo se protege con el test estático de tokens, los specs de estructura, las e2e y la revisión visual (que es una tarea explícita de cada bloque). **Cero funcionalidad nueva**; conservar los nombres de clase que usan las e2e. Fuente del diseño: `specs/_design/playful-momentum/DESIGN.md`.
@@ -92,24 +92,24 @@
 
 ## Bloque 6 — Cierre y verificación (US-010-06, P1)
 
-- [ ] T-010-58: `pnpm e2e` completo (42 pruebas) en verde; ajustar solo selectores de estilo si algo cambió, sin tocar comportamiento
-- [ ] T-010-59: recorrido completo en navegador (claro y oscuro) de **todas** las pantallas y estados, con la consola limpia y objetivos táctiles ≥ 44 px
-- [ ] T-010-60: `pnpm build` y comprobar el presupuesto de tamaño; comprobar que la fuente va dentro del APK (sin peticiones de red)
-- [ ] T-010-61 *(manual)*: emulador Android con arranque en frío en claro y en oscuro: lista, formulario, hojas, progreso, subida de nivel, bloqueo con huella y barra de estado; con la red desactivada la fuente sigue aplicándose
-- [ ] T-010-62: `docs/setup-android.md` y `CLAUDE.md`: fuente empaquetada, mixins de diseño y limitación del cambio de tema en caliente
-- [ ] T-010-63: `specs/010-interfaz-stitch/review.md` con lo comprobado, las discrepancias diseño ↔ comportamiento y la lista de lo detectado fuera de alcance; estado de la spec a Implementada y fila del `README`
+- [x] T-010-58: `pnpm e2e` completo (42 pruebas) en verde; ajustar solo selectores de estilo si algo cambió, sin tocar comportamiento
+- [x] T-010-59: recorrido completo en navegador (claro y oscuro) de **todas** las pantallas y estados, con la consola limpia y objetivos táctiles ≥ 44 px
+- [x] T-010-60: `pnpm build` y comprobar el presupuesto de tamaño; comprobar que la fuente va dentro del APK (sin peticiones de red)
+- [x] T-010-61 *(manual)*: emulador Android con arranque en frío en claro y en oscuro: lista, formulario, hojas, progreso, subida de nivel, bloqueo con huella y barra de estado; con la red desactivada la fuente sigue aplicándose
+- [x] T-010-62: `docs/setup-android.md` y `CLAUDE.md`: fuente empaquetada, mixins de diseño y limitación del cambio de tema en caliente
+- [x] T-010-63: `specs/010-interfaz-stitch/review.md` con lo comprobado, las discrepancias diseño ↔ comportamiento y la lista de lo detectado fuera de alcance; estado de la spec a Implementada y fila del `README`
 - [ ] T-010-64: pedir confirmación antes de cada commit, push y apertura de PR
 
 ---
 
 ## Checklist de cierre
 
-- [ ] `pnpm lint:fix && pnpm format` sin errores
-- [ ] `pnpm secrets:check` sin hallazgos
-- [ ] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar
-- [ ] `pnpm e2e` en verde (42 pruebas)
-- [ ] Criterios P1 de `spec.md` verificados (US-010-01, 02, 03 y 06)
-- [ ] Revisión visual en navegador con la extensión de Chrome, en claro y en oscuro
-- [ ] Comprobado en el emulador Android (arranque en frío, claro y oscuro, sin red)
-- [ ] Ninguna funcionalidad nueva añadida (revisado contra la sección «Out of scope»)
+- [x] `pnpm lint:fix && pnpm format` sin errores
+- [x] `pnpm secrets:check` sin hallazgos
+- [x] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar
+- [x] `pnpm e2e` en verde (42 pruebas)
+- [x] Criterios P1 de `spec.md` verificados (US-010-01, 02, 03 y 06)
+- [x] Revisión visual en navegador con la extensión de Chrome, en claro y en oscuro
+- [x] Comprobado en el emulador Android (arranque en frío, claro y oscuro, sin red)
+- [x] Ninguna funcionalidad nueva añadida (revisado contra la sección «Out of scope»)
 - [ ] Confirmación del usuario antes de cada commit y push
