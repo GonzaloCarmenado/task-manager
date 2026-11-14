@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 121 |
-| Preguntas `F` (funcionalidad) | 35 |
+| Turnos del usuario | 125 |
+| Preguntas `F` (funcionalidad) | 43 |
 | Preguntas `W` (flujo) | 58 |
-| **Total preguntas** | **93** |
+| **Total preguntas** | **101** |
 
 ## Log
 
@@ -127,3 +127,7 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 118 | 2026-11-14 | "asi" (commit del bloque 3) | 1 W (¿commit del bloque 4?) | Commit `e7c04f9`. Bloque 4: formulario con campos en píldora de 52 px, chips de 36 px con zona de 44 px, hojas con velo desenfocado y sombra de nivel 3, banner ámbar. 8 tests estáticos nuevos |
 | 119 | 2026-11-14 | "si" (commit del bloque 4) | 1 W (¿commit del bloque 5?) | Commit `e967eac`. Bloque 5: oferta, bloqueo, aviso de huella y estado de sesión con insignia con halo, `headline-md` y botón de 52 px. 4 tests estáticos nuevos |
 | 120 | 2026-11-14 | "si" (commit del bloque 5) | 1 W (¿commit del cierre?) | Commit `8875ff2`. Bloque 6: build sin avisos (presupuesto de estilos 8/12 kB), emulador en frío claro y oscuro, APK sin red con la fuente aplicada, docs, `review.md` y spec 010 Implementada |
+| 121 | 2026-11-14 | "si" (auditoría, push y actualizar la PR) | 1 W (¿auditoría, push y PR?) | Push de `5fa224f` y PR #1 actualizada a «006-010» |
+| 122 | 2026-11-14 | "deja eso como está y vamos con la de cuenta de usuario etc" (`/specify` de la 011) | 2 F (ciclo; alcance extra) | Borde del check se deja como está. Ciclo completo. Alcance: pantalla Cuenta, cambiar contraseña, borrar cuenta y cambiar correo. Spec 011 en Borrador con 6 decisiones para `/clarify` |
+| 123 | 2026-11-14 | "si" (aprobación de la spec 011) | 0 | Spec 011 aprobada; siguiente paso `/clarify` |
+| 124 | 2026-11-14 | "daleç" (`/clarify` de la 011) | 6 F (verificación, datos anónimos, envío de correo, recordatorio, identificador, recuperación) | El usuario eligió sin verificación ni envío de correo → nombre de usuario y contraseña, sin recuperación; preguntar al entrar con tareas anónimas; aviso discreto. US-011-04 sin trabajo; cambiar correo pasa a cambiar nombre de usuario. 7 decisiones por defecto. `clarify.md` CERRADO |
