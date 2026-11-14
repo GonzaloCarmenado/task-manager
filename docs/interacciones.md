@@ -6,7 +6,7 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 128 |
+| Turnos del usuario | 133 |
 | Preguntas `F` (funcionalidad) | 43 |
 | Preguntas `W` (flujo) | 59 |
 | **Total preguntas** | **102** |
@@ -134,3 +134,7 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 125 | 2026-11-14 | "si" (commit de la spec 011 y revisión cruzada) | 1 W (¿commit de la spec 011?) | Commit `680b7f2`. La revisión cruzada no pudo ejecutarse: la cuenta de la API de DeepSeek no tiene saldo («Insufficient Balance»); el flujo continúa sin ella (explica también la ausencia de informes en los pushes anteriores) |
 | 126 | 2026-11-14 | "si" (`/stitch-prompt` de la 011) | 0 | `stitch-prompt.md` con 10 pantallas y componentes de cuenta, flujos, estados y reglas, sin estilos. Espera el resultado de Stitch |
 | 127 | 2026-11-14 | Export de Stitch de la 011 (ruta de descargas) | 0 | Revisado como datos no confiables (sin correos, rutas ni ids; URLs solo de fuentes/CDN del prototipo y un avatar de ejemplo). 4 pantallas copiadas con hashes a `specs/011-cuenta-usuario/design/` y `README.md` con lo conservado, lo ignorado y lo inexacto. Faltan en el export: cambiar contraseña, cambiar usuario, borrar cuenta y los estados con cuenta/cargando |
+| 128 | 2026-11-14 | "si, recuerda ser muy preciso a la hora de copiar el front" (commit y `/sdd-plan` de la 011) | 0 | Commit `35e4cb4`. `plan.md` en borrador con las medidas exactas de cada pantalla leídas del HTML de Stitch, tokens nuevos, iconos propios, identidad por cliente sonda, traspaso de tareas sin SQL y una e2e de medidas |
+| 129 | 2026-11-14 | "vamos" (aprobación del plan de la 011) | 0 | Plan aprobado; siguiente paso `/task` |
+| 130 | 2026-11-14 | "task" (`/task` de la 011) | 0 | `tasks.md` con 134 tareas en 9 bloques: núcleo y spike con paradas de confirmación para el remoto, base visual, y un bloque por historia con tareas de medidas y comparación lado a lado con cada `screen.png` |
+| 131 | 2026-11-14 | "si dake" (aprobación de las tareas de la 011) | 0 | Tareas aprobadas; siguiente paso `/implement` |
