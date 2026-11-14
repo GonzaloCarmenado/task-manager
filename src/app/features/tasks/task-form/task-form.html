@@ -7,8 +7,8 @@
   <section class="card">
     <div class="label-row">
       <label class="label" for="task-title">{{ copy.form.titleLabel }}</label>
-      <span class="counter" [class.over]="title().length > max"
-        >{{ title().length }} / {{ max }}</span
+      <span class="counter" [class.over]="titleLength() > max"
+        >{{ titleLength() }} / {{ max }}</span
       >
     </div>
     <input

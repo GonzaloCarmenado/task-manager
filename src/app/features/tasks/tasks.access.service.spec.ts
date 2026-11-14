@@ -405,6 +405,44 @@ describe('TasksAccessService · completar', () => {
     expect(called('eq').at(-1)).toEqual(['id', 't1']);
   });
 
+  it('US-005-03 una recarga que llega con datos antiguos no deshace un cambio optimista en curso', async () => {
+    const { service, next } = await loaded();
+    let releaseLoad: (r: Result) => void = () => undefined;
+    let releaseUpdate: (r: Result) => void = () => undefined;
+    next(() => new Promise<Result>((resolve) => (releaseLoad = resolve)));
+    const reloading = service.load();
+    next(() => new Promise<Result>((resolve) => (releaseUpdate = resolve)));
+    const completing = service.setCompleted('t1', true);
+    await flush();
+
+    releaseLoad(ok([row()])); // el servidor aún no sabe lo de «completada»
+    await reloading;
+    expect(service.get('t1')?.completedAt).toBe(NOW.toISOString());
+
+    releaseUpdate(ok(null));
+    await completing;
+    expect(service.get('t1')?.completedAt).toBe(NOW.toISOString());
+  });
+
+  it('US-005-04 una recarga con datos antiguos no hace reaparecer una tarea que se está borrando', async () => {
+    const { service, next } = await loaded();
+    let releaseLoad: (r: Result) => void = () => undefined;
+    let releaseDelete: (r: Result) => void = () => undefined;
+    next(() => new Promise<Result>((resolve) => (releaseLoad = resolve)));
+    const reloading = service.load();
+    next(() => new Promise<Result>((resolve) => (releaseDelete = resolve)));
+    const removing = service.remove('t1');
+    await flush();
+
+    releaseLoad(ok([row()]));
+    await reloading;
+    expect(service.get('t1')).toBeUndefined();
+
+    releaseDelete(ok(null));
+    await removing;
+    expect(service.get('t1')).toBeUndefined();
+  });
+
   it('US-005-03 desmarcar vuelve a pendiente (completed_at null)', async () => {
     const { service, next, called } = await loaded();
     next(() => ok(null));

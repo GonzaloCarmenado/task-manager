@@ -78,6 +78,8 @@ export class TasksAccessService {
 
   private readonly cache = signal<ReadonlyMap<string, readonly Task[]>>(new Map());
   private readonly states = signal<ReadonlyMap<string, UserState>>(new Map());
+  /** Cambios optimistas (completar, borrar) a la espera del servidor. */
+  private inFlight = 0;
 
   /** Tareas del usuario actual (nunca las de otro). */
   readonly tasks = computed<readonly Task[]>(() => {
@@ -110,7 +112,8 @@ export class TasksAccessService {
     );
 
     if (outcome.ok) {
-      this.setTasks(uid, toTasks(outcome.data));
+      // Con un cambio optimista en vuelo, la respuesta puede traer datos anteriores a él: no se pisa.
+      if (this.inFlight === 0) this.setTasks(uid, toTasks(outcome.data));
       this.setState(uid, { status: 'ready', reason: null });
     } else if (!this.cache().has(uid)) {
       this.setState(uid, { status: 'error', reason: outcome.reason });
@@ -163,7 +166,7 @@ export class TasksAccessService {
     const completedAt = done ? this.clock().toISOString() : null;
     this.replaceTask(uid, id, { ...previous, completedAt });
 
-    const outcome = await this.run((signal) =>
+    const outcome = await this.runOptimistic((signal) =>
       this.supabase.client
         .from('tasks')
         .update({ completed_at: completedAt })
@@ -184,13 +187,24 @@ export class TasksAccessService {
 
     this.replaceTask(uid, id, null);
 
-    const outcome = await this.run((signal) =>
+    const outcome = await this.runOptimistic((signal) =>
       this.supabase.client.from('tasks').delete().eq('id', id).abortSignal(signal)
     );
     if (outcome.ok) return { ok: true };
 
     this.setTasks(uid, [...(this.cache().get(uid) ?? []), previous]);
     return { ok: false, reason: outcome.reason };
+  }
+
+  private async runOptimistic(
+    build: (signal: AbortSignal) => PromiseLike<{ data: unknown; error: unknown }>
+  ): Promise<Outcome> {
+    this.inFlight += 1;
+    try {
+      return await this.run(build);
+    } finally {
+      this.inFlight -= 1;
+    }
   }
 
   private async run(

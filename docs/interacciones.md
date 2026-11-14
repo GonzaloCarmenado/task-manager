@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 75 |
+| Turnos del usuario | 78 |
 | Preguntas `F` (funcionalidad) | 22 |
-| Preguntas `W` (flujo) | 34 |
-| **Total preguntas** | **56** |
+| Preguntas `W` (flujo) | 35 |
+| **Total preguntas** | **57** |
 
 ## Log
 
@@ -85,3 +85,5 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 068 | 2026-11-13 | "Vamos" (→ `/implement` de la 005) | 0 | Bloques 1 a 8 hechos con TDD (migración, fechas, agrupado, servicio de acceso, iconos, lista, formulario, rutas; 316 tests de la app y 51 de scripts). Parada en el bloque 9: la CLI de Supabase estaba en la cuenta equivocada; sesión cerrada, sin comandos contra el remoto |
 | 069-072 | 2026-11-13 | Cuenta de Supabase: discusión del correo, el proyecto y el login | 1 W (¿confirmas `db push`?) | CLI con la cuenta equivocada → logout → el usuario hace login. Verificado por id de organización y por el proyecto; `db:push:dry` limpio (solo `tasks`). Pendiente: confirmación para `db push` |
 | 073-075 | 2026-11-13 | "Sí" (db push), "listo" (ventana del navegador) y cierre | 1 W (¿commit?) | `db push` aplicado (verificada la cuenta por id). `pnpm verify:rls`: 15/15. Verificación en navegador y en Android (selectores nativos, teclado, persistencia, borrado) con datos de prueba borrados al terminar. Bug corregido con test: aviso «Escribe un título» con título demasiado largo. Spec 005 Implementada |
+| 076-077 | 2026-11-14 | "Sí, vamos" (commit) y "vamos" (push) | 0 | Commit `f045a53` tras auditar el diff staged (42 ficheros). Push a `main` tras auditar lo que viaja; sin hallazgos del hook |
+| 078 | 2026-11-14 | "Dale a review y al terminar empezamos con la siguiente spec" (→ `/pr-review` de la 005) | 1 W (¿commit de las correcciones?) | Coherencia verificada. El revisor del push dejó 2 hallazgos de gravedad baja, ambos válidos: corregidos con test primero (carrera entre recarga y cambio optimista; contador con espacios). `review.md` creado. Sin PR: la rama ya está en `main` |

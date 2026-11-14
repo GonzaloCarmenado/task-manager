@@ -156,6 +156,16 @@ describe('TaskForm · título (crear)', () => {
     expect(f.text()).not.toContain(f.copy.form.saveBlocked);
   });
 
+  it('US-005-01 el contador cuenta lo que se guarda: sin los espacios de los extremos y sin ponerse en rojo', () => {
+    const f = setup();
+    f.type(`  ${'a'.repeat(120)}  `);
+    expect(f.text()).toContain('120 / 120');
+    expect(f.el.querySelector('.counter.over')).toBeNull();
+
+    f.type('     ');
+    expect(f.text()).toContain('0 / 120');
+  });
+
   it('US-005-01 los espacios de los extremos no cuentan para el límite', () => {
     const f = setup();
     f.type(`  ${'a'.repeat(120)}  `);

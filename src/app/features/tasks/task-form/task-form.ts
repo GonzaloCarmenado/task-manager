@@ -32,6 +32,8 @@ export class TaskForm {
   protected readonly confirmingDelete = signal(false);
 
   private readonly trimmed = computed(() => this.title().trim());
+  /** Lo que se guarda: sin los espacios de los extremos (el contador y la validación coinciden). */
+  protected readonly titleLength = computed(() => this.trimmed().length);
 
   /** Motivo por el que no se puede guardar (o `null` si el título es válido). */
   protected readonly titleProblem = computed(() => {
