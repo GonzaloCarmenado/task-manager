@@ -1,0 +1,729 @@
+<!doctype html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_tab" name="shell-type" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100vw;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'primary-fixed-dim': '#c0c1ff',
+              background: '#fcf8ff',
+              'on-tertiary-container': '#000703',
+              'inverse-primary': '#c0c1ff',
+              'on-surface-variant': '#464554',
+              'secondary-fixed-dim': '#ffb95f',
+              'on-tertiary': '#ffffff',
+              'tertiary-fixed-dim': '#4edea3',
+              'surface-dim': '#dad6ff',
+              'surface-container-high': '#e9e5ff',
+              'secondary-container': '#fea619',
+              'surface-container-highest': '#e3dfff',
+              'on-primary-container': '#fffbff',
+              'on-primary-fixed-variant': '#2f2ebe',
+              'on-surface': '#181445',
+              'surface-tint': '#494bd6',
+              'on-tertiary-fixed-variant': '#005236',
+              'on-primary-fixed': '#07006c',
+              'on-secondary': '#ffffff',
+              'primary-fixed': '#e1e0ff',
+              'surface-container-low': '#f6f2ff',
+              'on-secondary-fixed': '#2a1700',
+              'surface-container-lowest': '#ffffff',
+              'inverse-on-surface': '#f3eeff',
+              'on-secondary-container': '#684000',
+              'on-tertiary-fixed': '#002113',
+              'secondary-fixed': '#ffddb8',
+              'primary-container': '#6063ee',
+              'surface-container': '#efebff',
+              'on-background': '#181445',
+              surface: '#fcf8ff',
+              'outline-variant': '#c7c4d7',
+              'inverse-surface': '#2d2a5b',
+              'on-secondary-fixed-variant': '#653e00',
+              'tertiary-container': '#00885d',
+              tertiary: '#006c49',
+              'error-container': '#ffdad6',
+              'tertiary-fixed': '#6ffbbe',
+              'surface-bright': '#fcf8ff',
+              error: '#ba1a1a',
+              outline: '#767586',
+              'on-primary': '#ffffff',
+              secondary: '#855300',
+              'on-error': '#ffffff',
+              'on-error-container': '#93000a',
+              primary: '#4648d4',
+              'surface-variant': '#e3dfff',
+            },
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+            spacing: {
+              'space-lg': '1.5rem',
+              'space-xl': '2.25rem',
+              'space-sm': '0.5rem',
+              'space-md': '1rem',
+              margin: '1.25rem',
+              gutter: '1rem',
+              'space-xs': '0.25rem',
+            },
+            fontFamily: {
+              'label-md': ['Plus Jakarta Sans'],
+              'headline-md': ['Plus Jakarta Sans'],
+              'headline-lg': ['Plus Jakarta Sans'],
+              'headline-sm': ['Plus Jakarta Sans'],
+              'body-lg': ['Plus Jakarta Sans'],
+              'label-sm': ['Plus Jakarta Sans'],
+              'label-lg': ['Plus Jakarta Sans'],
+              'body-md': ['Plus Jakarta Sans'],
+              'body-sm': ['Plus Jakarta Sans'],
+              'display-lg': ['Plus Jakarta Sans'],
+            },
+            fontSize: {
+              'label-md': [
+                '12px',
+                { lineHeight: '16px', letterSpacing: '0.02em', fontWeight: '600' },
+              ],
+              'headline-md': [
+                '22px',
+                { lineHeight: '28px', letterSpacing: '-0.01em', fontWeight: '700' },
+              ],
+              'headline-lg': [
+                '28px',
+                { lineHeight: '36px', letterSpacing: '-0.02em', fontWeight: '700' },
+              ],
+              'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+              'body-lg': ['16px', { lineHeight: '24px', fontWeight: '500' }],
+              'label-sm': [
+                '10px',
+                { lineHeight: '14px', letterSpacing: '0.04em', fontWeight: '700' },
+              ],
+              'label-lg': [
+                '14px',
+                { lineHeight: '20px', letterSpacing: '0.01em', fontWeight: '700' },
+              ],
+              'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+              'body-sm': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+              'display-lg': [
+                '36px',
+                { lineHeight: '44px', letterSpacing: '-0.03em', fontWeight: '800' },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-background font-body-md text-on-surface antialiased min-h-screen flex flex-col">
+    <header
+      class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"
+    >
+      <div class="h-16 px-margin flex items-center justify-between">
+        <div class="flex items-center gap-space-sm">
+          <div
+            class="w-10 h-10 rounded-full bg-primary-container/20 flex items-center justify-center text-primary"
+          >
+            <span class="material-symbols-outlined text-[22px]">bolt</span>
+          </div>
+          <h1 class="font-headline-sm text-headline-sm text-on-surface">Perfil De Usuario</h1>
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <div
+            class="flex items-center gap-space-xs bg-secondary-fixed/50 px-space-sm py-1 rounded-full"
+          >
+            <span class="material-symbols-outlined text-[18px] text-secondary"
+              >local_fire_department</span
+            ><span class="font-label-md text-label-md text-on-secondary-fixed">5 d</span>
+          </div>
+          <a
+            class="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full"
+            data-path="perfil-de-usuario"
+            href="#"
+            ><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+            </div></a
+          >
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 flex flex-col relative w-full px-margin pt-16 pb-28 bg-background">
+      <div class="flex flex-col w-full pb-8">
+        <!-- Interactive Navigation Sub-header (Ergonomic thumb-friendly back & dismiss) -->
+        <div class="flex items-center justify-between py-space-sm mb-space-sm">
+          <button
+            class="flex items-center gap-space-xs text-primary bg-primary-fixed/50 hover:bg-primary-fixed active:scale-95 transition-all px-space-md py-2 rounded-full"
+            onclick="history.back()"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+            <span class="font-label-md text-label-md">Volver</span>
+          </button>
+          <!-- Demo State Switcher (Toggle between Active User & Nuevo Usuario) -->
+          <button
+            class="flex items-center gap-space-xs bg-surface-container-high text-on-surface-variant hover:text-on-surface px-space-md py-2 rounded-full active:scale-95 transition-all shadow-sm"
+            id="toggle-demo-btn"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[18px] text-primary" id="toggle-icon"
+              >magic_button</span
+            >
+            <span class="font-label-md text-label-md" id="toggle-text">Ver como nuevo usuario</span>
+          </button>
+        </div>
+        <!-- CONTAINER: Dynamic Content View (Active vs Fresh) -->
+        <div
+          class="flex flex-col gap-space-md transition-opacity duration-300"
+          id="gamification-root"
+        >
+          <!-- HERO CARD: LEVEL & XP ACCUMULATOR -->
+          <div
+            class="relative overflow-hidden rounded-lg bg-surface-container-lowest p-space-lg shadow-[0_8px_30px_rgba(70,72,212,0.08)]"
+          >
+            <!-- Ambient Decorative Aura -->
+            <div
+              class="absolute -right-12 -top-12 w-48 h-48 bg-primary-container/15 rounded-full blur-2xl pointer-events-none"
+            ></div>
+            <div
+              class="absolute -left-10 bottom-0 w-36 h-36 bg-tertiary-container/10 rounded-full blur-xl pointer-events-none"
+            ></div>
+            <div class="relative z-10 flex flex-col gap-space-md">
+              <!-- Level Badge & Avatar Frame -->
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-space-md">
+                  <div class="relative">
+                    <div
+                      class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-primary-container text-on-primary flex items-center justify-center shadow-[0_8px_20px_rgba(70,72,212,0.3)]"
+                      id="badge-icon-box"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[34px]"
+                        id="level-glyph"
+                        style="font-variation-settings: 'FILL' 1"
+                        >workspace_premium</span
+                      >
+                    </div>
+                    <div
+                      class="absolute -bottom-2 -right-1 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm px-2 py-0.5 rounded-full shadow-sm"
+                      id="level-chip"
+                    >
+                      LVL 4
+                    </div>
+                  </div>
+                  <div class="flex flex-col">
+                    <span
+                      class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold"
+                      >Rango Actual</span
+                    >
+                    <h2 class="font-headline-sm text-headline-sm text-on-surface" id="level-title">
+                      Nivel 4 — Creador de Hábitos
+                    </h2>
+                    <p
+                      class="font-body-sm text-body-sm text-on-surface-variant"
+                      id="xp-accumulated"
+                    >
+                      340 XP acumulados
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary-container"
+                >
+                  <span class="material-symbols-outlined text-[22px]">military_tech</span>
+                </div>
+              </div>
+              <!-- Progress Track & Target Info -->
+              <div class="flex flex-col gap-space-xs mt-1">
+                <div class="flex justify-between items-center text-on-surface">
+                  <span
+                    class="font-label-md text-label-md text-on-surface-variant"
+                    id="xp-progress-label"
+                    >Progreso al Nivel 5</span
+                  >
+                  <span
+                    class="font-label-md text-label-md text-primary font-bold"
+                    id="xp-ratio-label"
+                    >340 / 500 XP</span
+                  >
+                </div>
+                <!-- Tactile Dual-Tone Progress Bar -->
+                <div
+                  class="w-full h-3.5 bg-surface-container-high rounded-full overflow-hidden p-0.5 shadow-inner"
+                >
+                  <div
+                    class="h-full rounded-full bg-gradient-to-r from-primary via-primary-container to-tertiary transition-all duration-700 ease-out"
+                    id="progress-fill-bar"
+                    style="width: 68%"
+                  ></div>
+                </div>
+                <div class="flex items-center justify-between text-on-surface-variant mt-0.5">
+                  <span class="font-body-sm text-body-sm" id="xp-remaining-hint"
+                    >Faltan 160 XP para el Nivel 5</span
+                  >
+                  <span class="font-label-sm text-label-sm text-tertiary font-bold">68%</span>
+                </div>
+              </div>
+              <!-- Non-Punitive Guarantee Pill -->
+              <div
+                class="flex items-center gap-space-sm bg-primary-fixed/40 px-space-md py-space-sm rounded-DEFAULT mt-1"
+              >
+                <span class="material-symbols-outlined text-primary text-[20px] shrink-0"
+                  >verified</span
+                >
+                <p
+                  class="font-body-sm text-body-sm text-on-primary-fixed leading-tight"
+                  id="level-rule-copy"
+                >
+                  <strong class="font-semibold">+10 XP</strong> por cada tarea completada. Tu nivel
+                  <span class="underline decoration-primary">nunca baja</span>.
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- STREAKS SECTION (Warm, guilt-free momentum) -->
+          <div
+            class="rounded-lg bg-surface-container-lowest p-space-lg shadow-[0_8px_30px_rgba(254,166,25,0.06)] flex flex-col gap-space-md"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-space-sm">
+                <div
+                  class="w-8 h-8 rounded-full bg-secondary-fixed/50 flex items-center justify-center text-secondary"
+                >
+                  <span class="material-symbols-outlined text-[20px]">local_fire_department</span>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface">Rachas e Impulso</h3>
+              </div>
+              <span
+                class="font-label-sm text-label-sm bg-surface-container px-2.5 py-1 rounded-full text-on-surface-variant font-bold"
+                >CONSTANCIA</span
+              >
+            </div>
+            <!-- Streak Metrics Grid -->
+            <div class="grid grid-cols-2 gap-space-sm">
+              <!-- Current Streak Card -->
+              <div
+                class="bg-secondary-fixed/30 p-space-md rounded-DEFAULT flex flex-col justify-between"
+              >
+                <div class="flex items-center gap-space-xs text-secondary mb-1">
+                  <span
+                    class="material-symbols-outlined text-[20px]"
+                    style="font-variation-settings: 'FILL' 1"
+                    >mode_heat</span
+                  >
+                  <span class="font-label-sm text-label-sm uppercase">Actual</span>
+                </div>
+                <p
+                  class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight"
+                  id="current-streak-val"
+                >
+                  6 días
+                </p>
+                <p
+                  class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                  id="current-streak-hint"
+                >
+                  ¡Haz 1 tarea hoy y llega a 7 días!
+                </p>
+              </div>
+              <!-- Best Streak Record Card -->
+              <div
+                class="bg-surface-container-low p-space-md rounded-DEFAULT flex flex-col justify-between"
+              >
+                <div class="flex items-center gap-space-xs text-secondary-container mb-1">
+                  <span
+                    class="material-symbols-outlined text-[20px]"
+                    style="font-variation-settings: 'FILL' 1"
+                    >star</span
+                  >
+                  <span class="font-label-sm text-label-sm uppercase">Récord</span>
+                </div>
+                <p
+                  class="font-headline-lg text-headline-lg text-on-surface font-extrabold tracking-tight"
+                  id="best-streak-val"
+                >
+                  14 días
+                </p>
+                <p
+                  class="font-body-sm text-body-sm text-on-surface-variant mt-1"
+                  id="best-streak-hint"
+                >
+                  Tu mejor racha registrada
+                </p>
+              </div>
+            </div>
+            <!-- Guilt-Free Philosophy Anchor -->
+            <div
+              class="flex items-start gap-space-sm bg-surface-container-low p-space-md rounded-DEFAULT"
+            >
+              <span class="material-symbols-outlined text-secondary text-[22px] shrink-0 mt-0.5"
+                >sentiment_satisfied</span
+              >
+              <div class="flex flex-col gap-0.5">
+                <span class="font-label-md text-label-md text-on-surface font-bold"
+                  >Cero culpas, cero presiones</span
+                >
+                <p class="font-body-sm text-body-sm text-on-surface-variant" id="guilt-free-copy">
+                  Si un día no puedes, no pasa nada: tu nivel y tu XP siguen intactos. Las rachas
+                  están para motivarte, no para castigarte.
+                </p>
+              </div>
+            </div>
+          </div>
+          <!-- RECENT ACTIVITY FEED -->
+          <div class="flex flex-col gap-space-sm">
+            <div class="flex items-center justify-between px-1">
+              <h3 class="font-headline-sm text-headline-sm text-on-surface">Actividad Reciente</h3>
+              <span class="font-label-sm text-label-sm text-primary font-bold">Últimas 24h</span>
+            </div>
+            <!-- Activity Items Container -->
+            <div class="flex flex-col gap-space-xs" id="activity-feed">
+              <!-- Activity 1 -->
+              <div
+                class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow transition-shadow"
+              >
+                <div class="flex items-center gap-space-md">
+                  <div
+                    class="w-10 h-10 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0"
+                  >
+                    <span class="material-symbols-outlined text-[22px]">check_circle</span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <p class="font-body-lg text-body-lg text-on-surface truncate font-semibold">
+                      Comprar verduras
+                    </p>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Hoy, 11:15</p>
+                  </div>
+                </div>
+                <span
+                  class="font-label-md text-label-md px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant shrink-0 font-bold"
+                >
+                  +10 XP
+                </span>
+              </div>
+              <!-- Activity 2 -->
+              <div
+                class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow transition-shadow"
+              >
+                <div class="flex items-center gap-space-md">
+                  <div
+                    class="w-10 h-10 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0"
+                  >
+                    <span class="material-symbols-outlined text-[22px]">check_circle</span>
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <p class="font-body-lg text-body-lg text-on-surface truncate font-semibold">
+                      Revisar apuntes
+                    </p>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Hoy, 09:30</p>
+                  </div>
+                </div>
+                <span
+                  class="font-label-md text-label-md px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant shrink-0 font-bold"
+                >
+                  +10 XP
+                </span>
+              </div>
+              <!-- Activity 3: Streak Milestone Triggered -->
+              <div
+                class="flex items-center justify-between p-space-md rounded-DEFAULT bg-secondary-fixed/20 shadow-sm"
+              >
+                <div class="flex items-center gap-space-md">
+                  <div
+                    class="w-10 h-10 rounded-full bg-secondary-container/20 text-secondary flex items-center justify-center shrink-0"
+                  >
+                    <span
+                      class="material-symbols-outlined text-[22px]"
+                      style="font-variation-settings: 'FILL' 1"
+                      >local_fire_department</span
+                    >
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <p class="font-body-lg text-body-lg text-on-surface font-semibold">
+                      Primera tarea del día
+                    </p>
+                    <p class="font-body-sm text-body-sm text-secondary font-medium">
+                      Racha de 6 días activada 🔥
+                    </p>
+                  </div>
+                </div>
+                <span class="material-symbols-outlined text-secondary text-[24px]">verified</span>
+              </div>
+            </div>
+          </div>
+          <!-- QUICK ENCOURAGEMENT CARD WITH ILLUSTRATION/AVATAR MOMENT -->
+          <div
+            class="rounded-lg bg-gradient-to-r from-primary-fixed to-surface-container-high p-space-md flex items-center gap-space-md mt-space-xs shadow-sm"
+            id="companion-cheer"
+          >
+            <div
+              class="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0 shadow-md"
+            >
+              <span class="material-symbols-outlined text-[30px]">smart_toy</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-label-md text-label-md text-on-primary-fixed font-bold"
+                >Compañero de Metas</span
+              >
+              <p class="font-body-sm text-body-sm text-on-surface-variant" id="cheer-message">
+                "¡Estás a solo 16 tareas de alcanzar el Rango 5! Tómalo con calma y celebra cada
+                paso."
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        (function initGamificationSpec() {
+          let isNewUser = false;
+
+          const toggleBtn = document.getElementById('toggle-demo-btn');
+          const toggleIcon = document.getElementById('toggle-icon');
+          const toggleText = document.getElementById('toggle-text');
+          const gamificationRoot = document.getElementById('gamification-root');
+
+          // UI elements to mutate
+          const levelGlyph = document.getElementById('level-glyph');
+          const levelChip = document.getElementById('level-chip');
+          const levelTitle = document.getElementById('level-title');
+          const xpAccumulated = document.getElementById('xp-accumulated');
+          const xpProgressLabel = document.getElementById('xp-progress-label');
+          const xpRatioLabel = document.getElementById('xp-ratio-label');
+          const progressFillBar = document.getElementById('progress-fill-bar');
+          const xpRemainingHint = document.getElementById('xp-remaining-hint');
+          const levelRuleCopy = document.getElementById('level-rule-copy');
+
+          const currentStreakVal = document.getElementById('current-streak-val');
+          const currentStreakHint = document.getElementById('current-streak-hint');
+          const bestStreakVal = document.getElementById('best-streak-val');
+          const bestStreakHint = document.getElementById('best-streak-hint');
+          const guiltFreeCopy = document.getElementById('guilt-free-copy');
+
+          const activityFeed = document.getElementById('activity-feed');
+          const cheerMessage = document.getElementById('cheer-message');
+
+          toggleBtn.addEventListener('click', () => {
+            isNewUser = !isNewUser;
+
+            // Smooth fade transition
+            gamificationRoot.style.opacity = '0.3';
+
+            setTimeout(() => {
+              if (isNewUser) {
+                // Switch to "Nuevo Usuario" State
+                toggleText.textContent = 'Ver estado activo (Nivel 4)';
+                toggleIcon.textContent = 'person_check';
+
+                levelGlyph.textContent = 'spa';
+                levelChip.textContent = 'LVL 1';
+                levelChip.className =
+                  'absolute -bottom-2 -right-1 bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm px-2 py-0.5 rounded-full shadow-sm';
+
+                levelTitle.textContent = 'Nivel 1 — Explorador Inicial';
+                xpAccumulated.textContent = '0 XP acumulados';
+                xpProgressLabel.textContent = 'Progreso al Nivel 2';
+                xpRatioLabel.textContent = '0 / 100 XP';
+                progressFillBar.style.width = '4%';
+                xpRemainingHint.textContent = 'Faltan 100 XP para el Nivel 2';
+
+                levelRuleCopy.innerHTML =
+                  '<strong class="font-semibold">+10 XP</strong> por cada tarea completada. Tu nivel <span class="underline decoration-primary">nunca baja</span>.';
+
+                currentStreakVal.textContent = '0 días';
+                currentStreakHint.textContent = '¡Completa tu primera misión!';
+                bestStreakVal.textContent = '0 días';
+                bestStreakHint.textContent = 'Tu viaje empieza aquí';
+
+                guiltFreeCopy.textContent =
+                  'Sin agobios: las rachas se construyen día a día a tu propio ritmo. Cada minuto dedicado a tus tareas cuenta.';
+
+                // Friendly Empty State in Activity Feed
+                activityFeed.innerHTML = `
+            <div class="flex flex-col items-center justify-center p-space-lg rounded-DEFAULT bg-surface-container-lowest text-center gap-space-sm shadow-sm py-8">
+              <div class="w-14 h-14 rounded-full bg-primary-fixed flex items-center justify-center text-primary mb-1">
+                <span class="material-symbols-outlined text-[32px]">flag_circle</span>
+              </div>
+              <p class="font-headline-sm text-headline-sm text-on-surface">¡Todo empieza con el primer paso!</p>
+              <p class="font-body-md text-body-md text-on-surface-variant max-w-xs">
+                Completa tu primera tarea para ganar tus primeros 10 XP y encender tu racha.
+              </p>
+              <a href="#" data-path="crear-mision" class="mt-2 inline-flex items-center gap-space-xs bg-primary text-on-primary font-label-md text-label-md px-space-md py-2.5 rounded-full shadow-sm active:scale-95 transition-transform">
+                <span class="material-symbols-outlined text-[18px]">add_task</span>
+                <span>Crear mi primera tarea</span>
+              </a>
+            </div>
+          `;
+
+                cheerMessage.textContent =
+                  '"¡Hola! Estoy listo para acompañarte. Añade una pequeña tarea fácil hoy para ver cómo sube tu XP."';
+              } else {
+                // Switch back to "Level 4 Active" State
+                toggleText.textContent = 'Ver como nuevo usuario';
+                toggleIcon.textContent = 'magic_button';
+
+                levelGlyph.textContent = 'workspace_premium';
+                levelChip.textContent = 'LVL 4';
+                levelChip.className =
+                  'absolute -bottom-2 -right-1 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm px-2 py-0.5 rounded-full shadow-sm';
+
+                levelTitle.textContent = 'Nivel 4 — Creador de Hábitos';
+                xpAccumulated.textContent = '340 XP acumulados';
+                xpProgressLabel.textContent = 'Progreso al Nivel 5';
+                xpRatioLabel.textContent = '340 / 500 XP';
+                progressFillBar.style.width = '68%';
+                xpRemainingHint.textContent = 'Faltan 160 XP para el Nivel 5';
+
+                levelRuleCopy.innerHTML =
+                  '<strong class="font-semibold">+10 XP</strong> por cada tarea completada. Tu nivel <span class="underline decoration-primary">nunca baja</span>.';
+
+                currentStreakVal.textContent = '6 días';
+                currentStreakHint.textContent = '¡Haz 1 tarea hoy y llega a 7 días!';
+                bestStreakVal.textContent = '14 días';
+                bestStreakHint.textContent = 'Tu mejor racha registrada';
+
+                guiltFreeCopy.textContent =
+                  'Si un día no puedes, no pasa nada: tu nivel y tu XP siguen intactos. Las rachas están para motivarte, no para castigarte.';
+
+                // Restore Recent Activity Feed
+                activityFeed.innerHTML = `
+            <div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow transition-shadow">
+              <div class="flex items-center gap-space-md">
+                <div class="w-10 h-10 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[22px]">check_circle</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <p class="font-body-lg text-body-lg text-on-surface truncate font-semibold">Comprar verduras</p>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">Hoy, 11:15</p>
+                </div>
+              </div>
+              <span class="font-label-md text-label-md px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant shrink-0 font-bold">+10 XP</span>
+            </div>
+
+            <div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-surface-container-lowest shadow-sm hover:shadow transition-shadow">
+              <div class="flex items-center gap-space-md">
+                <div class="w-10 h-10 rounded-full bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[22px]">check_circle</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <p class="font-body-lg text-body-lg text-on-surface truncate font-semibold">Revisar apuntes</p>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant">Hoy, 09:30</p>
+                </div>
+              </div>
+              <span class="font-label-md text-label-md px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed-variant shrink-0 font-bold">+10 XP</span>
+            </div>
+
+            <div class="flex items-center justify-between p-space-md rounded-DEFAULT bg-secondary-fixed/20 shadow-sm">
+              <div class="flex items-center gap-space-md">
+                <div class="w-10 h-10 rounded-full bg-secondary-container/20 text-secondary flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+                </div>
+                <div class="flex flex-col min-w-0">
+                  <p class="font-body-lg text-body-lg text-on-surface font-semibold">Primera tarea del día</p>
+                  <p class="font-body-sm text-body-sm text-secondary font-medium">Racha de 6 días activada 🔥</p>
+                </div>
+              </div>
+              <span class="material-symbols-outlined text-secondary text-[24px]">verified</span>
+            </div>
+          `;
+
+                cheerMessage.textContent =
+                  '"¡Estás a solo 16 tareas de alcanzar el Rango 5! Tómalo con calma y celebra cada paso."';
+              }
+
+              gamificationRoot.style.opacity = '1';
+            }, 150);
+          });
+        })();
+      </script>
+    </main>
+    <nav
+      class="fixed bottom-0 w-full z-50 pb-safe bg-surface/85 backdrop-blur-xl shadow-[0_-4px_24px_rgba(70,72,212,0.06)]"
+      data-active-classes="text-primary bg-primary-fixed/60 font-bold"
+    >
+      <div class="h-20 px-space-md flex items-center justify-around">
+        <a
+          class="flex flex-col items-center justify-center gap-space-xs min-w-[56px] min-h-[44px] px-space-sm py-1.5 rounded-full text-on-surface-variant transition-colors"
+          data-path="misiones-diarias"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">checklist</span
+          ><span class="font-label-sm text-label-sm">Tareas</span></a
+        ><a
+          class="flex flex-col items-center justify-center gap-space-xs min-w-[56px] min-h-[44px] px-space-sm py-1.5 rounded-full text-on-surface-variant transition-colors"
+          data-path="logros-y-rachas"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">emoji_events</span
+          ><span class="font-label-sm text-label-sm">Logros</span></a
+        ><a
+          class="flex items-center justify-center -mt-6 min-w-[56px] min-h-[56px] w-14 h-14 rounded-full bg-primary text-on-primary shadow-[0_8px_20px_-4px_rgba(70,72,212,0.45)] hover:scale-105 active:scale-95 transition-transform"
+          data-path="crear-mision"
+          href="#"
+          ><span class="material-symbols-outlined text-[28px]">add</span></a
+        ><a
+          class="flex flex-col items-center justify-center gap-space-xs min-w-[56px] min-h-[44px] px-space-sm py-1.5 rounded-full text-on-surface-variant transition-colors"
+          data-path="tienda-de-recompensas"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">redeem</span
+          ><span class="font-label-sm text-label-sm">Tienda</span></a
+        ><a
+          aria-current="page"
+          class="flex flex-col items-center justify-center gap-space-xs min-w-[56px] min-h-[44px] px-space-sm py-1.5 rounded-full transition-colors text-primary bg-primary-fixed/60 font-bold"
+          data-path="perfil-de-usuario"
+          href="#"
+          ><span class="material-symbols-outlined text-[24px]">account_circle</span
+          ><span class="font-label-sm text-label-sm">Perfil</span></a
+        >
+      </div>
+    </nav>
+  </body>
+</html>
