@@ -3,6 +3,8 @@
     <h1 class="heading">{{ copy.list.title }}</h1>
   </header>
 
+  <app-progress-summary />
+
   @if (alarms.bannerVisible()) {
   <app-alarms-banner (activate)="openNotificationSettings()" (dismiss)="alarms.dismissBanner()" />
   } @if (access.status() === 'loading' || access.status() === 'idle') {
@@ -120,7 +122,9 @@
     <span>{{ copy.list.newTask }}</span>
   </button>
 
-  @if (postponing(); as target) {
+  @if (progress.celebration(); as celebration) {
+  <app-celebration [celebration]="celebration" (finished)="progress.dismissCelebration()" />
+  } @if (postponing(); as target) {
   <app-postpone-sheet
     [task]="target"
     (choose)="postpone(target, $event)"

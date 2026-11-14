@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -12,6 +13,9 @@ import { Task } from '../../../core/models/task';
 import { AlarmsConstructorService } from '../../../core/services/alarms.constructor.service';
 import { CLOCK } from '../../../core/services/clock';
 import { Icon } from '../../../shared/components/icon/icon';
+import { Celebration } from '../../progress/celebration/celebration';
+import { ProgressAccessService } from '../../progress/progress.access.service';
+import { ProgressSummary } from '../../progress/progress-summary/progress-summary';
 import { AlarmsBanner } from '../alarms/alarms-banner/alarms-banner';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import { ExactAlarmSheet } from '../alarms/exact-alarm-sheet/exact-alarm-sheet';
@@ -28,7 +32,7 @@ import { TasksNoticeService } from '../tasks-notice.service';
 @Component({
   selector: 'app-tasks-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon, AlarmsBanner, ExactAlarmSheet, PostponeSheet],
+  imports: [Icon, AlarmsBanner, ExactAlarmSheet, PostponeSheet, ProgressSummary, Celebration],
   templateUrl: './tasks-list.html',
   styleUrl: './tasks-list.scss',
 })
@@ -38,6 +42,7 @@ export class TasksList {
   protected readonly alarms = inject(AlarmsAccessService);
   private readonly alarmsCopy = inject(AlarmsConstructorService);
   private readonly postponeRules = inject(PostponeConstructorService);
+  protected readonly progress = inject(ProgressAccessService);
   private readonly clock = inject(CLOCK);
   private readonly notices = inject(TasksNoticeService);
   protected readonly notice = this.notices.notice;
@@ -64,6 +69,12 @@ export class TasksList {
 
   constructor() {
     void this.access.load();
+    void this.progress.load();
+    // Al subir de nivel se abre la pantalla de subida (una sola vez).
+    effect(() => {
+      const level = this.progress.levelUp();
+      if (level !== null) void this.router.navigate(['/nivel', level]);
+    });
     this.document.addEventListener('visibilitychange', this.onVisibility);
     this.destroyRef.onDestroy(() =>
       this.document.removeEventListener('visibilitychange', this.onVisibility)
@@ -88,8 +99,10 @@ export class TasksList {
 
   protected async toggle(task: Task): Promise<void> {
     const done = task.completedAt === null;
+    const before = this.progress.progress();
     const result = await this.access.setCompleted(task.id, done);
     if (result.ok) {
+      void this.progress.afterToggle(done, before);
       this.notices.show(done ? this.copy.list.doneNotice : this.copy.list.undoneNotice, false);
     } else {
       this.notices.show(this.copy.list.failNotice, true);

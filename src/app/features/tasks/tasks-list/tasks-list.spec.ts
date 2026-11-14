@@ -4,6 +4,8 @@ import { Router, provideRouter } from '@angular/router';
 import { AlarmPermission } from '../../../core/models/alarm';
 import { Task } from '../../../core/models/task';
 import { CLOCK } from '../../../core/services/clock';
+import { Celebration, Progress } from '../../../core/models/progress';
+import { ProgressAccessService, ProgressStatus } from '../../progress/progress.access.service';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import {
   TaskOpResult,
@@ -54,6 +56,34 @@ function alarmsMock(o: AlarmsMockOptions = {}) {
   };
 }
 
+const PROGRESS: Progress = {
+  totalXp: 20,
+  level: 1,
+  xpIntoLevel: 20,
+  xpForNextLevel: 50,
+  currentStreak: 1,
+  bestStreak: 1,
+  xpToday: 20,
+  lastCompletedDay: '2026-11-13',
+};
+
+function progressMock() {
+  const progress = signal<Progress | null>(PROGRESS);
+  const status = signal<ProgressStatus>('ready');
+  const celebration = signal<Celebration | null>(null);
+  const levelUp = signal<number | null>(null);
+  return {
+    progress,
+    status,
+    celebration,
+    levelUp,
+    load: vi.fn(async () => true),
+    afterToggle: vi.fn(async () => undefined),
+    dismissCelebration: vi.fn(() => celebration.set(null)),
+    consumeLevelUp: vi.fn(),
+  };
+}
+
 function setup(
   initial: Task[] = [],
   status: TasksStatus = 'ready',
@@ -61,6 +91,7 @@ function setup(
 ) {
   let now = new Date(2026, 10, 13, 12, 0, 0);
   const alarms = alarmsMock(alarmOptions);
+  const progress = progressMock();
   const tasks = signal<readonly Task[]>(initial);
   const statusSig = signal<TasksStatus>(status);
   const errorReason = signal<TasksErrorReason | null>(null);
@@ -76,6 +107,7 @@ function setup(
       provideRouter([]),
       { provide: TasksAccessService, useValue: access },
       { provide: AlarmsAccessService, useValue: alarms },
+      { provide: ProgressAccessService, useValue: progress },
       { provide: CLOCK, useValue: () => now },
     ],
   });
@@ -97,6 +129,7 @@ function setup(
     load,
     navigate,
     alarms,
+    progress,
     setNow: (d: Date) => (now = d),
     text: () => el.textContent?.replace(/\s+/g, ' ').trim() ?? '',
     detect: () => fixture.detectChanges(),
@@ -499,5 +532,67 @@ describe('TasksList · posponer', () => {
 
     expect(t.el.querySelector('app-postpone-sheet')).toBeNull();
     expect(t.postpone).not.toHaveBeenCalled();
+  });
+});
+
+describe('TasksList · progreso', () => {
+  it('US-008-04 muestra el resumen de progreso arriba de la lista y carga el progreso', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    const summary = t.el.querySelector('app-progress-summary');
+    expect(summary).not.toBeNull();
+    expect(t.progress.load).toHaveBeenCalled();
+    const heading = t.el.querySelector('h1');
+    expect(heading?.compareDocumentPosition(summary as Node)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('US-008-01 completar pide al progreso comparar con lo de antes', async () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.el.querySelector<HTMLButtonElement>('.check')?.click();
+    await flush();
+
+    expect(t.setCompleted).toHaveBeenCalledWith('a', true);
+    expect(t.progress.afterToggle).toHaveBeenCalledWith(true, PROGRESS);
+  });
+
+  it('US-008-01 desmarcar también avisa al progreso', async () => {
+    const t = setup([task({ id: 'c', completedAt: '2026-11-12T09:00:00.000Z' })]);
+    t.el.querySelector<HTMLButtonElement>('.completed-toggle')?.click();
+    t.detect();
+    t.el.querySelector<HTMLButtonElement>('.task.done .check')?.click();
+    await flush();
+
+    expect(t.progress.afterToggle).toHaveBeenCalledWith(false, PROGRESS);
+  });
+
+  it('US-008-01 si falla el guardado, el progreso no se toca', async () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.setCompleted.mockResolvedValueOnce({ ok: false, reason: 'network' });
+    t.el.querySelector<HTMLButtonElement>('.check')?.click();
+    await flush();
+
+    expect(t.progress.afterToggle).not.toHaveBeenCalled();
+    expect(t.text()).toContain(t.copy.list.failNotice);
+  });
+
+  it('US-008-01 muestra la celebración mientras la haya y la quita al terminar', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.progress.celebration.set({ xpDelta: 10, capped: false, streakDays: null, leveledUpTo: null });
+    t.detect();
+    expect(t.el.querySelector('app-celebration')).not.toBeNull();
+    expect(t.text()).toContain('+10 XP');
+
+    t.el.querySelector('app-celebration')?.dispatchEvent(new Event('finished'));
+    t.progress.dismissCelebration();
+    t.detect();
+    expect(t.el.querySelector('app-celebration')).toBeNull();
+  });
+
+  it('US-008-02 al subir de nivel lleva a la pantalla de subida', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.progress.levelUp.set(2);
+    t.detect();
+    expect(t.navigate).toHaveBeenCalledWith(['/nivel', 2]);
   });
 });

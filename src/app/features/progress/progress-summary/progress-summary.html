@@ -1,0 +1,40 @@
+@if (access.progress(); as p) {
+<button
+  type="button"
+  class="summary"
+  [attr.aria-label]="rules.summary.open + ': ' + rules.levelLabel(p.level)"
+  (click)="open()"
+>
+  <span class="row">
+    <span class="level"><app-icon name="star" />{{ rules.levelLabel(p.level) }}</span>
+    <span class="streak" [class.none]="p.currentStreak === 0"
+      ><app-icon name="flame" />{{ rules.streakLabel(p.currentStreak) }}</span
+    >
+  </span>
+  <span
+    class="bar"
+    role="progressbar"
+    [attr.aria-valuemin]="0"
+    [attr.aria-valuemax]="p.xpForNextLevel"
+    [attr.aria-valuenow]="p.xpIntoLevel"
+    [attr.aria-valuetext]="rules.xpBar(p.xpIntoLevel, p.xpForNextLevel)"
+  >
+    <span class="fill" [style.width.%]="percent()"></span>
+  </span>
+  <span class="row">
+    <span class="xp">{{ rules.xpBar(p.xpIntoLevel, p.xpForNextLevel) }}</span>
+    @if (keepAlive()) {
+    <span class="hint">{{ rules.summary.keepStreak }}</span>
+    }
+  </span>
+</button>
+} @else if (access.status() === 'error') {
+<div class="summary state" role="alert">
+  <span class="message">{{ rules.summary.error }}</span>
+  <button type="button" class="retry" (click)="retry()">{{ rules.summary.retry }}</button>
+</div>
+} @else {
+<div class="summary state" role="status" aria-live="polite">
+  <span class="message">{{ rules.summary.loading }}</span>
+</div>
+}

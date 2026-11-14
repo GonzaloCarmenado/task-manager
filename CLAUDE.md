@@ -83,6 +83,13 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - Solo `AlarmsAccessService` (`features/tasks/alarms/`) habla con el plugin de avisos; envía siempre el conjunto **completo** de avisos (`schedule_alarms`).
 - La programación, restauración tras reinicio y publicación de la notificación son **código nativo propio** del plugin local `src-tauri/plugins/app-settings`; `tauri-plugin-notification` (versión exacta) solo pide el permiso y crea el canal. No programar avisos con el plugin oficial: no restaura tras reiniciar. Detalles en `docs/setup-android.md`.
 
+### Progreso y gamificación (spec 008)
+
+- El progreso (XP, tope diario, racha) lo **calcula la base de datos** con disparadores sobre `tasks`; el cliente solo envía el **día local** (`completed_day`) y lee `get_progress`. `player_stats` y `xp_events` son de solo lectura desde el cliente. Detalles en `docs/supabase.md`.
+- Solo `ProgressAccessService` (`features/progress/`) habla con `get_progress`; el nivel se calcula en el cliente (`ProgressConstructorService`).
+- **Orden de despliegue**: las migraciones `tasks_postponed_count` (007) y `progress` (008) se aplican **antes** de ejecutar el cliente contra el remoto (el cliente exige `postponed_count` y envía `completed_day`).
+- Pruebas reales (manuales, contra el remoto): `pnpm verify:rls` y `pnpm verify:progress`.
+
 ### Revisión visual obligatoria en el navegador (CRITICO)
 
 - **OBLIGATORIO**: todo diseño (pantalla, componente, estilo, estado visual) se revisa en el navegador con la **extensión de Claude en Chrome sincronizada** (`mcp__claude-in-chrome__*`; invocar antes la skill `claude-in-chrome`).

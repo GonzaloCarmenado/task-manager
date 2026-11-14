@@ -28,6 +28,7 @@ describe('Icon', () => {
         'chevron-right',
         'clock',
         'fingerprint',
+        'flame',
         'plus',
         'trash',
         'hourglass',
@@ -36,6 +37,8 @@ describe('Icon', () => {
         'server',
         'shield',
         'snooze',
+        'star',
+        'trophy',
         'wifi-off',
       ].sort()
     );

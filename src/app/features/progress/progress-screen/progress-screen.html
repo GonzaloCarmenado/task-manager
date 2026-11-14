@@ -1,0 +1,68 @@
+<main class="screen">
+  <header class="header">
+    <button type="button" class="back" [attr.aria-label]="rules.screen.back" (click)="leave()">
+      <app-icon name="chevron-right" class="flip" />
+    </button>
+    <h1 class="heading">{{ rules.screen.title }}</h1>
+    <button type="button" class="close" [attr.aria-label]="rules.screen.close" (click)="leave()">
+      <app-icon name="plus" class="x" />
+    </button>
+  </header>
+
+  @if (access.progress(); as p) {
+  <section class="hero">
+    <div class="badge"><app-icon name="trophy" /></div>
+    <p class="level">{{ rules.levelLabel(p.level) }}</p>
+    <span
+      class="bar"
+      role="progressbar"
+      [attr.aria-valuemin]="0"
+      [attr.aria-valuemax]="p.xpForNextLevel"
+      [attr.aria-valuenow]="p.xpIntoLevel"
+      [attr.aria-valuetext]="rules.xpBar(p.xpIntoLevel, p.xpForNextLevel)"
+    >
+      <span class="fill" [style.width.%]="percent()"></span>
+    </span>
+    <p class="remaining">
+      {{ rules.xpBar(p.xpIntoLevel, p.xpForNextLevel) }} · {{ rules.remainingText(p.xpForNextLevel -
+      p.xpIntoLevel) }}
+    </p>
+    @if (isNew()) {
+    <p class="new-user">{{ rules.screen.newUser }}</p>
+    }
+  </section>
+
+  <dl class="stats">
+    <div class="stat">
+      <dt>{{ rules.screen.totalXp }}</dt>
+      <dd>{{ p.totalXp }}</dd>
+    </div>
+    <div class="stat">
+      <dt>{{ rules.screen.today }}</dt>
+      <dd>{{ rules.todayXp(p.xpToday) }}</dd>
+    </div>
+    <div class="stat">
+      <dt>{{ rules.screen.currentStreak }}</dt>
+      <dd>{{ rules.streakLabel(p.currentStreak) }}</dd>
+    </div>
+    <div class="stat">
+      <dt>{{ rules.screen.bestStreak }}</dt>
+      <dd>{{ rules.streakLabel(p.bestStreak) }}</dd>
+    </div>
+  </dl>
+
+  <p class="note">{{ rules.screen.perTask }}</p>
+  <p class="note">{{ rules.screen.noGuilt }}</p>
+  } @else if (access.status() === 'error') {
+  <section class="state" role="alert">
+    <h2 class="state-title">{{ rules.screen.error }}</h2>
+    <p class="state-text">{{ rules.screen.errorHint }}</p>
+    <button type="button" class="retry" (click)="retry()">{{ rules.screen.retry }}</button>
+  </section>
+  } @else {
+  <section class="state" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="state-text">{{ rules.screen.loading }}</p>
+  </section>
+  }
+</main>

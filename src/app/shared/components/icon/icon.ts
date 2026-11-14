@@ -19,6 +19,9 @@ export const ICON_NAMES = [
   'bell',
   'bell-off',
   'snooze',
+  'flame',
+  'star',
+  'trophy',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -127,6 +130,23 @@ export type IconName = (typeof ICON_NAMES)[number];
             <path d="M12 9v4l2.5 1.5" />
             <path d="M4 4.5 7 2" />
             <path d="M20 4.5 17 2" />
+          }
+          @case ('flame') {
+            <path
+              d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.2 2-4.2.2 1.3.8 2 1.6 2.4C10.3 8.5 10.8 5.5 12 3z"
+            />
+          }
+          @case ('star') {
+            <path
+              d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9L12 3.5z"
+            />
+          }
+          @case ('trophy') {
+            <path d="M8 4h8v6a4 4 0 0 1-8 0V4z" />
+            <path d="M8 6H5v2a3 3 0 0 0 3 3" />
+            <path d="M16 6h3v2a3 3 0 0 1-3 3" />
+            <path d="M12 14v4" />
+            <path d="M8.5 20h7" />
           }
           @case ('shield') {
             <path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z" />

@@ -61,7 +61,7 @@ function makeChain(calls: Call[], settle: Settle): Chain {
   return chain;
 }
 
-function setup(options: { userId?: string | null } = {}) {
+function setup(options: { userId?: string | null; now?: Date } = {}) {
   const userId = signal<string | null>(options.userId === undefined ? USER_A : options.userId);
   const calls: Call[] = [];
   const queue: Settle[] = [];
@@ -76,7 +76,7 @@ function setup(options: { userId?: string | null } = {}) {
     providers: [
       { provide: SupabaseService, useValue: { client: { from } } },
       { provide: AuthAccessService, useValue: { userId } },
-      { provide: CLOCK, useValue: () => NOW },
+      { provide: CLOCK, useValue: () => options.now ?? NOW },
     ],
   });
   const service = TestBed.inject(TasksAccessService);
@@ -403,7 +403,9 @@ describe('TasksAccessService · completar', () => {
 
     release(ok(null));
     expect(await pending).toEqual({ ok: true });
-    expect(called('update')[0]).toEqual([{ completed_at: NOW.toISOString() }]);
+    expect(called('update')[0]).toEqual([
+      { completed_at: NOW.toISOString(), completed_day: '2026-11-13' },
+    ]);
     expect(called('eq').at(-1)).toEqual(['id', 't1']);
   });
 
@@ -499,7 +501,7 @@ describe('TasksAccessService · completar', () => {
     expect(await service.setCompleted('t1', false)).toEqual({ ok: true });
 
     expect(service.get('t1')?.completedAt).toBeNull();
-    expect(called('update').at(-1)).toEqual([{ completed_at: null }]);
+    expect(called('update').at(-1)).toEqual([{ completed_at: null, completed_day: null }]);
   });
 
   it('US-005-03 si falla el guardado, la tarea vuelve a su estado anterior', async () => {
@@ -592,6 +594,48 @@ describe('TasksAccessService · editar y borrar', () => {
 
     expect(result).toEqual({ ok: false, reason: 'network' });
     expect(service.get('t1')).toBeDefined();
+  });
+});
+
+describe('TasksAccessService · día local del completado', () => {
+  async function loaded() {
+    const ctx = setup();
+    ctx.next(() => ok([row()]));
+    await ctx.service.load();
+    return ctx;
+  }
+
+  it('US-008-01 envía el día local (no el UTC) también a las 23:59 y a las 00:01', async () => {
+    for (const [moment, day] of [
+      [new Date(2026, 10, 13, 23, 59, 30), '2026-11-13'],
+      [new Date(2026, 10, 14, 0, 1, 0), '2026-11-14'],
+    ] as const) {
+      const ctx = setup({ now: moment });
+      ctx.next(() => ok([row()]));
+      await ctx.service.load();
+      ctx.next(() => ok(null));
+      await ctx.service.setCompleted('t1', true);
+      expect(ctx.called('update')[0]).toEqual([
+        { completed_at: moment.toISOString(), completed_day: day },
+      ]);
+    }
+  });
+
+  it('US-008-01 desmarcar envía completed_at y completed_day a null', async () => {
+    const { service, next, called } = await loaded();
+    next(() => ok(null));
+    await service.setCompleted('t1', true);
+    next(() => ok(null));
+    await service.setCompleted('t1', false);
+    expect(called('update')[1]).toEqual([{ completed_at: null, completed_day: null }]);
+  });
+
+  it('US-008-01 si falla, no se queda ningún día inventado en la tarea', async () => {
+    const { service, next } = await loaded();
+    next(() => fail(new Error('Failed to fetch')));
+    const result = await service.setCompleted('t1', true);
+    expect(result).toEqual({ ok: false, reason: 'network' });
+    expect(service.get('t1')?.completedAt).toBeNull();
   });
 });
 

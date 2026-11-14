@@ -7,6 +7,9 @@ import { SessionStatusPreview } from './features/dev/session-status-preview';
 import { BiometricPreview } from './features/dev/biometric-preview';
 import { AlarmsPreview } from './features/dev/alarms-preview';
 import { PostponePreview } from './features/dev/postpone-preview';
+import { ProgressPreview } from './features/dev/progress-preview';
+import { LevelUp } from './features/progress/level-up/level-up';
+import { ProgressScreen } from './features/progress/progress-screen/progress-screen';
 
 const DEV_PATH = '__dev/session-status/:state';
 const BIOMETRIC_DEV_PATH = '__dev/biometric/:state';
@@ -43,7 +46,7 @@ describe('app.routes', () => {
   it('US-003-06 en producción no se registra ninguna ruta de desarrollo', () => {
     const production = buildRoutes(false);
     expect(production.some((r) => r.path?.startsWith('__dev'))).toBe(false);
-    expect(production.map((r) => r.path)).toEqual(['', 'nueva', ':id']);
+    expect(production.map((r) => r.path)).toEqual(['', 'nueva', 'progreso', 'nivel/:level', ':id']);
   });
 
   it('US-003-06 en desarrollo existe la ruta de vista previa y se carga de forma lazy', async () => {
@@ -79,6 +82,25 @@ describe('app.routes', () => {
     expect(route).toBeDefined();
     expect(await route?.loadComponent?.()).toBe(PostponePreview);
     expect(buildRoutes(false).some((r) => r.path === POSTPONE_DEV_PATH)).toBe(false);
+  });
+
+  it('US-008-04 en desarrollo existe la vista previa del progreso, lazy, y no en producción', async () => {
+    const route = buildRoutes(true).find((r) => r.path === '__dev/progress/:state');
+    expect(await route?.loadComponent?.()).toBe(ProgressPreview);
+    expect(buildRoutes(false).some((r) => r.path === '__dev/progress/:state')).toBe(false);
+  });
+
+  it('US-008-04 progreso y nivel/:level son lazy y van antes que :id', async () => {
+    const paths = buildRoutes(false).map((r) => r.path);
+    expect(paths.indexOf('progreso')).toBeLessThan(paths.indexOf(':id'));
+    expect(paths.indexOf('nivel/:level')).toBeLessThan(paths.indexOf(':id'));
+
+    const progress = buildRoutes(false).find((r) => r.path === 'progreso');
+    const level = buildRoutes(false).find((r) => r.path === 'nivel/:level');
+    expect(progress?.component).toBeUndefined();
+    expect(level?.component).toBeUndefined();
+    expect(await progress?.loadComponent?.()).toBe(ProgressScreen);
+    expect(await level?.loadComponent?.()).toBe(LevelUp);
   });
 
   it('US-003-06 las rutas de la app dependen de isDevMode()', () => {

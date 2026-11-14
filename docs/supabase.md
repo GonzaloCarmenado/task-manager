@@ -114,6 +114,18 @@ Rollback: una nueva migración con `drop table public.tasks;`.
 
 Verificación real (manual): `pnpm verify:rls` crea dos sesiones anónimas y comprueba que una no ve, edita, borra ni crea tareas de la otra, que sin sesión no se accede a nada y que se rechazan los títulos inválidos y la hora sin fecha; borra lo que crea y nunca imprime claves ni ids.
 
+### Progreso (spec 008)
+
+El progreso lo calcula la **base de datos**: el cliente solo envía el **día local** al completar una tarea (`completed_day`) y lee el resultado con `get_progress(hoy)`.
+
+- Columnas nuevas en `tasks`: `completed_day` (día local en que se completó; es `null` si y solo si `completed_at` lo es), `xp_awarded` (0 a 10) y `xp_day`. Las escribe el disparador, no el cliente.
+- `player_stats` (XP total y mejor racha, una fila por usuario) y `xp_events` (libro de movimientos de XP por día): **solo lectura** desde el cliente, con RLS por `user_id`; las escribe el disparador (`security definer`, `search_path` fijado).
+- **Reglas**: una tarea completada da 10 XP, con tope de **100 XP por día local** (suma del libro de ese día). Desmarcarla quita el XP que dio, en el día en que se concedió. Volver a completarla lo da otra vez, respetando el tope. Borrar una tarea completada **no** quita XP.
+- **Racha**: se deriva de los días con alguna tarea completada (`streak_ending`); la mejor racha solo sube.
+- Solo `get_progress(date)` es ejecutable desde el cliente; las demás funciones no.
+- Las tareas completadas antes de esta migración conservan su día (en UTC) y no dan XP.
+- Rollback: ver el final de la migración `<marca>_progress.sql`.
+
 ## Estado
 
-Migraciones: `tasks` (spec 005). El resto del modelo (XP, rachas…) llegará con las siguientes specs. La identidad anónima ya existe (spec 003).
+Migraciones: `tasks` (spec 005), `tasks_postponed_count` (007) y `progress` (008; las dos últimas, pendientes de aplicar al remoto). El resto del modelo (XP, rachas…) llegará con las siguientes specs. La identidad anónima ya existe (spec 003).

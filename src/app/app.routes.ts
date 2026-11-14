@@ -17,6 +17,15 @@ export function buildRoutes(devMode: boolean): Routes {
       loadComponent: () => import('./features/tasks/task-form/task-form').then((m) => m.TaskForm),
     },
     {
+      path: 'progreso',
+      loadComponent: () =>
+        import('./features/progress/progress-screen/progress-screen').then((m) => m.ProgressScreen),
+    },
+    {
+      path: 'nivel/:level',
+      loadComponent: () => import('./features/progress/level-up/level-up').then((m) => m.LevelUp),
+    },
+    {
       path: ':id',
       loadComponent: () => import('./features/tasks/task-form/task-form').then((m) => m.TaskForm),
     },
@@ -36,6 +45,11 @@ export function buildRoutes(devMode: boolean): Routes {
             path: '__dev/postpone/:state',
             loadComponent: () =>
               import('./features/dev/postpone-preview').then((m) => m.PostponePreview),
+          },
+          {
+            path: '__dev/progress/:state',
+            loadComponent: () =>
+              import('./features/dev/progress-preview').then((m) => m.ProgressPreview),
           },
           {
             path: '__dev/biometric/:state',

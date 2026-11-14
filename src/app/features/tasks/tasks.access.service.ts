@@ -3,7 +3,7 @@ import { COMPLETED_DAYS, Task, TaskInput, TaskRow } from '../../core/models/task
 import { AuthAccessService } from '../../core/services/auth.access.service';
 import { CLOCK } from '../../core/services/clock';
 import { SupabaseService } from '../../core/services/supabase';
-import { formatTime } from '../../core/utils/local-date';
+import { formatTime, toLocalDay } from '../../core/utils/local-date';
 import {
   PostponeConstructorService,
   PostponeTarget,
@@ -173,13 +173,16 @@ export class TasksAccessService {
     const previous = this.get(id);
     if (uid === null || previous === undefined) return { ok: false, reason: 'unknown' };
 
-    const completedAt = done ? this.clock().toISOString() : null;
+    const now = this.clock();
+    const completedAt = done ? now.toISOString() : null;
+    // El día local lo envía el cliente: la base de datos no conoce la zona horaria del usuario.
+    const completedDay = done ? toLocalDay(now) : null;
     this.replaceTask(uid, id, { ...previous, completedAt });
 
     const outcome = await this.runMutation((signal) =>
       this.supabase.client
         .from('tasks')
-        .update({ completed_at: completedAt })
+        .update({ completed_at: completedAt, completed_day: completedDay })
         .eq('id', id)
         .abortSignal(signal)
     );
