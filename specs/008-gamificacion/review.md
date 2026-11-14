@@ -27,3 +27,18 @@ El revisor lee lo versionado en HEAD: no veía las specs 006 y 007 ni el diseño
 **Orden obligatorio**: las migraciones de la 007 y la 008 se aplican **antes** de ejecutar el cliente contra el remoto. El plan decía «cliente primero», pero mientras la migración no esté, el cliente nuevo falla contra el remoto (envía `completed_day` y exige `postponed_count`).
 
 **Decisiones de implementación no previstas en el plan**: (1) la migración rellena `completed_day` de las tareas ya completadas (en UTC) antes de añadir la restricción, para que no falle con datos existentes; (2) el disparador de inserción pone a `null` `completed_at` y `completed_day`, para que no se pueda crear una tarea ya completada con XP; (3) los usuarios anónimos de prueba de `verify:progress` no se pueden borrar desde el cliente: solo se borran sus tareas.
+
+---
+
+# Verificación en remoto y en emulador (2026-11-14)
+
+| Comprobación | Resultado |
+|---|---|
+| Migraciones `progress` y `progress_best_streak` aplicadas | HECHO |
+| `verify:progress` | 27/27 OK (detectó que la mejor racha ignoraba los días posteriores al completado; corregido con `streak_run`) |
+| `verify:rls` | 16/16 OK |
+| Emulador: completar (+10 XP, «Llevas 1 día»), desmarcar (0 XP, sin racha), subida a nivel 2 con 50 XP, Continuar, pantalla de progreso, atrás, persistencia al reabrir | OK |
+| Emulador: tema oscuro (lista, progreso y hoja de posponer) | OK |
+| Racha entre días y tope de 100 XP en el emulador | No repetido: cubiertos por `verify:progress` y por las e2e |
+
+Hallazgo: la celebración se solapaba con el aviso «Tarea completada»; se sube su posición.

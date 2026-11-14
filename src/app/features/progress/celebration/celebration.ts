@@ -35,7 +35,7 @@ const DURATION_MS = 1_000;
   styles: `
     :host {
       position: fixed;
-      inset: auto 0 calc(6rem + env(safe-area-inset-bottom)) 0;
+      inset: auto 0 calc(9rem + env(safe-area-inset-bottom)) 0;
       z-index: 20;
       display: flex;
       justify-content: center;

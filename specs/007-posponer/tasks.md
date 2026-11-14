@@ -1,7 +1,7 @@
 # Tasks 007 — Posponer tareas
 
 **Plan**: [plan.md](./plan.md)
-**Estado**: En curso (cliente hecho; falta `db push` y verificación en Android)
+**Estado**: Implementada (verificada en emulador Android)
 **Fecha**: 2026-11-14
 
 > Cada historia sigue TDD: la tarea **(Red)** va siempre antes que la **(Green)**. En Red se ejecutan los tests y se comprueba que fallan por el motivo correcto. Lo que Stitch añada y no esté en la spec se ignora (ver `design/README.md`). Se implementa **después de la 006**.
@@ -89,7 +89,7 @@
 
 - [x] T-007-43: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` en verde
 - [x] T-007-44 *(hoja revisada en navegador; fila de la lista y tema oscuro pendientes de ver en el emulador, ver `review.md`)*: revisión visual en navegador con la extensión de Chrome (claro y oscuro): botón en la fila, hoja con cada opción y atrasada, selector de fecha, aviso de éxito y de error; área táctil, sin scroll horizontal, consola limpia
-- [ ] T-007-45 *(manual)*: emulador Android: selector nativo con mínimo, botón atrás cierra la hoja, tarea cambia de grupo, el aviso del sistema se reprograma (con la 006) y la tarea pospuesta persiste al reabrir
+- [x] T-007-45 *(manual, hecho en el emulador el 2026-11-14)*: emulador Android: selector nativo con mínimo, botón atrás cierra la hoja, tarea cambia de grupo, el aviso del sistema se reprograma (con la 006) y la tarea pospuesta persiste al reabrir
 - [ ] T-007-46: documentar lo comprobado, marcar la spec como Implementada, actualizar `specs/README.md` y el log
 
 ---
@@ -101,6 +101,6 @@
 - [ ] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar
 - [ ] Criterios P1 de `spec.md` verificados (US-007-01 y 03)
 - [ ] Revisión visual en navegador con la extensión de Chrome
-- [ ] Comprobado en el emulador Android
+- [x] Comprobado en el emulador Android
 - [ ] RLS comprobada contra el remoto
 - [ ] Confirmación del usuario antes de `db push`, de cada commit y de cada push
