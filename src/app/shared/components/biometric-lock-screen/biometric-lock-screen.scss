@@ -1,3 +1,6 @@
+@use 'mixins';
+@use 'type';
+
 :host {
   display: block;
 }
@@ -11,9 +14,9 @@
   justify-content: center;
   gap: var(--space-4);
   padding: calc(var(--space-6) + env(safe-area-inset-top))
-    calc(var(--space-4) + env(safe-area-inset-right))
+    calc(var(--space-margin) + env(safe-area-inset-right))
     calc(var(--space-6) + env(safe-area-inset-bottom))
-    calc(var(--space-4) + env(safe-area-inset-left));
+    calc(var(--space-margin) + env(safe-area-inset-left));
   text-align: center;
   background: var(--color-bg);
   color: var(--color-text);
@@ -28,23 +31,21 @@
   border-radius: var(--radius-full);
   background: var(--color-primary-soft);
   color: var(--color-on-primary-soft);
+  box-shadow: var(--shadow-xp);
   font-size: 3rem;
 }
 
 .title {
   margin: 0;
-  font-size: var(--font-size-headline);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
+  @include type.headline-md;
 }
 
 .message {
   margin: 0;
   max-width: 26rem;
-  font-size: var(--font-size-body-lg);
-  line-height: var(--line-height-body);
   color: var(--color-text-muted);
+  @include type.body-lg;
+  font-weight: 400;
 
   &.error {
     color: var(--color-error);
@@ -52,37 +53,8 @@
 }
 
 .unlock {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+  @include mixins.pill-button;
   width: 100%;
   max-width: 26rem;
-  min-height: 3.5rem;
   margin-top: var(--space-2);
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font: inherit;
-  font-size: var(--font-size-body-lg);
-  font-weight: 700;
-  box-shadow: var(--shadow-button);
-  cursor: pointer;
-  transition: transform 150ms ease;
-
-  &:active:not(:disabled) {
-    transform: scale(0.97);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    box-shadow: none;
-    cursor: default;
-  }
-
-  &:focus-visible {
-    outline: 3px solid var(--color-primary-soft);
-    outline-offset: 3px;
-  }
 }

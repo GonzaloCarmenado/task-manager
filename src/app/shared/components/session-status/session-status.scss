@@ -1,15 +1,22 @@
+@use 'mixins';
+@use 'type';
+
 :host {
   display: block;
 }
 
 .screen {
+  box-sizing: border-box;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
-  padding: var(--space-6) var(--space-4);
+  padding: calc(var(--space-6) + env(safe-area-inset-top))
+    calc(var(--space-margin) + env(safe-area-inset-right))
+    calc(var(--space-6) + env(safe-area-inset-bottom))
+    calc(var(--space-margin) + env(safe-area-inset-left));
   text-align: center;
   background: var(--color-bg);
   color: var(--color-text);
@@ -18,18 +25,15 @@
 
 .title {
   margin: 0;
-  font-size: var(--font-size-headline);
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
+  @include type.headline-md;
 }
 
 .description {
   margin: 0;
   max-width: 26rem;
-  font-size: var(--font-size-body-lg);
-  line-height: var(--line-height-body);
   color: var(--color-text-muted);
+  @include type.body-lg;
+  font-weight: 400;
 }
 
 // Carga indeterminada: un anillo que gira (sin porcentaje ni pasos).
@@ -49,13 +53,8 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation-duration: 3s;
-  }
-}
-
 .card {
+  @include mixins.card;
   width: 100%;
   max-width: 26rem;
   display: flex;
@@ -63,31 +62,24 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-6) var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+  border-radius: var(--radius-lg);
 }
 
 .pill {
-  display: inline-flex;
-  align-items: center;
+  @include mixins.pill;
   gap: var(--space-2);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
   background: var(--color-surface-soft);
   color: var(--color-text-muted);
-  font-size: var(--font-size-label);
-  font-weight: 600;
 }
 
 .dot {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: var(--radius-full);
-  background: var(--color-accent);
+  background: var(--color-secondary-container);
 
   &.ok {
-    background: var(--color-success);
+    background: var(--color-tertiary-container);
   }
 }
 
@@ -99,6 +91,7 @@
   border-radius: var(--radius-full);
   background: var(--color-primary-soft);
   color: var(--color-on-primary-soft);
+  box-shadow: var(--shadow-xp);
   font-size: 2.5rem;
 }
 
@@ -107,41 +100,18 @@
   align-items: center;
   gap: var(--space-2);
   margin: 0;
-  font-size: var(--font-size-body);
   color: var(--color-text-muted);
+  @include type.body-md;
 }
 
 .retry {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+  @include mixins.pill-button;
   width: 100%;
   max-width: 26rem;
-  min-height: 3.5rem; // bien por encima del área táctil mínima
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font: inherit;
-  font-size: var(--font-size-body-lg);
-  font-weight: 700;
-  box-shadow: var(--shadow-button);
-  cursor: pointer;
-  transition: transform 150ms ease;
-
-  &:active {
-    transform: scale(0.97);
-  }
-
-  &:focus-visible {
-    outline: 3px solid var(--color-primary-soft);
-    outline-offset: 3px;
-  }
 }
 
 .hint {
   margin: 0;
-  font-size: var(--font-size-body);
   color: var(--color-text-muted);
+  @include type.body-sm;
 }

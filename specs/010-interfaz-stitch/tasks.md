@@ -80,13 +80,13 @@
 
 ## Bloque 5 — US-010-05: pantallas de sistema (P2)
 
-- [ ] T-010-51 (Red): specs de `biometric-offer`, `biometric-lock-screen`, `biometric-notice` y `session-status`: mantienen textos y acciones; el bloqueo no renderiza datos de la app
-- [ ] T-010-52: ejecutar los tests y comprobar que fallan por el motivo correcto (o documentar que ya cubren la estructura y la verificación recae en la revisión visual)
-- [ ] T-010-53 (Green): `biometric-offer`, `biometric-lock-screen` y `biometric-notice`: insignia, `headline-md`, botones de 52 px y la profundidad del diseño
-- [ ] T-010-54 (Green): `session-status`: cargando, error y reintentar con la misma identidad y botones del diseño
-- [ ] T-010-55 (Refactor): limpiar con los tests en verde
-- [ ] T-010-56: revisión visual en navegador (claro y oscuro) con las vistas previas `__dev/biometric/*` y `__dev/session-status/*`
-- [ ] T-010-57: `pnpm lint:fix && pnpm format && pnpm test:ci` en verde
+- [x] T-010-51 (Red): specs de `biometric-offer`, `biometric-lock-screen`, `biometric-notice` y `session-status`: mantienen textos y acciones; el bloqueo no renderiza datos de la app
+- [x] T-010-52 *(los specs de las pantallas de sistema ya cubren textos, acciones y que el bloqueo no muestra datos; la fidelidad de estilo la fijan 4 tests estáticos nuevos, en rojo antes del cambio)*: ejecutar los tests y comprobar que fallan por el motivo correcto (o documentar que ya cubren la estructura y la verificación recae en la revisión visual)
+- [x] T-010-53 (Green): `biometric-offer`, `biometric-lock-screen` y `biometric-notice`: insignia, `headline-md`, botones de 52 px y la profundidad del diseño
+- [x] T-010-54 (Green): `session-status`: cargando, error y reintentar con la misma identidad y botones del diseño
+- [x] T-010-55 (Refactor): limpiar con los tests en verde
+- [x] T-010-56: revisión visual en navegador (claro y oscuro) con las vistas previas `__dev/biometric/*` y `__dev/session-status/*`
+- [x] T-010-57: `pnpm lint:fix && pnpm format && pnpm test:ci` en verde
 
 ---
 

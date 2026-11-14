@@ -390,3 +390,41 @@ test('US-010-04 los textos de formulario y hojas usan la escala tipográfica (si
     assert.doesNotMatch(scss(f), /var\(--font-size-/, `${f}: usa tamaños antiguos en vez de la escala`);
   }
 });
+
+// ---- Pantallas de sistema (spec 010, US-010-05) ---------------------------------------------------------
+const systemScreens = [
+  ['src/app/shared/components/biometric-offer/biometric-offer.scss', '\n.primary {'],
+  ['src/app/shared/components/biometric-lock-screen/biometric-lock-screen.scss', '\n.unlock {'],
+  ['src/app/shared/components/biometric-notice/biometric-notice.scss', '\n.ack {'],
+  ['src/app/shared/components/session-status/session-status.scss', '\n.retry {'],
+];
+
+test('US-010-05 las pantallas de sistema usan títulos headline-md y la escala tipográfica', () => {
+  for (const [f] of systemScreens) {
+    const css = scss(f);
+    assert.match(blockAt(css, '\n.title {'), /@include type\.headline-md/, `${f}: .title sin headline-md`);
+    assert.doesNotMatch(css, /var\(--font-size-/, `${f}: usa tamaños antiguos en vez de la escala`);
+  }
+});
+
+test('US-010-05 su botón principal es el botón de 52 px del diseño', () => {
+  for (const [f, selector] of systemScreens) {
+    assert.match(blockAt(scss(f), selector), /@include mixins\.pill-button/, `${f}: ${selector.trim()} sin pill-button`);
+  }
+});
+
+test('US-010-05 la insignia es de color con halo de profundidad', () => {
+  for (const [f] of systemScreens) {
+    const body = blockAt(scss(f), '\n.badge {');
+    assert.match(body, /background:\s*var\(--color-primary-soft\)/, `${f}: insignia sin color de rol`);
+    assert.match(body, /box-shadow:\s*var\(--shadow-xp\)/, `${f}: insignia sin halo`);
+  }
+});
+
+test('US-010-05 la tarjeta de error de sesión es una tarjeta del diseño y las zonas seguras se respetan', () => {
+  const css = scss('src/app/shared/components/session-status/session-status.scss');
+  assert.match(blockAt(css, '\n.card {'), /@include mixins\.card/);
+  for (const [f] of systemScreens) {
+    assert.match(scss(f), /safe-area-inset-bottom/, `${f}: no respeta la zona segura inferior`);
+  }
+});
