@@ -89,6 +89,7 @@ const lightMap = {
   '--color-primary': 'primary',
   '--color-primary-text': 'primary',
   '--color-on-primary': 'on-primary',
+  '--color-ring': 'primary-fixed-dim',
   '--color-primary-container': 'primary-container',
   '--color-on-primary-container': 'on-primary-container',
   '--color-primary-soft': 'primary-fixed',

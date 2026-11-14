@@ -14,7 +14,7 @@
   </section>
   } @else if (access.status() === 'error') {
   <section class="state" role="alert">
-    <div class="badge"><app-icon name="wifi-off" /></div>
+    <app-illustration kind="cloud" />
     <h2 class="state-title">{{ copy.list.errorTitle }}</h2>
     <p class="state-text">{{ copy.list.errorDescription }}</p>
     <button type="button" class="action" (click)="retry()">
@@ -24,7 +24,7 @@
   </section>
   } @else { @if (grouped().groups.length === 0) {
   <section class="state">
-    <div class="badge"><app-icon name="check" /></div>
+    <app-illustration kind="hill" />
     <h2 class="state-title">{{ copy.list.emptyTitle }}</h2>
     <p class="state-text">{{ copy.list.emptyDescription }}</p>
     <button type="button" class="action" (click)="create()">
@@ -47,19 +47,19 @@
           [attr.aria-label]="copy.list.markDone + ': ' + task.title"
           (click)="toggle(task)"
         >
-          <app-icon name="check" />
+          <span class="ring"><app-icon name="check" /></span>
         </button>
         <button type="button" class="open" (click)="open(task)">
           <span class="title">{{ task.title }}</span>
           @if (task.dueTime || isOverdue(task)) {
           <span class="meta">
             @if (isOverdue(task)) {
-            <span class="tag">{{ copy.list.overdueTag }}</span>
-            <span class="when">{{ dayLabel(task.dueDate) }}</span>
+            <span class="tag pill">{{ copy.list.overdueTag }}</span>
+            <span class="when pill">{{ dayLabel(task.dueDate) }}</span>
             } @if (task.dueTime) {
-            <span class="when"><app-icon name="clock" />{{ task.dueTime }}</span>
+            <span class="when pill"><app-icon name="clock" />{{ task.dueTime }}</span>
             } @if (alarmState(task); as state) {
-            <span class="alarm" [class.off]="state === 'off'">
+            <span class="alarm pill" [class.off]="state === 'off'">
               <app-icon [name]="state === 'off' ? 'bell-off' : 'bell'" />{{ alarmLabel(task) }}
             </span>
             }
@@ -101,7 +101,7 @@
           [attr.aria-label]="copy.list.markUndone + ': ' + task.title"
           (click)="toggle(task)"
         >
-          <app-icon name="check" />
+          <span class="ring"><app-icon name="check" /></span>
         </button>
         <button type="button" class="open" (click)="open(task)">
           <span class="title">{{ task.title }}</span>

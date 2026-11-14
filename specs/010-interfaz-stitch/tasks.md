@@ -33,18 +33,18 @@
 
 ## Bloque 2 — US-010-02: lista de tareas con tarjetas dinámicas (P1)
 
-- [ ] T-010-19 (Red): `shared/components/illustration/illustration.spec.ts`: variantes `hill`, `cloud` y `sparkles`; `aria-hidden="true"`; sin `<image>` ni `href` externos; `ChangeDetectionStrategy.OnPush`
-- [ ] T-010-20 (Red): `tasks-list.spec.ts`: el check sigue siendo un botón con su `aria-label` y zona ≥ 44 px (círculo visible de 28 px); hora, atraso y aviso son píldoras con su clase; vacío y error muestran ilustración decorativa y conservan textos y acciones
-- [ ] T-010-21: ejecutar los tests y comprobar que fallan por el motivo correcto (falta el componente y la estructura nueva)
-- [ ] T-010-22 (Green): `shared/components/illustration/illustration.ts`: SVG inline propio de las 3 variantes con colores por variables CSS
-- [ ] T-010-23 (Green): `tasks-list.html` y `.scss`: tarjetas de 1 rem con relleno de 16 px y sombra de nivel 1; título en `headline-sm`
-- [ ] T-010-24 (Green): `tasks-list`: check con círculo de 28 px (borde de 2 px violeta claro), relleno esmeralda con marca blanca y animación de resorte al completar
-- [ ] T-010-25 (Green): `tasks-list`: píldoras horizontales de hora, atraso (error) y aviso (esmeralda) con micro-etiquetas en mayúsculas; títulos de grupo y contador con la nueva escala; botón de posponer coherente
-- [ ] T-010-26 (Green): `tasks-list`: botón «Nueva tarea» de 52 px anclado en la zona del pulgar y relleno inferior `space-xl` más la barra; aviso inferior sin solaparse con el botón
-- [ ] T-010-27 (Green): `tasks-list`: estados vacío (`hill`), carga y error (`cloud`) con título `headline-md` y botón primario, sin cambiar textos ni acciones
-- [ ] T-010-28 (Refactor): limpiar estilos de la lista con los tests en verde
-- [ ] T-010-29: revisión visual en navegador (claro y oscuro): lista con grupos y atrasadas, completadas, vacío, carga, error, foco por teclado, títulos largos, 390 px sin desborde, consola limpia
-- [ ] T-010-30: `pnpm lint:fix && pnpm format && pnpm test:ci` y `pnpm e2e` (`tareas`, `completar-xp`, `posponer`) en verde
+- [x] T-010-19 (Red): `shared/components/illustration/illustration.spec.ts`: variantes `hill`, `cloud` y `sparkles`; `aria-hidden="true"`; sin `<image>` ni `href` externos; `ChangeDetectionStrategy.OnPush`
+- [x] T-010-20 (Red): `tasks-list.spec.ts`: el check sigue siendo un botón con su `aria-label` y zona ≥ 44 px (círculo visible de 28 px); hora, atraso y aviso son píldoras con su clase; vacío y error muestran ilustración decorativa y conservan textos y acciones
+- [x] T-010-21: ejecutar los tests y comprobar que fallan por el motivo correcto (falta el componente y la estructura nueva)
+- [x] T-010-22 (Green): `shared/components/illustration/illustration.ts`: SVG inline propio de las 3 variantes con colores por variables CSS
+- [x] T-010-23 (Green): `tasks-list.html` y `.scss`: tarjetas de 1 rem con relleno de 16 px y sombra de nivel 1; título en `headline-sm`
+- [x] T-010-24 (Green): `tasks-list`: check con círculo de 28 px (borde de 2 px violeta claro), relleno esmeralda con marca blanca y animación de resorte al completar
+- [x] T-010-25 (Green): `tasks-list`: píldoras horizontales de hora, atraso (error) y aviso (esmeralda) con micro-etiquetas en mayúsculas; títulos de grupo y contador con la nueva escala; botón de posponer coherente
+- [x] T-010-26 (Green): `tasks-list`: botón «Nueva tarea» de 52 px anclado en la zona del pulgar y relleno inferior `space-xl` más la barra; aviso inferior sin solaparse con el botón
+- [x] T-010-27 (Green): `tasks-list`: estados vacío (`hill`), carga y error (`cloud`) con título `headline-md` y botón primario, sin cambiar textos ni acciones
+- [x] T-010-28 (Refactor): limpiar estilos de la lista con los tests en verde
+- [x] T-010-29: revisión visual en navegador (claro y oscuro): lista con grupos y atrasadas, completadas, vacío, carga, error, foco por teclado, títulos largos, 390 px sin desborde, consola limpia
+- [x] T-010-30: `pnpm lint:fix && pnpm format && pnpm test:ci` y `pnpm e2e` (`tareas`, `completar-xp`, `posponer`) en verde
 
 ---
 

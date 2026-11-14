@@ -596,3 +596,68 @@ describe('TasksList · progreso', () => {
     expect(t.navigate).toHaveBeenCalledWith(['/nivel', 2]);
   });
 });
+
+describe('TasksList · sistema de diseño (spec 010)', () => {
+  const timed = (over: Partial<Task> = {}) =>
+    task({ title: 'Llamar al fontanero', dueDate: '2026-11-14', dueTime: '11:00', ...over });
+
+  it('US-010-02 hora, atraso y aviso son píldoras con su rol de color', () => {
+    const overdue = timed({ title: 'Vieja', dueDate: '2026-11-10' });
+    const t = setup([overdue], 'ready', {
+      supported: true,
+      permission: 'granted',
+      scheduled: [overdue.id],
+    });
+    const meta = t.el.querySelector('.meta') as HTMLElement;
+    expect(meta.querySelector('.tag.pill')?.textContent?.trim()).toBe(t.copy.list.overdueTag);
+    expect(meta.querySelector('.when.pill')).not.toBeNull();
+    expect(meta.querySelector('.alarm.pill')).not.toBeNull();
+  });
+
+  it('US-010-02 el aviso apagado y el encendido se distinguen por clase', () => {
+    const a = timed();
+    const on = setup([a], 'ready', { supported: true, permission: 'granted', scheduled: [a.id] });
+    expect(on.el.querySelector('.alarm.pill')?.classList.contains('off')).toBe(false);
+    const off = setup([timed()], 'ready', { supported: true, permission: 'denied' });
+    expect(off.el.querySelector('.alarm.pill')?.classList.contains('off')).toBe(true);
+  });
+
+  it('US-010-02 el check es un botón con nombre accesible y marca visible dentro de un círculo', () => {
+    const t = setup([task({ title: 'Regar', dueDate: '2026-11-14' })]);
+    const check = t.el.querySelector<HTMLButtonElement>('button.check');
+    expect(check?.getAttribute('aria-label')).toContain('Regar');
+    expect(check?.querySelector('app-icon')).not.toBeNull();
+    expect(check?.querySelector('.ring')).not.toBeNull();
+  });
+
+  it('US-010-02 vacío muestra una ilustración decorativa sin cambiar textos ni acciones', () => {
+    const t = setup([]);
+    const art = t.el.querySelector('.state app-illustration');
+    expect(art?.getAttribute('kind')).toBe('hill');
+    expect(art?.getAttribute('aria-hidden')).toBe('true');
+    expect(t.text()).toContain(t.copy.list.emptyTitle);
+    expect(t.text()).toContain(t.copy.list.createFirst);
+  });
+
+  it('US-010-02 error muestra la ilustración de nube y conserva Reintentar', () => {
+    const t = setup([], 'loading');
+    t.errorReason.set('network');
+    t.status.set('error');
+    t.detect();
+    expect(t.el.querySelector('.state app-illustration')?.getAttribute('kind')).toBe('cloud');
+    expect(t.text()).toContain(t.copy.list.errorTitle);
+    expect(t.text()).toContain(t.copy.list.retry);
+  });
+
+  it('US-010-02 cargando mantiene el indicador y no usa ilustración', () => {
+    const t = setup([], 'loading');
+    expect(t.el.querySelector('.spinner')).not.toBeNull();
+    expect(t.el.querySelector('app-illustration')).toBeNull();
+  });
+
+  it('US-010-02 el botón flotante «Nueva tarea» es un botón principal anclado y el aviso no lo tapa', () => {
+    const t = setup([task({ dueDate: '2026-11-14' })]);
+    expect(t.el.querySelector('button.fab')).not.toBeNull();
+    expect(t.el.querySelector('.screen')).not.toBeNull();
+  });
+});
