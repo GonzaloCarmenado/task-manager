@@ -1,6 +1,12 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, InjectionToken, inject } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { SUPABASE_CONFIG } from './supabase.config';
+
+/** Constructor del cliente; se inyecta para poder sustituirlo en los tests sin simular el módulo. */
+export const SUPABASE_CLIENT_FACTORY = new InjectionToken<typeof createClient>(
+  'SUPABASE_CLIENT_FACTORY',
+  { providedIn: 'root', factory: () => createClient }
+);
 
 const PLACEHOLDER_MARK = 'YOUR_';
 
@@ -16,10 +22,11 @@ export class SupabaseService {
 
   constructor() {
     const { url, key } = inject(SUPABASE_CONFIG);
+    const create = inject(SUPABASE_CLIENT_FACTORY);
     this.assertConfigured('url', url);
     this.assertConfigured('key', key);
 
-    this.client = createClient(url, key, {
+    this.client = create(url, key, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,

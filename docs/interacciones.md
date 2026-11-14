@@ -6,7 +6,7 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 104 |
+| Turnos del usuario | 105 |
 | Preguntas `F` (funcionalidad) | 29 |
 | Preguntas `W` (flujo) | 52 |
 | **Total preguntas** | **81** |
@@ -111,3 +111,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 102 | 2026-11-14 | "si" (commit de los fixes), "si" (auditoría y push), "si" (PR con `/pr-review`) | 3 W (¿commit?, ¿push?, ¿abro la PR?) | Commit `1b6f4d6` y push (la revisión cruzada no dejó informe). `/pr-review`: coherencia de las specs 006 a 009 correcta, listas de cierre marcadas, `review.md` de la 009 creado; pendiente confirmar título y cuerpo de la PR |
 | 103 | 2026-11-14 | "seguimos" | 1 F (¿por qué spec seguimos?) | Propuestas: cerrar la 006, cuenta de usuario, tareas repetidas, logros |
 | 104 | 2026-11-14 | Los tres pendientes de la PR (006 sin verificar, revisar/merge, datos de prueba) | 1 W (¿commit y editar el cuerpo de la PR?) | 006 verificada en emulador (60 alarmas, zona horaria, toque con huella); 69 tareas de prueba borradas del servidor; sin merge |
+| 105 | 2026-11-14 | "si investigalo" (fallo intermitente de `supabase.spec.ts`) | 0 | Reproducido (1 de cada 3 ejecuciones completas). Causa: `vi.mock` de `@supabase/supabase-js` dependía del orden de carga con otros specs que lo importan real. Corregido inyectando el constructor del cliente (`SUPABASE_CLIENT_FACTORY`); 8/8 ejecuciones limpias. Regla añadida a `CLAUDE.md` |

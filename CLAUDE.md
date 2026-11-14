@@ -294,6 +294,6 @@ const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${Stri
 ### Tests (Vitest)
 
 - Assertions: `toHaveLength`, `toBe`, `toEqual` — nunca `toHaveSize`.
-- Mocks de módulos a nivel de módulo; para capturar valores usar `vi.hoisted()`.
+- Mocks de módulos a nivel de módulo; para capturar valores usar `vi.hoisted()`. **Excepción**: no usar `vi.mock` sobre librerías que otros specs importan reales (p. ej. `@supabase/supabase-js`): con el empaquetado del builder de Angular el mock falla de forma intermitente según el orden de carga. Inyectar la dependencia con un `InjectionToken` (ver `SUPABASE_CLIENT_FACTORY`).
 - Un `*.spec.ts` por servicio o componente relevante.
 - Cobertura objetivo ≥ 80 % en access services.

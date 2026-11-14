@@ -1,16 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { SUPABASE_CONFIG, SupabaseConfig } from './supabase.config';
-import { AUTH_STORAGE_KEY, SupabaseService } from './supabase';
+import { AUTH_STORAGE_KEY, SUPABASE_CLIENT_FACTORY, SupabaseService } from './supabase';
 
 const mocks = vi.hoisted(() => ({
   createClient: vi.fn((..._args: unknown[]) => ({ auth: {} })),
 }));
 
-vi.mock('@supabase/supabase-js', () => ({ createClient: mocks.createClient }));
-
 function setup(config: SupabaseConfig): SupabaseService {
   TestBed.resetTestingModule();
-  TestBed.configureTestingModule({ providers: [{ provide: SUPABASE_CONFIG, useValue: config }] });
+  // El constructor del cliente se inyecta: no se simula el módulo (un `vi.mock` sobre `@supabase/supabase-js`
+  // dependía del orden en que otros specs cargaban el módulo real y fallaba de forma intermitente).
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: SUPABASE_CONFIG, useValue: config },
+      { provide: SUPABASE_CLIENT_FACTORY, useValue: mocks.createClient },
+    ],
+  });
   return TestBed.inject(SupabaseService);
 }
 
