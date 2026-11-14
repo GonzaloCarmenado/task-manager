@@ -69,5 +69,7 @@ Los selectores de fecha y hora del formulario son los **nativos** del sistema (`
 - El mismo plugin declara `SCHEDULE_EXACT_ALARM`, abre los ajustes de notificaciones y de alarmas exactas, y entrega el id del aviso que abrió la app (`launch_notification_id`).
 - El permiso de notificaciones se pide al guardar una tarea con hora (hasta 3 negativas).
 - **Probar en el emulador**: guardar una tarea con hora a unos minutos, cerrar la app y esperar. `adb shell dumpsys alarm` muestra la alarma (etiqueta `app.tauri.appsettings.ALARM`, `window=0` si es exacta); `adb shell cmd statusbar expand-notifications` abre el panel; `adb reboot` comprueba la restauración.
+- **Zona horaria**: los avisos se reconcilian al volver a primer plano; si cambia la zona con la app en segundo plano, suenan a la hora antigua hasta reabrirla.
+- **`am force-stop`** (y «Forzar detención» en Ajustes) cancela todas las alarmas de la app: para cerrarla en pruebas, quitarla de «recientes».
 - **Limitación conocida**: si Android mata el proceso pero la tarea sigue en «recientes», el toque en el aviso abre la lista en vez de la tarea (Android no entrega el intent en ese caso). Con la app abierta, cerrada por el usuario o tras un reinicio, sí abre la tarea.
 - Al compilar con `pnpm tauri android build`, **no** definir `MSYS_NO_PATHCONV` en la misma sesión (rompe la ruta de `pnpm` y falla con `MODULE_NOT_FOUND`).

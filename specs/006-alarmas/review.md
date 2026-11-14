@@ -31,7 +31,9 @@ Tres de los hallazgos se emitieron antes de que la spec incorporase las decision
 | Tocar el aviso con la app cerrada **por el usuario** (tarea fuera de «recientes») | OK (se emuló con el mismo intent) |
 | Tocar el aviso con el proceso muerto pero la tarea aún en «recientes» | Limitación de Android: el intent no llega a la app; se abre la lista |
 | Alarma tras **reiniciar** el móvil sin abrir la app | OK con la programación nativa (ver «Cambio de diseño»); con el plugin oficial FALLABA |
-| Cambio de zona horaria, 60 avisos y toque con el bloqueo con huella activo | No verificados en el emulador |
+| 60 avisos a la vez | OK en emulador (2026-11-14): con 65 tareas con hora hay exactamente 60 alarmas pendientes, las 60 más próximas; al borrar 3 entran las siguientes y se mantiene en 60 |
+| Cambio de zona horaria | OK al volver a primer plano (la alarma pasa de la hora vieja a las 06:30 locales de la nueva zona). **Limitación**: con la app en segundo plano la alarma suena a la hora antigua hasta reabrirla (no hay receptor del cambio de zona) |
+| Toque en la notificación con el bloqueo con huella activo | OK en emulador: la app abre bloqueada sin mostrar datos y, tras la huella, abre «Editar tarea» de esa tarea |
 
 ## Hallazgos
 
@@ -64,7 +66,7 @@ Verificado en el emulador con la programación nativa:
 | La notificación suena a la hora («Es la hora (12:06)») tras el reinicio | OK |
 | Tocar la notificación tras el reinicio abre la tarea («Editar tarea») | OK |
 
-**Sin verificar en el emulador**: cambio de zona horaria, 60 avisos a la vez y toque con el bloqueo con huella activo (las dos primeras tienen tests unitarios del plan; la tercera depende de la superposición de la 004).
+**Verificado en el emulador el 2026-11-14**: 60 avisos, cambio de zona horaria y toque con el bloqueo con huella activo. Pendiente como mejora (no bloqueante): reconciliar también al recibir el cambio de zona horaria con la app en segundo plano.
 
 ---
 

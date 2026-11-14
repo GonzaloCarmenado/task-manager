@@ -1,6 +1,6 @@
 # task-manager — Índice de Especificaciones
 
-**Siguiente número disponible**: `009`
+**Siguiente número disponible**: `010`
 
 ---
 
