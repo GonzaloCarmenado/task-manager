@@ -46,6 +46,7 @@
 
 // Chip de 36 px; activo (`aria-pressed="true"`) en índigo suave con texto en negrita y sin contorno
 @mixin chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -57,6 +58,13 @@
   color: var(--color-text);
   cursor: pointer;
   @include type.label-md;
+
+  // Altura visible de 36 px, zona táctil de 44 px
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -4px 0;
+  }
 
   &[aria-pressed='true'] {
     border-color: transparent;

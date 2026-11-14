@@ -318,3 +318,75 @@ test('US-010-01 ningún estilo usa funciones CSS recientes que un WebView antigu
     assert.doesNotMatch(readFileSync(f, 'utf8'), /color-mix\(/, `${f} usa color-mix`);
   }
 });
+
+// ---- Formulario y hojas (spec 010, US-010-04) ---------------------------------------------------------
+const scss = (p) => strip(read(p));
+const sheetFiles = [
+  'src/app/features/tasks/postpone/postpone-sheet/postpone-sheet.scss',
+  'src/app/features/tasks/alarms/exact-alarm-sheet/exact-alarm-sheet.scss',
+];
+
+test('US-010-04 el chip de 36 px conserva una zona táctil de 44 px', () => {
+  const body = blockAt(mixinsCss, '@mixin chip');
+  assert.match(body, /position:\s*relative/);
+  assert.match(body, /&::after\s*\{[^}]*inset:\s*-4px 0/);
+});
+
+test('US-010-04 los velos de hojas y diálogos usan el mixin scrim (desenfoque) y no un color suelto', () => {
+  for (const f of [...sheetFiles, 'src/app/features/tasks/task-form/task-form.scss']) {
+    const css = scss(f);
+    assert.match(blockAt(css, '.backdrop'), /@include mixins\.scrim/, `${f}: .backdrop sin scrim`);
+    assert.doesNotMatch(css, /rgba\(15,\s*14,\s*23/, `${f}: velo con color suelto`);
+  }
+});
+
+test('US-010-04 las hojas inferiores usan el mixin sheet (radio superior, relleno y sombra de nivel 3)', () => {
+  for (const f of sheetFiles) {
+    assert.match(blockAt(scss(f), '.sheet'), /@include mixins\.sheet/, `${f}: .sheet sin mixin sheet`);
+  }
+  assert.match(blockAt(scss('src/app/features/tasks/task-form/task-form.scss'), '.dialog'), /@include mixins\.sheet/);
+});
+
+test('US-010-04 el formulario usa los mixins de campo en píldora, chip y botón primario', () => {
+  const css = scss('src/app/features/tasks/task-form/task-form.scss');
+  assert.match(blockAt(css, '\n.field {'), /@include mixins\.field/);
+  assert.match(blockAt(css, '\n.chip {'), /@include mixins\.chip/);
+  assert.match(blockAt(css, '\n.save,'), /@include mixins\.pill-button/);
+});
+
+test('US-010-04 los botones principales de hojas y avisos usan el mixin pill-button (52 px)', () => {
+  for (const f of [
+    ...sheetFiles,
+    'src/app/features/tasks/alarms/alarm-permission-prompt/alarm-permission-prompt.scss',
+    'src/app/features/tasks/alarms/alarms-banner/alarms-banner.scss',
+  ]) {
+    const css = scss(f);
+    const target = f.includes('alarms-banner') ? '.activate' : f.includes('postpone') ? '.close' : '.primary';
+    if (f.includes('postpone')) continue; // la hoja de posponer no tiene botón principal: elige una opción
+    assert.match(blockAt(css, target), /@include mixins\.pill-button/, `${f}: ${target} sin pill-button`);
+  }
+});
+
+test('US-010-04 el selector de fecha de posponer es un campo en píldora', () => {
+  assert.match(
+    blockAt(scss('src/app/features/tasks/postpone/postpone-sheet/postpone-sheet.scss'), '.date'),
+    /@include mixins\.field/
+  );
+});
+
+test('US-010-04 el aviso de alarmas tiene identidad ámbar suave (no el rojo de error)', () => {
+  const body = blockAt(scss('src/app/features/tasks/alarms/alarms-banner/alarms-banner.scss'), '.banner');
+  assert.match(body, /background:\s*var\(--color-secondary-soft\)/);
+  assert.match(body, /color:\s*var\(--color-on-secondary-soft\)/);
+});
+
+test('US-010-04 los textos de formulario y hojas usan la escala tipográfica (sin tamaños sueltos)', () => {
+  for (const f of [
+    'src/app/features/tasks/task-form/task-form.scss',
+    ...sheetFiles,
+    'src/app/features/tasks/alarms/alarm-permission-prompt/alarm-permission-prompt.scss',
+    'src/app/features/tasks/alarms/alarms-banner/alarms-banner.scss',
+  ]) {
+    assert.doesNotMatch(scss(f), /var\(--font-size-/, `${f}: usa tamaños antiguos en vez de la escala`);
+  }
+});

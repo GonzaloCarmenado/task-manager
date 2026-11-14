@@ -1,29 +1,29 @@
+@use 'mixins';
+@use 'type';
+
 :host {
   display: block;
 }
 
 .backdrop {
+  @include mixins.scrim;
   position: fixed;
   inset: 0;
   z-index: 30;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
-  background: rgba(15, 14, 23, 0.55);
 }
 
 .sheet {
+  @include mixins.sheet;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
   width: 100%;
   max-width: 28rem;
-  padding: var(--space-6) var(--space-4) var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
-  color: var(--color-text);
+  padding: var(--space-6) var(--space-margin) calc(var(--space-6) + env(safe-area-inset-bottom));
   font-family: var(--font-family);
   text-align: center;
 }
@@ -41,40 +41,31 @@
 
 .title {
   margin: 0;
-  font-size: var(--font-size-headline);
-  font-weight: 700;
+  @include type.headline-md;
 }
 
 .description {
   margin: 0;
   color: var(--color-text-muted);
-  line-height: var(--line-height-body);
-}
-
-button {
-  width: 100%;
-  min-height: 3.5rem;
-  border: 0;
-  border-radius: var(--radius-full);
-  font: inherit;
-  font-size: var(--font-size-body-lg);
-  font-weight: 700;
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: 3px solid var(--color-primary-soft);
-    outline-offset: 3px;
-  }
+  @include type.body-md;
 }
 
 .primary {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  box-shadow: var(--shadow-button);
+  @include mixins.pill-button;
+  width: 100%;
 }
 
 .link {
+  width: 100%;
+  min-height: var(--tap-target);
+  border: 0;
   background: transparent;
   color: var(--color-text-muted);
-  font-weight: 600;
+  cursor: pointer;
+  @include type.label-lg;
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
 }

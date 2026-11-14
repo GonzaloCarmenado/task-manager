@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 118 |
+| Turnos del usuario | 119 |
 | Preguntas `F` (funcionalidad) | 35 |
-| Preguntas `W` (flujo) | 55 |
-| **Total preguntas** | **90** |
+| Preguntas `W` (flujo) | 56 |
+| **Total preguntas** | **91** |
 
 ## Log
 
@@ -124,3 +124,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 115 | 2026-11-14 | "no veo ese permitir" | 1 W (¿commit del bloque 1?) | La extensión respondió al reintentar. T-010-18: fuente cargada (200), sin desborde, consola limpia. Bloque 1 listo para commit |
 | 116 | 2026-11-14 | "si" (commit del bloque 1 de la 010) | 1 W (¿commit del bloque 2?) | Commit `1cecf1e`. Bloque 2 (lista): componente `illustration` (3 SVG propios), tarjetas, check de 28 px (zona 44), píldoras, botón de 52 px, estados vacío/error/carga. 569 tests, 93 de scripts y 42 e2e en verde. Revisión visual en navegador con un Supabase falso fuera del repo |
 | 117 | 2026-11-14 | "si" (commit del bloque 2) | 1 W (¿commit del bloque 3?) | Commit `807fb9b`. Bloque 3 (gamificación): pastilla de racha ámbar con halo, barra con degradado, tarjetas de progreso, celebración con destellos y subida de nivel como modal. Destellos parametrizados para tener contraste sobre ámbar |
+| 118 | 2026-11-14 | "asi" (commit del bloque 3) | 1 W (¿commit del bloque 4?) | Commit `e7c04f9`. Bloque 4: formulario con campos en píldora de 52 px, chips de 36 px con zona de 44 px, hojas con velo desenfocado y sombra de nivel 3, banner ámbar. 8 tests estáticos nuevos |

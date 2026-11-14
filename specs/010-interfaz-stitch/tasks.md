@@ -65,16 +65,16 @@
 
 ## Bloque 4 — US-010-04: formulario y hojas inferiores (P2)
 
-- [ ] T-010-41 (Red): `task-form.spec.ts` y `postpone-sheet.spec.ts`: las hojas y el diálogo de borrar conservan `role="dialog"`/`alertdialog` y el cierre con atrás; los chips mantienen `aria-pressed`
-- [ ] T-010-42: ejecutar los tests y comprobar que fallan por el motivo correcto (o, si ya cubren la estructura actual, documentar que la verificación recae en el test estático y la revisión visual)
-- [ ] T-010-43 (Green): `task-form`: campos de texto, fecha y hora en píldora con anillo de foco de 2 px, contador y ayudas en `body-sm`
-- [ ] T-010-44 (Green): `task-form`: chips de 36 px con estado activo en índigo suave; botones «Guardar», «Posponer» y «Borrar» (error) de 52 px; diálogo de borrar como modal de nivel 3
-- [ ] T-010-45 (Green): `postpone-sheet`: hoja inferior con radio superior de 1,5 rem, relleno `space-lg`, sombra de nivel 3, velo con desenfoque y opciones como tarjetas
-- [ ] T-010-46 (Green): `alarms-banner`: identidad ámbar suave y botones acordes
-- [ ] T-010-47 (Green): `exact-alarm-sheet` y `alarm-permission-prompt`: mismo patrón de hoja y velo que posponer
-- [ ] T-010-48 (Refactor): limpiar con los tests en verde
-- [ ] T-010-49: revisión visual en navegador (claro y oscuro): crear y editar (vacío, con error de título, con contador pasado, foco, teclado), posponer (opciones, fecha no válida), borrar, avisos y hojas de alarmas con las vistas previas `__dev/alarms/*` y `__dev/postpone/*`
-- [ ] T-010-50: `pnpm lint:fix && pnpm format && pnpm test:ci` y `pnpm e2e` (`tareas`, `posponer`, `errores`) en verde
+- [x] T-010-41 (Red): `task-form.spec.ts` y `postpone-sheet.spec.ts`: las hojas y el diálogo de borrar conservan `role="dialog"`/`alertdialog` y el cierre con atrás; los chips mantienen `aria-pressed`
+- [x] T-010-42 *(los specs de roles, cierre con atrás y `aria-pressed` ya cubren la estructura; la fidelidad de estilo la fijan 8 tests estáticos nuevos en `design-tokens.test.mjs`, en rojo antes del cambio)*: ejecutar los tests y comprobar que fallan por el motivo correcto (o, si ya cubren la estructura actual, documentar que la verificación recae en el test estático y la revisión visual)
+- [x] T-010-43 (Green): `task-form`: campos de texto, fecha y hora en píldora con anillo de foco de 2 px, contador y ayudas en `body-sm`
+- [x] T-010-44 (Green): `task-form`: chips de 36 px con estado activo en índigo suave; botones «Guardar», «Posponer» y «Borrar» (error) de 52 px; diálogo de borrar como modal de nivel 3
+- [x] T-010-45 (Green): `postpone-sheet`: hoja inferior con radio superior de 1,5 rem, relleno `space-lg`, sombra de nivel 3, velo con desenfoque y opciones como tarjetas
+- [x] T-010-46 (Green): `alarms-banner`: identidad ámbar suave y botones acordes
+- [x] T-010-47 (Green): `exact-alarm-sheet` y `alarm-permission-prompt`: mismo patrón de hoja y velo que posponer
+- [x] T-010-48 (Refactor): limpiar con los tests en verde
+- [x] T-010-49: revisión visual en navegador (claro y oscuro): crear y editar (vacío, con error de título, con contador pasado, foco, teclado), posponer (opciones, fecha no válida), borrar, avisos y hojas de alarmas con las vistas previas `__dev/alarms/*` y `__dev/postpone/*`
+- [x] T-010-50: `pnpm lint:fix && pnpm format && pnpm test:ci` y `pnpm e2e` (`tareas`, `posponer`, `errores`) en verde
 
 ---
 
