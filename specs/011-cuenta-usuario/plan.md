@@ -30,7 +30,7 @@
 | `src/app/core/models/account.ts` | Crear | `AccountErrorReason`, `AccountResult`, `LocalTasksSnapshot`, reglas |
 | `src/app/core/models/auth-session.ts` | Modificar | `user.username: string \| null` |
 | `src/app/core/services/auth-error.util.ts` (+ spec) | Modificar | `mapAccountError` (credenciales, nombre ocupado, límite, red, plazo…) |
-| `src/app/core/services/auth.access.service.ts` (+ spec) | Modificar | `linkAccount`, `checkCredentials` / `completeSignIn` / `cancelSignIn`, `signOut`, `changePassword`, `changeUsername`, `deleteOwnAccount`; evento `USER_UPDATED`; `SIGNED_OUT` esperado sin aviso |
+| `src/app/core/services/auth.access.service.ts` (+ spec) | Modificar | `linkAccount`, `checkCredentials` / `completeSignIn` / `cancelSignIn`, `signOut`, `changePassword`, `deleteOwnAccount`; evento `USER_UPDATED`; `SIGNED_OUT` esperado sin aviso |
 | `src/app/features/account/account.constructor.service.ts` (+ spec) | Crear | Textos de todas las pantallas y reglas puras de usuario/contraseña |
 | `src/app/features/account/account.access.service.ts` (+ spec) | Crear | Flujos, traspaso de tareas pendientes con buffer, recordatorio de 14 días |
 | `src/app/features/account/shared/` | Crear | `account-header`, `account-field`, `rule-list`, `offline-banner`, `account-toast` (+ servicio), `overlay-back` (botón atrás) con specs |
@@ -42,7 +42,7 @@
 | `src/app/features/account/profile-button/` | Crear | Botón de perfil de la cabecera de la lista |
 | `src/app/shared/components/icon/icon.ts` (+ spec) | Modificar | Nuevos iconos propios y variante `filled` |
 | `src/styles/_tokens.scss`, `scripts/design-tokens.test.mjs` | Modificar | Tokens nuevos del diseño (ver «Tokens nuevos») y sus tests |
-| `src/app/app.routes.ts` (+ spec) | Modificar | Rutas `cuenta`, `cuenta/crear`, `cuenta/entrar`, `cuenta/contrasena`, `cuenta/usuario`, `cuenta/borrar` (antes de `:id`) |
+| `src/app/app.routes.ts` (+ spec) | Modificar | Rutas `cuenta`, `cuenta/crear`, `cuenta/entrar`, `cuenta/contrasena`, `cuenta/borrar` (antes de `:id`) |
 | `src/app/app.html`, `app.ts` | Modificar | `<app-account-toast />` y reanudar el traspaso pendiente |
 | `src/app/features/tasks/tasks-list/*` | Modificar | Botón de perfil en la cabecera y tarjeta de recordatorio bajo el resumen |
 | `src/app/features/progress/progress.access.service.ts` (+ spec) | Modificar | Limpiar celebración y subida de nivel al cambiar de `userId` |
@@ -136,7 +136,6 @@ completeSignIn(): Promise<AccountResult>;   // setSession con lo comprobado; cam
 cancelSignIn(): void;                       // descarta lo comprobado; la sesión anónima sigue intacta
 signOut(): Promise<AccountResult>;          // sesión anónima nueva; SIGNED_OUT esperado
 changePassword(current: string, next: string): Promise<AccountResult>;
-changeUsername(next: string, password: string): Promise<AccountResult>;
 deleteOwnAccount(password: string): Promise<AccountResult>;                    // sonda + rpc + sesión anónima nueva
 ```
 
@@ -150,7 +149,7 @@ createAccount(username, password): Promise<AccountResult>;
 startSignIn(username, password): Promise<AccountResult>;  // checkCredentials + captura de tareas locales
 finishSignIn(mode: 'merge' | 'discard' | 'none'): Promise<AccountResult>;
 cancelSignIn(): void;
-signOut(); changePassword(); changeUsername(); deleteAccount();
+signOut(); changePassword(); deleteAccount();
 snoozeReminder(): void;                                   // 14 días, con CLOCK
 resumePendingTransfer(): Promise<void>;                   // reanuda el buffer de localStorage
 ```
@@ -160,7 +159,7 @@ resumePendingTransfer(): Promise<void>;                   // reanuda el buffer d
 usernameRules(value: string, touched: boolean): RuleView[];
 passwordRules(password: string, username: string, touched: boolean, extra?: { notSameAs?: string }): RuleView[];
 matchState(password: string, repeat: string): { state: RuleState; label: 'Sin verificar' | 'Coinciden' | 'No coinciden' };
-errorText(reason: AccountErrorReason, context: 'create' | 'signin' | 'change-password' | 'change-username' | 'delete'): string;
+errorText(reason: AccountErrorReason, context: 'create' | 'signin' | 'change-password' | 'delete'): string;
 ```
 
 ---
@@ -217,7 +216,7 @@ Contenido en columna con separación **24**.
 
 ### 4. Cuenta — con cuenta
 - **Tarjeta de usuario**: fondo `--color-surface`, radio 32, relleno 24, sombra `--shadow-soft`, `overflow: hidden`, halo decorativo arriba a la derecha (112×112, `primary` al 10 %). Fila (separación 16, margen inferior 16): **avatar 64×64** con anillo degradado `primary` → `primary-container` de 2 de grosor, sombra media, interior círculo `--color-surface` con icono `person` relleno de 32 `primary` (sin imagen), insignia **20** `tertiary` abajo derecha con `check` de 13 `on-tertiary`; a la derecha el nombre de usuario como `headline-sm` `on-surface` (truncado) con prefijo «@» (sin nombre visible, sin estrella, sin nivel). Debajo, bloque de estado: fondo `--tint-tertiary`, radio 16, relleno 12, separación 8: icono `cloud-check` relleno de 20 `tertiary` y `label-md` semibold `on-surface`: «Tus tareas y tu XP están guardados en tu cuenta» (sin «última copia»).
-- **«AJUSTES DE CUENTA»**: etiqueta `label-md` `on-surface-variant` mayúsculas `tracking-wider`, relleno horizontal 4, separación 6 con el panel. **Panel**: fondo `--color-surface`, radio 32, `overflow: hidden`, sombra `--shadow-soft`. Filas con relleno 16, separación 16, texto a la izquierda, `chevron-right` de 20 `outline` a la derecha; divisor de 1 `--color-surface-high` con margen horizontal 16. Cada fila: círculo **40** (`--color-surface-soft`; el de cerrar sesión `--color-surface-high`) con icono de 20 `on-surface-variant` (cerrar sesión `on-surface`); título `body-lg` `leading-tight` y subtítulo `body-sm` `on-surface-variant`. Filas: **«Cambiar nombre de usuario»** (icono `id-card`, subtítulo «@usuario») → `/cuenta/usuario`; **«Cambiar contraseña»** (icono `key`, «Protección con clave segura») → `/cuenta/contrasena`; **«Cerrar sesión»** (icono `log-out`, «Tus datos seguirán en tu cuenta») → diálogo.
+- **«AJUSTES DE CUENTA»**: etiqueta `label-md` `on-surface-variant` mayúsculas `tracking-wider`, relleno horizontal 4, separación 6 con el panel. **Panel**: fondo `--color-surface`, radio 32, `overflow: hidden`, sombra `--shadow-soft`. Filas con relleno 16, separación 16, texto a la izquierda, `chevron-right` de 20 `outline` a la derecha; divisor de 1 `--color-surface-high` con margen horizontal 16. Cada fila: círculo **40** (`--color-surface-soft`; el de cerrar sesión `--color-surface-high`) con icono de 20 `on-surface-variant` (cerrar sesión `on-surface`); título `body-lg` `leading-tight` y subtítulo `body-sm` `on-surface-variant`. Filas: **«Cambiar contraseña»** (icono `key`, «Protección con clave segura») → `/cuenta/contrasena`; **«Cerrar sesión»** (icono `log-out`, «Tus datos seguirán en tu cuenta») → diálogo.
 - **Zona de peligro**: margen superior 24, relleno superior 16, separación 4. Etiqueta «ZONA DE PELIGRO» `label-md` `error` semibold mayúsculas `tracking-wider`. Caja: fondo `--tint-error`, radio 32, relleno 16, separación 16: fila de separación 8 con `alert` de 22 `error` (margen superior 2) y, al lado, título `headline-sm` `leading-tight` «Borrar cuenta permanentemente» + `body-sm` `on-surface-variant` `leading-normal` margen superior 4: «Esta acción eliminará tu nombre de usuario, todas tus tareas guardadas, tus rachas y tu nivel de XP. No se puede revertir.»; botón alto **48**, fondo `--color-surface`, texto `error` `label-md`, sombra suave, icono `trash` de 18: **«Borrar cuenta y datos»** (→ `/cuenta/borrar`).
 - **Diálogo «¿Cerrar sesión?»** (`AccountLogoutDialog`, rol `alertdialog`): velo `--scrim-inverse-40` con desenfoque 4, abajo (`items-end`) con margen 20; caja ancho completo (máx. 24 rem), fondo `--color-surface`, radio 32, relleno 24, sombra `--shadow-pop`, separación 16, entra subiendo 24 px en 200 ms. Icono `log-out` de 28 `primary` en círculo **48** `--color-surface-high` centrado; título `headline-sm` y texto `body-md` `on-surface-variant` `leading-relaxed`, centrados: «Tus tareas y tu progreso permanecerán guardados en tu cuenta. Este teléfono quedará sin tareas hasta que vuelvas a iniciar sesión.» Botones (separación 4, margen superior 8): **«Sí, cerrar sesión»** alto 48 `primary` `label-lg` sombra media; **«Cancelar»** alto 48 `--color-surface-soft` `on-surface`. Botón atrás de Android cierra el diálogo.
 - Tras cerrar sesión: aviso pequeño «Sesión cerrada» y vuelta a la lista (vacía).
@@ -255,8 +254,8 @@ Relleno inferior de 36. Separación 24 en el formulario.
 ### 7. Cambiar contraseña (derivada de Crear cuenta)
 Título «Cambiar contraseña». Banner sin conexión. Tarjetas de campo: **«Contraseña actual»** (icono `lock`, botón mostrar/ocultar, sin reglas, error «La contraseña actual no es correcta.»); **«Contraseña nueva»** (icono `key`, «Mín. 8», reglas «De 8 a 64 caracteres», «Distinta del nombre de usuario» y «Distinta de la contraseña actual»); **«Repetir contraseña nueva»** (como en Crear cuenta). Acciones: **«Cambiar contraseña»** (icono `key`, estados deshabilitado/habilitado/cargando «Cambiando tu contraseña…») y «Cancelar y volver». Éxito: aviso pequeño «Contraseña cambiada» y vuelta a Cuenta.
 
-### 8. Cambiar nombre de usuario (derivada)
-Título «Cambiar nombre de usuario». Tarjetas: **«Nombre de usuario nuevo»** (como en Crear cuenta, con contador y reglas; error «Nombre de usuario no disponible») y **«Contraseña»** (icono `lock`, error «La contraseña no es correcta.»). Acciones: **«Guardar»** (icono `check`; cargando «Guardando…») y «Cancelar y volver». Éxito: aviso pequeño «Nombre de usuario cambiado» y vuelta a Cuenta mostrando el nombre nuevo.
+### 8. Cambiar nombre de usuario — DESCARTADA
+DESCARTADA tras el spike (2026-11-14): el servicio rechaza (`email_address_invalid`) cambiar el identificador a una dirección `.invalid`; el nombre de usuario no se puede cambiar (ver Out of scope).
 
 ### 9. Borrar cuenta (derivada)
 Título «Borrar cuenta». Primero la **caja de peligro** de la pantalla Cuenta (mismos título y texto). Tarjeta **«Contraseña»** (icono `lock`, error «La contraseña no es correcta.»). **Bloque de confirmación** como el aviso de Crear cuenta pero con fondo `--tint-error` y casilla: «Entiendo que se borrarán mi cuenta y todos mis datos para siempre.» (negrita `error`). Acciones: **«Borrar mi cuenta»** alto 52, fondo `error`, texto `on-error`, icono `trash` de 20 (deshabilitado hasta casilla y contraseña, como el botón de Crear cuenta; cargando «Borrando tu cuenta…») y «Cancelar y volver». Error del servidor: banner «No se ha borrado nada. Inténtalo de nuevo.» Éxito: aviso pequeño «Cuenta eliminada» y vuelta a la lista (vacía, sin cuenta).
@@ -277,14 +276,14 @@ Los nombres de los `it` empiezan por el id del criterio (`US-011-xx`).
 |---|---|---|
 | `core/utils/username.spec.ts` | Normalización, identificador interno y su inverso (casos borde: mayúsculas, espacios, dominio ajeno) | US-011-01, 02, 07 |
 | `core/services/auth-error.util.spec.ts` | `mapAccountError` por código (credenciales, ya existe, débil, igual, 429, red, plazo, 401) | US-011-01, 02, 05 |
-| `core/services/auth.access.service.spec.ts` (ampliar) | `linkAccount` conserva `user_id` y deja `username`; `checkCredentials`/`completeSignIn`/`cancelSignIn` (la sesión anónima no cambia hasta completar; los tokens no salen del servicio); `signOut` crea una sesión anónima nueva sin aviso de «rechazo»; `changePassword`/`changeUsername`/`deleteOwnAccount` re-autentican y no hacen nada a medias; plazos; sin consola | US-011-01, 02, 03, 05, 06, 07 |
+| `core/services/auth.access.service.spec.ts` (ampliar) | `linkAccount` conserva `user_id` y deja `username`; `checkCredentials`/`completeSignIn`/`cancelSignIn` (la sesión anónima no cambia hasta completar; los tokens no salen del servicio); `signOut` crea una sesión anónima nueva sin aviso de «rechazo»; `changePassword`/`deleteOwnAccount` re-autentican y no hacen nada a medias; plazos; sin consola | US-011-01, 02, 03, 05, 06, 07 |
 | `features/account/account.constructor.service.spec.ts` | Reglas de usuario y contraseña con sus estados y mensajes, coincidencia, textos | US-011-01, 05, 07 |
 | `features/account/account.access.service.spec.ts` | Instantánea de tareas locales; traspaso de pendientes (solo pendientes, sin XP) con buffer y reanudación; descarte; recordatorio (anónimo + primera tarea + 14 días con `CLOCK`); no mostrar datos ajenos al cambiar de identidad | US-011-02, 03, 08 |
 | `features/account/shared/*.spec.ts` | Cabecera (atrás, título, decorativa), campo (contador, mostrar/ocultar, foco, `autocomplete`), reglas, banner, aviso pequeño, botón atrás de overlays | US-011-01, 03 |
 | `account-screen.spec.ts` | Sin cuenta / con cuenta, filas, destinos, zona de peligro, diálogo de cerrar sesión (confirmar, cancelar, atrás), anónima no ve «Borrar» | US-011-03, 06 |
 | `create-account.spec.ts` | Reglas en vivo, botón deshabilitado sin casilla, estados cargando/ocupado/sin conexión, conserva lo escrito, éxito | US-011-01 |
 | `sign-in.spec.ts` | Error genérico y límite; hoja con tareas pendientes; A selecciona y completa; B pide confirmación; cancelar deja la sesión anónima; variante solo completadas | US-011-02 |
-| `change-password.spec.ts`, `change-username.spec.ts`, `delete-account.spec.ts` | Reglas, contraseña actual incorrecta, rechazo de igual/ocupado, confirmación, fallo sin cambios | US-011-05, 06, 07 |
+| `change-password.spec.ts`, `delete-account.spec.ts` | Reglas, contraseña actual incorrecta, rechazo de igual/ocupado, confirmación, fallo sin cambios | US-011-05, 06, 07 |
 | `account-reminder.spec.ts`, `profile-button.spec.ts`, `tasks-list.spec.ts` (ampliar) | Visibilidad, aspa y «En 14 días», icono de perfil con zona de 44 | US-011-03, 08 |
 | `progress.access.service.spec.ts`, `alarms.access.service.spec.ts` (ampliar) | Limpiar celebración al cambiar de usuario; cancelar y reconciliar alarmas | US-011-03, 08 |
 | `shared/components/icon/icon.spec.ts` | Nuevos iconos y `filled` | US-011-01–03 |
@@ -309,7 +308,7 @@ Cada bloque: **Red → Green → Refactor**, revisión visual en navegador (clar
 5. **Iniciar sesión y tareas de este móvil (US-011-02, P1)**, con el traspaso, el buffer y la reanudación.
 6. **Recordatorio, identidad y datos ajenos (US-011-08, P1)**: tarjeta, aplazamiento, limpieza de progreso, alarmas.
 7. **Cambiar contraseña y borrar cuenta (US-011-05/06, P2)**.
-8. **Cambiar nombre de usuario (US-011-07, P3)**.
+8. ~~Cambiar nombre de usuario (US-011-07)~~ — descartada tras el spike.
 9. **Cierre**: e2e de flujos y de fidelidad, recorrido completo en navegador (claro y oscuro) comparando cada pantalla con su `screen.png`, emulador Android (arranque en frío, claro y oscuro, teclado, botón atrás), `pnpm verify:account` final con confirmación, documentación, `review.md` y estado de la spec.
 
 ---

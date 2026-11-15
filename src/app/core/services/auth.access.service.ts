@@ -10,7 +10,7 @@ import {
   AuthErrorReason,
   AuthStatus,
 } from '../models/auth-status';
-import { fromInternalIdentifier, normalizeUsername, toInternalIdentifier } from '../utils/username';
+import { fromInternalIdentifier, toInternalIdentifier } from '../utils/username';
 import { mapAccountError, mapAuthError } from './auth-error.util';
 import { AUTH_STORAGE_KEY, SupabaseService } from './supabase';
 
@@ -187,31 +187,6 @@ export class AuthAccessService {
       );
       if (!outcome.ok) return outcome;
       if (outcome.value.error) return { ok: false, reason: mapAccountError(outcome.value.error) };
-      return { ok: true };
-    });
-  }
-
-  /** Cambia el nombre de usuario tras comprobar la contraseña; el `user_id` y los datos no cambian. */
-  async changeUsername(next: string, password: string): Promise<AccountResult> {
-    const username = this.accountUsername();
-    if (username === null) return { ok: false, reason: 'unauthorized' };
-    const target = normalizeUsername(next);
-    if (target === username) return { ok: false, reason: 'username-taken' };
-    return this.exclusive(async () => {
-      const verified = await this.reauthenticate(username, password);
-      if (!verified.ok) return verified;
-      const outcome = await this.guarded(() =>
-        this.supabase.client.auth.updateUser({ email: toInternalIdentifier(target) })
-      );
-      if (!outcome.ok) return outcome;
-      const { data, error } = outcome.value;
-      if (error) return { ok: false, reason: mapAccountError(error) };
-      // Si el servicio dejara el cambio pendiente de verificar, el identificador no habría cambiado.
-      if (fromInternalIdentifier(data.user?.email) !== target)
-        return { ok: false, reason: 'unknown' };
-      this._session.update((session) =>
-        session === null ? session : { ...session, user: { ...session.user, username: target } }
-      );
       return { ok: true };
     });
   }

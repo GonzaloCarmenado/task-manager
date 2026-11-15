@@ -41,8 +41,7 @@ async function main() {
   const { createClient } = await import('@supabase/supabase-js');
   const suffix = randomBytes(4).toString('hex');
   const name = `verif_${suffix}`;
-  const renamed = `verif_${suffix}_b`;
-  const password = `P${randomBytes(9).toString('hex')}`;
+    const password = `P${randomBytes(9).toString('hex')}`;
   const newPassword = `N${randomBytes(9).toString('hex')}`;
   const checks = {};
   const record = (label, ok) => {
@@ -76,20 +75,17 @@ async function main() {
   const dup = await memoryClient(createClient, url, key).auth.signUp({ email: `${name}@${DOMAIN}`, password });
   record('un nombre ya usado no se puede registrar de nuevo', Boolean(dup.error) || dup.data?.user?.identities?.length === 0);
 
-  const rename = await phone.auth.updateUser({ email: `${renamed}@${DOMAIN}` });
-  record('cambiar el nombre de usuario sin verificación', !rename.error && rename.data.user?.email === `${renamed}@${DOMAIN}` && !rename.data.user.new_email);
-
   const change = await phone.auth.updateUser({ password: newPassword });
   record('cambiar la contraseña', !change.error);
 
-  const stale = await memoryClient(createClient, url, key).auth.signInWithPassword({ email: `${renamed}@${DOMAIN}`, password });
+  const stale = await memoryClient(createClient, url, key).auth.signInWithPassword({ email: `${name}@${DOMAIN}`, password });
   record('la contraseña antigua deja de valer', Boolean(stale.error));
-  const fresh = await memoryClient(createClient, url, key).auth.signInWithPassword({ email: `${renamed}@${DOMAIN}`, password: newPassword });
+  const fresh = await memoryClient(createClient, url, key).auth.signInWithPassword({ email: `${name}@${DOMAIN}`, password: newPassword });
   record('la nueva contraseña con el nuevo nombre entra', !fresh.error && fresh.data.user?.id === uid);
 
   const del = await phone.rpc('delete_my_account');
   record('delete_my_account borra la cuenta', !del.error);
-  const gone = await memoryClient(createClient, url, key).auth.signInWithPassword({ email: `${renamed}@${DOMAIN}`, password: newPassword });
+  const gone = await memoryClient(createClient, url, key).auth.signInWithPassword({ email: `${name}@${DOMAIN}`, password: newPassword });
   record('la cuenta borrada ya no entra', Boolean(gone.error));
 
   const anonCaller = memoryClient(createClient, url, key);

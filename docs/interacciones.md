@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 133 |
-| Preguntas `F` (funcionalidad) | 43 |
-| Preguntas `W` (flujo) | 60 |
-| **Total preguntas** | **103** |
+| Turnos del usuario | 134 |
+| Preguntas `F` (funcionalidad) | 44 |
+| Preguntas `W` (flujo) | 62 |
+| **Total preguntas** | **106** |
 
 ## Log
 
@@ -140,3 +140,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 131 | 2026-11-14 | "si dake" (aprobación de las tareas de la 011) | 0 | Tareas aprobadas; siguiente paso `/implement` |
 | 132 | 2026-11-14 | "commitea y luego seguimos" | 0 | Commit `0546d41` (plan y tareas de la 011) |
 | 133 | 2026-11-14 | `/implement 011` | 1 W | Bloque 1 hecho en local (identidad, cambio de contraseña/nombre, cierre, borrado, migración `account`, `verify:account`, docs). Cadena en verde. Pendiente: ajustes del panel y subida de la migración (requieren confirmación). Pregunta W: commit del bloque. |
+| 134 | 2026-11-14 | "si" (commit bloque 1) · "lo de la contraseña no se como hacerlo" · "ya esta seguimos" · "es este" · "ya" · "si" (db push) · "Si quitalo" | 1 F, 2 W | Commit `3521f29`. CLI en otra cuenta: logout y login del propietario, verificada por id de organización. Migración `account` aplicada al remoto. Spike `verify:account`: todo OK salvo cambiar el nombre (el servicio rechaza el identificador `.invalid`); decisión F: se descarta US-011-07 y se elimina `changeUsername`. Preguntas W: cerrar sesión de la CLI, aplicar la migración. |

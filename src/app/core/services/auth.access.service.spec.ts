@@ -1373,7 +1373,7 @@ describe('AuthAccessService · cuenta: cerrar sesión (spec 011)', () => {
   });
 });
 
-describe('AuthAccessService · cuenta: cambiar contraseña y nombre de usuario (spec 011)', () => {
+describe('AuthAccessService · cuenta: cambiar contraseña (spec 011)', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => {
     vi.useRealTimers();
@@ -1480,82 +1480,6 @@ describe('AuthAccessService · cuenta: cambiar contraseña y nombre de usuario (
     const pending = service.changePassword('ClaveActual123', 'ClaveNueva456');
     await vi.advanceTimersByTimeAsync(40_000);
     expect(await pending).toEqual({ ok: false, reason: 'timeout' });
-  });
-
-  it('US-011-07 cambia el nombre de usuario tras re-autenticar y la sesión muestra el nuevo', async () => {
-    const { service, probeAuth, updateUser } = changeSetup();
-    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
-    updateUser.mockResolvedValue({
-      data: { user: { id: UID, is_anonymous: false, email: 'ana_nueva@cuenta.invalid' } },
-      error: null,
-    });
-
-    const result = await service.changeUsername('  Ana_Nueva ', 'ClaveActual123');
-
-    expect(result).toEqual({ ok: true });
-    expect(probeAuth.signInWithPassword).toHaveBeenCalledWith({
-      email: 'ana@cuenta.invalid',
-      password: PW_CURRENT,
-    });
-    expect(updateUser).toHaveBeenCalledWith({ email: 'ana_nueva@cuenta.invalid' });
-    expect(service.userId()).toBe(UID);
-    expect(service.session()?.user.username).toBe('ana_nueva');
-  });
-
-  it('US-011-07 nombre ocupado → username-taken y la sesión no cambia', async () => {
-    const { service, probeAuth, updateUser } = changeSetup();
-    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
-    updateUser.mockResolvedValue(apiError('email_exists'));
-
-    expect(await service.changeUsername('ocupado', 'ClaveActual123')).toEqual({
-      ok: false,
-      reason: 'username-taken',
-    });
-    expect(service.session()?.user.username).toBe('ana');
-  });
-
-  it('US-011-07 contraseña incorrecta no cambia nada; el mismo nombre se rechaza sin llamar', async () => {
-    const { service, probeAuth, updateUser } = changeSetup();
-    probeAuth.signInWithPassword.mockResolvedValueOnce({
-      data: { session: null },
-      error: Object.assign(new Error('x'), {
-        name: 'AuthApiError',
-        status: 400,
-        code: 'invalid_credentials',
-      }),
-    });
-    expect(await service.changeUsername('otro', 'mala')).toEqual({
-      ok: false,
-      reason: 'invalid-credentials',
-    });
-    expect(updateUser).not.toHaveBeenCalled();
-
-    expect(await service.changeUsername(' ANA ', 'ClaveActual123')).toEqual({
-      ok: false,
-      reason: 'username-taken',
-    });
-  });
-
-  it('US-011-07 si el servicio deja el cambio pendiente de verificar, no cuenta como éxito', async () => {
-    const { service, probeAuth, updateUser } = changeSetup();
-    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
-    updateUser.mockResolvedValue({
-      data: {
-        user: {
-          id: UID,
-          is_anonymous: false,
-          email: 'ana@cuenta.invalid',
-          new_email: 'otra@cuenta.invalid',
-        },
-      },
-      error: null,
-    });
-
-    expect(await service.changeUsername('otra', 'ClaveActual123')).toEqual({
-      ok: false,
-      reason: 'unknown',
-    });
-    expect(service.session()?.user.username).toBe('ana');
   });
 
   it('US-011-05 ni contraseñas ni identificadores internos llegan a la consola', async () => {

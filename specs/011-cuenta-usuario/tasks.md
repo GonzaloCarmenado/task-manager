@@ -23,8 +23,8 @@
 - [x] T-011-11 (Green): `checkCredentials`, `completeSignIn`, `cancelSignIn`
 - [x] T-011-12 (Red): `auth.access.service.spec.ts` · `signOut`: cierra, deja una sesión anónima nueva, `ready` vuelve a `true`, sin aviso de rechazo; fallo de red no deja la app sin identidad
 - [x] T-011-13 (Green): `signOut`
-- [x] T-011-14 (Red): `auth.access.service.spec.ts` · `changePassword` y `changeUsername`: re-autentican con la contraseña actual en la sonda y solo entonces actualizan; contraseña actual incorrecta no cambia nada; nombre ocupado; igual a la actual
-- [x] T-011-15 (Green): `changePassword` y `changeUsername`
+- [x] T-011-14 (Red): `auth.access.service.spec.ts` · `changePassword`: re-autentica con la contraseña actual en la sonda y solo entonces actualizan; contraseña actual incorrecta no cambia nada; nombre ocupado; igual a la actual
+- [x] T-011-15 (Green): `changePassword`
 - [x] T-011-16 (Red): `auth.access.service.spec.ts` · `deleteOwnAccount`: re-autentica, llama a `rpc('delete_my_account')` y, solo si va bien, cierra y crea sesión anónima nueva; si falla no cambia nada; una sesión anónima se rechaza sin llamar al servidor
 - [x] T-011-17 (Green): `deleteOwnAccount`
 - [x] T-011-18 (Red): `scripts/account-migration.test.mjs`: `delete_my_account` existe, `security definer`, `set search_path`, comprueba usuario anónimo y nulo, sin parámetros, `revoke … from public, anon`, `grant … to authenticated`, sin `drop table` ni `truncate`, rollback documentado
@@ -32,9 +32,9 @@
 - [x] T-011-20: `scripts/verify-account.mjs` y script `verify:account` en `package.json` (manual, remoto; usuarios de prueba con prefijo propio que se borran al terminar; solo imprime nombres de comprobación y OK/FALLO)
 - [x] T-011-21 (Refactor): limpiar `AuthAccessService` con los tests en verde; cobertura ≥ 80 %
 - [x] T-011-22: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` en verde
-- [ ] T-011-23 *(requiere confirmación del usuario)*: el propietario ajusta en el panel de Supabase **«Confirm email» desactivado** y **longitud mínima de contraseña 8** (no se usa `config push`); documentar los pasos sin ids ni URLs
-- [ ] T-011-24 *(requiere confirmación del usuario)*: verificar la cuenta de la CLI por **id de organización**, `pnpm db:push:dry`, mostrar la migración y `pnpm db:push --yes`
-- [ ] T-011-25 *(requiere confirmación del usuario)*: ejecutar `pnpm verify:account` (spike): identificador interno aceptado, vincular conserva el `user_id`, entrar en otro cliente, cambiar contraseña y nombre, borrar y fallo de anónimo. **Si algo falla, parar y revisar el plan antes de seguir**
+- [x] T-011-23 *(requiere confirmación del usuario)*: el propietario ajusta en el panel de Supabase **«Confirm email» desactivado** y **longitud mínima de contraseña 8** (no se usa `config push`); documentar los pasos sin ids ni URLs
+- [x] T-011-24 *(requiere confirmación del usuario)*: verificar la cuenta de la CLI por **id de organización**, `pnpm db:push:dry`, mostrar la migración y `pnpm db:push --yes`
+- [x] T-011-25 *(requiere confirmación del usuario)*: ejecutar `pnpm verify:account` (spike): identificador interno aceptado, vincular conserva el `user_id`, entrar en otro cliente, cambiar contraseña y nombre, borrar y fallo de anónimo. **Si algo falla, parar y revisar el plan antes de seguir**
 - [x] T-011-26: `docs/supabase.md`: sección de cuenta (identificador interno, ajustes remotos, `delete_my_account`, sin recuperación) y estado de migraciones
 
 ---
@@ -73,7 +73,7 @@
 - [ ] T-011-51 (Green): `features/account/account.access.service.ts` (parte de sesión y cierre)
 - [ ] T-011-52 (Red): `account-screen.spec.ts` · sin cuenta: título, texto de datos locales, «Crear cuenta gratuita» (→ `/cuenta/crear`) e «Ya tengo cuenta, iniciar sesión» (→ `/cuenta/entrar`), pie «opcional y sin correo», atrás vuelve a la lista, sin racha ni XP
 - [ ] T-011-53 (Green): `AccountScreen` sin cuenta: tarjeta de estado, mascota con rebote, píldora con pulso, tarjeta «¿Cambias de móvil pronto?», acciones de 54/50 (html y scss con las medidas del plan)
-- [ ] T-011-54 (Red): `account-screen.spec.ts` · con cuenta: tarjeta de usuario con `@usuario`, aviso «guardados en tu cuenta», filas «Cambiar nombre de usuario», «Cambiar contraseña» y «Cerrar sesión» con sus destinos, zona de peligro con «Borrar cuenta y datos» (→ `/cuenta/borrar`), una sesión anónima no ve los ajustes ni la zona de peligro
+- [ ] T-011-54 (Red): `account-screen.spec.ts` · con cuenta: tarjeta de usuario con `@usuario`, aviso «guardados en tu cuenta», filas «Cambiar contraseña» y «Cerrar sesión» con sus destinos, zona de peligro con «Borrar cuenta y datos» (→ `/cuenta/borrar`), una sesión anónima no ve los ajustes ni la zona de peligro
 - [ ] T-011-55 (Green): `AccountScreen` con cuenta: avatar con anillo, panel de ajustes, divisores, zona de peligro
 - [ ] T-011-56 (Red): `account-logout-dialog.spec.ts`: rol `alertdialog`, textos, «Sí, cerrar sesión» cierra y avisa «Sesión cerrada», «Cancelar» y el botón atrás cierran sin cambios
 - [ ] T-011-57 (Green): `AccountLogoutDialog` (velo con desenfoque, caja inferior, entrada animada)
@@ -160,16 +160,9 @@
 
 ---
 
-## Bloque 8 — Cambiar nombre de usuario (US-011-07, P3)
+## Bloque 8 — Cambiar nombre de usuario (US-011-07) — DESCARTADO
 
-- [ ] T-011-118 (Red): `account.access.service.spec.ts` · `changeUsername`: valida, delega, rechaza ocupado y contraseña incorrecta, la sesión muestra el nombre nuevo
-- [ ] T-011-119 (Green): `changeUsername` en `AccountAccessService`
-- [ ] T-011-120 (Red): `change-username.spec.ts`: tarjeta de nombre nuevo (contador y dos reglas), tarjeta de contraseña, «Guardar» deshabilitado/habilitado/cargando «Guardando…», nombre no disponible, contraseña incorrecta, éxito con aviso «Nombre de usuario cambiado» y Cuenta con el nombre nuevo
-- [ ] T-011-121 (Green): `ChangeUsername`
-- [ ] T-011-122 (Red→Green): `cypress/e2e/cuenta.cy.ts` · cambiar nombre de usuario (libre y ocupado)
-- [ ] T-011-123 (Refactor): limpiar con los tests en verde
-- [ ] T-011-124: **medidas y comparación** de la pantalla derivada contra Crear cuenta; claro y oscuro
-- [ ] T-011-125: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
+El spike mostró que el servicio no permite cambiar el identificador (`email_address_invalid`). Sin tareas; `changeUsername` y su test se eliminaron del Bloque 1.
 
 ---
 

@@ -29,7 +29,7 @@ Que cualquier persona pueda crear una cuenta (nombre de usuario y contraseña, s
 4. **Contraseña**: de 8 a 64 caracteres y distinta del nombre de usuario; sin más reglas.
 5. **Nombre de usuario**: de 3 a 24 caracteres entre `a-z`, `0-9`, `.`, `-` y `_`; sin distinguir mayúsculas (se guarda en minúsculas); único.
 6. **Cerrar sesión**: deja una sesión anónima nueva y vacía y cancela las alarmas; los datos siguen en la cuenta.
-7. **Confirmaciones**: la contraseña actual para cambiarla; la contraseña para borrar la cuenta y para cambiar el nombre de usuario.
+7. **Confirmaciones**: la contraseña actual para cambiarla; la contraseña para borrar la cuenta.
 8. **Recordatorio sin cuenta**: tarjeta discreta descartable bajo el resumen de nivel, solo tras completar la primera tarea; descartada, no vuelve en 14 días.
 9. **Remoto**: desactivar la confirmación de correo del proyecto y fijar la longitud mínima de la contraseña (configuración remota, con confirmación explícita y tras verificar la cuenta de la CLI de Supabase).
 10. **Riesgos aceptados**: sin recuperación; sin verificación, cualquiera puede ocupar un nombre de usuario; la seguridad de la cuenta es solo su contraseña (sin MFA).
@@ -69,7 +69,7 @@ Detalle en [clarify.md](./clarify.md).
 
 **Criterios de aceptación:**
 - Un icono de perfil en la cabecera de la lista abre la pantalla **Cuenta** (zona táctil ≥ 44 px).
-- Sin cuenta: indica que los datos solo están en este móvil y ofrece «Crear cuenta» e «Iniciar sesión». Con cuenta: muestra el nombre de usuario y las acciones disponibles (cambiar contraseña, cambiar nombre de usuario, cerrar sesión, borrar cuenta).
+- Sin cuenta: indica que los datos solo están en este móvil y ofrece «Crear cuenta» e «Iniciar sesión». Con cuenta: muestra el nombre de usuario y las acciones disponibles (cambiar contraseña, cerrar sesión, borrar cuenta).
 - «Cerrar sesión» pide confirmación, cierra la sesión, deja una **sesión anónima nueva y vacía** y cancela las alarmas del móvil; los datos siguen en la cuenta y reaparecen al volver a entrar.
 - La app nunca se queda sin identidad: tras cerrar sesión hay sesión anónima y el uso sin cuenta funciona.
 - Móvil: el botón atrás de Android vuelve a la lista desde la pantalla Cuenta.
@@ -97,14 +97,9 @@ Decidido: **sin recuperación**. No hay «He olvidado la contraseña», ni códi
 - Si falla (sin red, error del servidor) no se borra nada a medias y se explica cómo reintentar.
 - Solo una cuenta con nombre de usuario puede ejecutarlo; una sesión anónima no ve la opción.
 
-### US-011-07 — Cambiar el nombre de usuario (P3)
+### US-011-07 — Cambiar el nombre de usuario (DESCARTADA)
 
-**Como** usuario con cuenta, **quiero** cambiar mi nombre de usuario, **para** que refleje cómo quiero identificarme.
-
-**Criterios de aceptación:**
-- Se pide el nombre nuevo (mismas reglas) y la contraseña; si está libre, se aplica y la pantalla Cuenta lo muestra.
-- Un nombre ya en uso se indica como «no disponible».
-- La sesión sigue abierta y los datos no cambian.
+DESCARTADA tras el spike (2026-11-14): el servicio rechaza (`email_address_invalid`) cambiar el identificador a una dirección `.invalid`; el nombre de usuario no se puede cambiar (ver Out of scope). Quien quiera otro nombre crea una cuenta nueva.
 
 ### US-011-08 — Seguir usando la app sin cuenta (P1)
 
@@ -136,7 +131,6 @@ Cada criterio tiene al menos un test. Orden Red → Green.
 | `US-011-03 cerrar sesión deja sesión anónima nueva y cancela alarmas` | CA 3 y 4 de US-011-03 | `auth.access.service.spec.ts`, `alarms.access.service.spec.ts` | unit |
 | `US-011-05 cambiar contraseña pide la actual, aplica reglas y rechaza igual` | CA 1 y 2 de US-011-05 | `account.constructor.service.spec.ts`, `change-password.spec.ts` | unit |
 | `US-011-06 borrar cuenta elimina cuenta y datos o no hace nada; anónima no ve la opción` | CA 1–4 de US-011-06 | `scripts/account-migration.test.mjs`, `account-screen.spec.ts` | estático + unit |
-| `US-011-07 cambiar nombre pide contraseña y rechaza ocupado` | CA 1 y 2 de US-011-07 | `auth.access.service.spec.ts`, `change-username.spec.ts` | unit |
 | `US-011-08 la tarjeta aparece tras la primera tarea, se descarta y no vuelve en 14 días` | CA 2 de US-011-08 | `account-reminder.spec.ts`, `tasks-list.spec.ts` | unit |
 | `US-011-08 sin cuenta la app funciona igual y cambiar de identidad no muestra datos ajenos` | CA 1 y 3 de US-011-08 | `app.spec.ts`, `tasks.access.service.spec.ts` | unit |
 | `e2e: crear cuenta, cerrar sesión, iniciar sesión (con y sin tareas anónimas), cambiar contraseña y borrar` | Flujos P1 y P2 completos | `cypress/e2e/cuenta.cy.ts`, `cypress/support/backend.ts` | e2e |
@@ -148,7 +142,7 @@ Si hay frontal: revisión visual en navegador con la extensión de Chrome (oblig
 ## Ficheros afectados
 
 **Crear** (por confirmar en `/sdd-plan`):
-- `src/app/features/account/` (pantalla Cuenta, crear cuenta, iniciar sesión, cambiar contraseña, cambiar nombre de usuario, borrar cuenta y tarjeta de recordatorio), cada uno con su `*.constructor.service.ts` y `*.access.service.ts` donde toque
+- `src/app/features/account/` (pantalla Cuenta, crear cuenta, iniciar sesión, cambiar contraseña, borrar cuenta y tarjeta de recordatorio), cada uno con su `*.constructor.service.ts` y `*.access.service.ts` donde toque
 - `src/app/core/models/account.ts`
 - `supabase/migrations/<marca>_account.sql` (borrado de cuenta y traspaso de tareas pendientes)
 - `scripts/account-migration.test.mjs`, `scripts/verify-account.mjs`, `cypress/e2e/cuenta.cy.ts`
@@ -194,6 +188,7 @@ Toda función con permisos elevados valida `auth.uid()`; ninguna acepta un `user
 
 ## Out of scope
 
+- Cambiar el nombre de usuario (US-011-07, descartada tras el spike: el servicio no permite cambiar el identificador interno).
 - Correo electrónico en cualquier forma: registro, verificación, recuperación, notificaciones y cambio de correo.
 - Recuperación del acceso (sin ella por decisión; ver US-011-04).
 - Inicio de sesión con terceros (Google, Apple…) y con huella como credencial.
