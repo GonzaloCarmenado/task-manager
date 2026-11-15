@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 160 |
-| Preguntas `F` (funcionalidad) | 46 |
-| Preguntas `W` (flujo) | 77 |
-| **Total preguntas** | **123** |
+| Turnos del usuario | 166 |
+| Preguntas `F` (funcionalidad) | 48 |
+| Preguntas `W` (flujo) | 79 |
+| **Total preguntas** | **127** |
 
 ## Log
 
@@ -167,3 +167,9 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 158 | 2026-11-15 | "si vamos" (commit de cierre, subir la rama y actualizar la PR) | 0 | Commit `b20a874`; auditoría de lo que viaja sin hallazgos; rama subida y PR #1 actualizada (título y descripción con la spec 012). Las dos preguntas `W` ya estaban contadas. |
 | 159 | 2026-11-15 | "si dale" + "siguiente spec: action para crear el compilado de Android en Releases; si necesitas algún secreto me dices" | 0 | Commit `203a700` del registro. `/specify`: creada `specs/013-release-android/spec.md` (Ciclo simple por decisión previa, sin frontal) y fila 013 en el índice. Pendiente de aprobación. |
 | 160 | 2026-11-15 | "me gusta" | 0 | Spec 013 aprobada. Siguiente paso: `/clarify`. |
+| 161 | 2026-11-15 | "si dale" (commit de la spec 013 y `/clarify`) | 2 F | Commit `fe793a0`. Clarify cerrado: solo arm64 (un APK por Release) y las etiquetas solo desde `main` (la primera Release y la prueba manual tras fusionar la PR #1). Valores por defecto: relanzar reemplaza archivos, primera versión `v0.1.0` con versión editada a mano y guarda, notas automáticas, Supabase compartido documentado. Spec actualizada. |
+| 162 | 2026-11-15 | "vamos" (`/sdd-plan` 013) | 0 | Generado `specs/013-release-android/plan.md`: flujo de tres trabajos (verify, build, publish), firma con zipalign/apksigner sobre el APK release sin firmar, versión inyectada con `--config`, scripts con tests (release-version, write-environment, release-ci), test estático del YAML, documentación y ensayo local. Ajustes: versionCode ×100 + etapa y alinear package.json a 0.1.0. Espera aprobación. |
+| 163 | 2026-11-15 | "vamos" (aprobar el plan 013 y `/task`) | 0 | Plan 013 aprobado; se lanza `/task`. |
+| 164 | 2026-11-15 | "vamos" (`/task` 013) | 0 | Generado `specs/013-release-android/tasks.md`: 25 tareas en 6 bloques (versiones, configuración y secretos, flujo, ensayo local de firmar, documentación y ejecución real en GitHub tras fusionar la PR #1), Red antes que Green y lo que toca GitHub marcado como requiere confirmación. Espera aprobación. |
+| 165 | 2026-11-15 | "vamos" (aprobar tareas y `/implement` 013) | 0 | Tareas 013 aprobadas; arranca la implementación por el Bloque 1. |
+| 166 | 2026-11-15 | (continuación de `/implement` 013) | 2 W | Implementados los Bloques 1 a 5 de la 013: `release-version`, `write-environment`, `release-ci` con tests, flujo `release-android.yml` (actionlint limpio), ensayo local de compilar y firmar con keystore desechable (todo limpio), documentos y CLAUDE.md. 210 tests de scripts y 1183 de la app en verde. Hallazgo: disco C: al 100%. Preguntas: commit y fusión de la PR #1 / creación de secretos para el Bloque 6. |

@@ -20,7 +20,7 @@
 | [010](./010-interfaz-stitch/spec.md) | Interfaz fiel al sistema de diseño de Stitch | Implementada | Adoptar tipografía, paleta, formas, sombras y componentes de «Playful Momentum» en todas las pantallas, sin funcionalidad nueva |
 | [011](./011-cuenta-usuario/spec.md) | Cuenta de usuario | Implementada | Usuario y contraseña (sin correo) conservando lo anónimo, pantalla Cuenta, cerrar sesión, cambiar contraseña y borrar cuenta (el cambio de usuario se descartó) |
 | [012](./012-tareas-repetitivas/spec.md) | Tareas repetitivas | Implementada | Repetir una tarea cada día, días de la semana, cada N días/semanas o un día del mes, con fin opcional y edición «solo esta / toda la serie» |
-| [013](./013-release-android/spec.md) | Publicar el APK en las Releases | Borrador | GitHub Action que compila, firma y publica el APK de Android al crear una etiqueta de versión, con secretos fuera del repo |
+| [013](./013-release-android/spec.md) | Publicar el APK en las Releases | Clarify cerrado | GitHub Action que compila, firma y publica el APK de Android al crear una etiqueta de versión, con secretos fuera del repo |
 
 ---
 

@@ -44,6 +44,8 @@ APK debug: `src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-univ
 Lista tus AVD con `emulator -list-avds`; crea uno con Android Studio o `avdmanager`.
 `src-tauri/gen/` está en `.gitignore` (se regenera con `pnpm tauri android init`).
 
+**APK de producción**: no se compila a mano. Lo publica el flujo de GitHub al crear una etiqueta de versión (ver [`release.md`](./release.md)); para instalarlo, ver [`instalacion.md`](./instalacion.md).
+
 ## Bloqueo con huella (spec 004)
 
 El plugin `tauri-plugin-biometry` (versión exacta fijada) solo se compila y se registra en Android. Permisos mínimos: `capabilities/mobile.json` concede únicamente `biometry:default` (estado y autenticación), con plataforma `android` y ventana `main`; no se da acceso al almacenamiento del plugin. `scripts/capabilities.test.mjs` lo comprueba.

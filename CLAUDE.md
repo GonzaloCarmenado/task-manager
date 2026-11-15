@@ -109,6 +109,13 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - Hojas con botón atrás de Android: `OverlayBack`; antes de navegar tras ellas, `await closeAll()`.
 - **Orden de despliegue**: la migración `task_series` se aplica antes de ejecutar el cliente contra el remoto. Detalles en `docs/supabase.md`.
 
+### Publicación de Android (spec 013)
+
+- El APK de producción lo compila, firma y publica en las **Releases** el flujo `.github/workflows/release-android.yml` al crear una etiqueta `vX.Y.Z` (o `vX.Y.Z-sufijo`, versión previa) **sobre un commit de `main`**. Solo `arm64-v8a`; el emulador x86_64 usa el APK de depuración local. Guía de mantenimiento: `docs/release.md`; para instalar: `docs/instalacion.md`.
+- **Secretos de CI** (solo en GitHub, nunca en el repo, en un commit ni en el chat): `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (esta nunca es la `service_role`). El *keystore* lo genera el propietario en su equipo y guarda una copia fuera de GitHub; Claude no lo lee ni lo pide.
+- Subir de versión: `package.json`, `src-tauri/tauri.conf.json` y `src-tauri/Cargo.toml` a la vez; el flujo falla si no coinciden con la etiqueta. `versionCode = (MAYOR*10000 + MENOR*100 + PARCHE)*100 + etapa` (99 en la final).
+- Cambios en el flujo: mantener permisos mínimos por trabajo, acciones fijadas por SHA, secretos solo en `env:` y el borrado del *keystore* con `if: always()`; `scripts/release-workflow.test.mjs` lo comprueba. Probar con `actionlint` y, antes de una etiqueta real, con la ejecución manual desde `main`.
+
 ### Pruebas e2e (spec 009)
 
 - `pnpm e2e` ejecuta Cypress contra la app con la configuración `e2e` (entorno ficticio, puerto 4300). Toda la red a Supabase se simula con estado en `cypress/support/backend.ts`: **nunca** toca el remoto.

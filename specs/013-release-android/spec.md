@@ -2,7 +2,7 @@
 
 **Rama**: `interaction-logging-claude-md`
 **Creada**: 2026-11-15
-**Estado**: Aprobada
+**Estado**: Aprobada (clarify cerrado)
 **Ciclo**: simple
 **Frontal**: no
 
@@ -43,7 +43,7 @@ Que al crear una etiqueta de versión, GitHub Actions compile la app, genere un 
 - Termina creando (o actualizando, si se relanza) una Release de GitHub con ese nombre que contiene el APK firmado y su suma SHA-256.
 - La Release lleva notas generadas a partir de los cambios desde la versión anterior.
 - Si cualquier paso falla (tests, compilación, firma), **no** se publica ninguna Release a medias.
-- Relanzar el flujo para la misma etiqueta no duplica archivos ni deja la Release inconsistente.
+- Relanzar el flujo para la misma etiqueta **reemplaza** los archivos de esa Release (no duplica ni crea otra) y no la deja inconsistente.
 
 ### US-013-02 — APK de producción firmado e instalable (P1)
 
@@ -52,9 +52,10 @@ Que al crear una etiqueta de versión, GitHub Actions compile la app, genere un 
 **Criterios de aceptación:**
 - El APK es de **release** (sin sufijo `.debug`): identificador `com.polyp.taskmanager`.
 - Está firmado con la clave de publicación; `apksigner verify` lo valida y el flujo falla si la firma no es válida.
-- `versionName` sale de la etiqueta (`v0.2.0` → `0.2.0`) y `versionCode` crece con cada versión (derivado de la etiqueta: `MAYOR*10000 + MENOR*100 + PARCHE`), de modo que Android permite actualizar encima.
-- Incluye al menos la arquitectura `arm64-v8a` (la de casi todos los móviles actuales); las demás se deciden en `/clarify`.
-- Móvil: se instala en un Android real/emulador, arranca, carga la fuente local y habla con Supabase (no queda pantalla en blanco por un ABI equivocado).
+- `versionName` sale de la etiqueta (`v0.2.0` → `0.2.0`) y `versionCode` crece con cada versión, derivado de la etiqueta: `(MAYOR*10000 + MENOR*100 + PARCHE)*100 + etapa`, con etapa 99 para la versión final y N para `-rc.N` (ajustado en el plan para que una previa sea menor que su final), de modo que Android permite actualizar encima.
+- Es un único APK `arm64-v8a` (la de casi todos los móviles actuales), decidido en el clarify; el emulador x86_64 sigue usando el APK debug local.
+- El archivo se llama `task-manager-X.Y.Z-arm64-v8a.apk` y va acompañado de `task-manager-X.Y.Z-arm64-v8a.apk.sha256`.
+- Móvil: se instala en un Android real (arm64) o en un emulador arm64, arranca, carga la fuente local y habla con Supabase (no queda pantalla en blanco por un ABI equivocado).
 
 ### US-013-03 — Configuración y secretos sin tocar el repo (P1)
 
@@ -73,7 +74,7 @@ Que al crear una etiqueta de versión, GitHub Actions compile la app, genere un 
 
 **Criterios de aceptación:**
 - Antes de compilar, el flujo comprueba que la versión de la etiqueta coincide con la de `package.json` y `src-tauri/tauri.conf.json` (y `Cargo.toml`); si no, falla diciendo qué difiere.
-- La etiqueta apunta a un commit que está en la rama principal (`main`); si no, falla.
+- La etiqueta apunta a un commit que está en la rama principal (`main`); si no, falla (decidido en el clarify). Por eso la primera Release y la prueba manual llegan tras fusionar la PR #1.
 - Pasan `pnpm secrets:check`, `pnpm lint`, `pnpm type-check`, `pnpm test:ci` y `pnpm test:scripts` (los mismos del pre-commit) antes de empezar a compilar el APK.
 - Permisos mínimos: el flujo solo puede escribir en las Releases (`contents: write`), nada más.
 
@@ -187,5 +188,6 @@ No aplica (sin tipos de datos de la app ni SQL).
 - Un flujo de integración continua en cada PR/push (lint, tests, e2e): sería otra spec.
 - Actualizaciones automáticas dentro de la app (descargar e instalar versiones nuevas desde la propia app).
 - Compilar para iOS, escritorio o web.
+- Publicar APK para x86_64 u otras arquitecturas (solo `arm64-v8a`, decidido en el clarify) ni un script que suba la versión (se edita a mano y el flujo comprueba que coincida).
 - Firma con Play App Signing, rotación de claves y ofuscación (R8/ProGuard) más allá de lo que Tauri ya hace.
 - Notificar a los usuarios de una versión nueva.
