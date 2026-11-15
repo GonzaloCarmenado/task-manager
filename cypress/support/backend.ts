@@ -285,6 +285,14 @@ export class FakeBackend {
     else if (wasDone && row.completed_at === null) this.revoke(row);
   }
 
+  /** Gasta uno de los fallos programados de ese tipo sin responder (quien llama elige la respuesta). */
+  private consume(kind: Failure): boolean {
+    const f = this.failures[kind];
+    if (f.count <= 0) return false;
+    f.count -= 1;
+    return true;
+  }
+
   private shouldFail(kind: Failure, req: Req): boolean {
     const f = this.failures[kind];
     if (f.count <= 0) return false;
@@ -358,7 +366,7 @@ export class FakeBackend {
         req.reply({ statusCode: 200, body: this.sessionBody(subOf(req.headers['authorization'])) });
         return;
       }
-      if (this.shouldFail('rate-limit', req)) {
+      if (this.consume('rate-limit')) {
         this.authError(req, 429, 'over_request_rate_limit');
         return;
       }
@@ -370,6 +378,11 @@ export class FakeBackend {
         return;
       }
       req.reply({ statusCode: 200, body: this.sessionBody(account.id) });
+    });
+
+    // `setSession` de la librería valida el token pidiendo el usuario.
+    cy.intercept('GET', '**/auth/v1/user*', (req) => {
+      req.reply({ statusCode: 200, body: this.userBody(subOf(req.headers['authorization'])) });
     });
 
     cy.intercept('PUT', '**/auth/v1/user*', (req) => {

@@ -1,11 +1,20 @@
 import { Location } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, isDevMode } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  isDevMode,
+  untracked,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthAccessService } from './core/services/auth.access.service';
 import { BiometricLockService } from './core/services/biometric-lock.service';
 import { BiometricLockScreen } from './shared/components/biometric-lock-screen/biometric-lock-screen';
 import { BiometricNotice } from './shared/components/biometric-notice/biometric-notice';
 import { BiometricOffer } from './shared/components/biometric-offer/biometric-offer';
+import { AccountAccessService } from './features/account/account.access.service';
 import { AccountToast } from './features/account/shared/account-toast/account-toast';
 import { SessionStatus } from './shared/components/session-status/session-status';
 
@@ -26,6 +35,7 @@ import { SessionStatus } from './shared/components/session-status/session-status
 export class App {
   protected readonly auth = inject(AuthAccessService);
   protected readonly lock = inject(BiometricLockService);
+  private readonly account = inject(AccountAccessService);
 
   /** SOLO DESARROLLO: la vista previa de estados no debe quedar tapada por la pantalla de sesión. */
   private readonly devPreview = isDevMode() && inject(Location).path().startsWith('/__dev/');
@@ -40,4 +50,12 @@ export class App {
     if (this.lock.offerVisible()) return 'offer';
     return null;
   });
+
+  constructor() {
+    // Con la identidad lista, se reanuda un traspaso de tareas que quedó a medias (cierre a mitad de entrar).
+    effect(() => {
+      if (this.auth.status() === 'ready')
+        untracked(() => void this.account.resumePendingTransfer());
+    });
+  }
 }

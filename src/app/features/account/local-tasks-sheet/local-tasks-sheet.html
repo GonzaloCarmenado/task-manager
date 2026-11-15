@@ -1,0 +1,63 @@
+<div class="scrim" (click)="cancel.emit()">
+  <div
+    class="sheet"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+    (click)="$event.stopPropagation()"
+  >
+    <span class="handle" aria-hidden="true"></span>
+
+    <header class="head">
+      <span class="head-icon" aria-hidden="true"><app-icon name="swap" [filled]="true" /></span>
+      <div>
+        <p class="eyebrow">{{ copy.label }}</p>
+        <h2 class="title" [id]="titleId">{{ copy.title }}</h2>
+      </div>
+    </header>
+
+    <p class="intro">{{ copy.body }}</p>
+
+    <div class="count">
+      <span class="count-main">
+        <span class="count-dot" aria-hidden="true"></span>
+        <span class="count-text">{{ copy.count(count()) }}</span>
+      </span>
+      <span class="count-badge">{{ copy.pendingBadge }}</span>
+    </div>
+
+    <div class="options">
+      <button class="option option-bring selected" type="button" aria-pressed="true">
+        <span class="option-icon primary" aria-hidden="true">
+          <app-icon name="list-plus" />
+        </span>
+        <span class="option-body">
+          <span class="option-title">{{ copy.bringTitle }}</span>
+          <span class="option-text">{{ copy.bringBody(count()) }}</span>
+          <span class="note">
+            <app-icon name="info" />
+            <span>{{ copy.bringNote }}</span>
+          </span>
+        </span>
+      </button>
+
+      <button class="option option-only" type="button" (click)="useOnly.emit()">
+        <span class="option-icon neutral" aria-hidden="true">
+          <app-icon name="cloud-check" [filled]="true" />
+        </span>
+        <span class="option-body">
+          <span class="option-title">{{ copy.useOnlyTitle }}</span>
+          <span class="option-text">{{ copy.useOnlyBody }}</span>
+        </span>
+      </button>
+    </div>
+
+    <div class="actions">
+      <button class="bring" type="button" (click)="bring.emit()">
+        <app-icon name="check" />
+        {{ copy.bringConfirm }}
+      </button>
+      <button class="cancel" type="button" (click)="cancel.emit()">{{ copy.cancel }}</button>
+    </div>
+  </div>
+</div>

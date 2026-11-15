@@ -11,6 +11,7 @@ import { ProgressPreview } from './features/dev/progress-preview';
 import { AccountPreview } from './features/dev/account-preview';
 import { AccountScreen } from './features/account/account-screen/account-screen';
 import { CreateAccount } from './features/account/create-account/create-account';
+import { SignIn } from './features/account/sign-in/sign-in';
 import { LevelUp } from './features/progress/level-up/level-up';
 import { ProgressScreen } from './features/progress/progress-screen/progress-screen';
 
@@ -56,6 +57,7 @@ describe('app.routes', () => {
       'nivel/:level',
       'cuenta',
       'cuenta/crear',
+      'cuenta/entrar',
       ':id',
     ]);
   });
@@ -125,6 +127,15 @@ describe('app.routes', () => {
 });
 
 describe('rutas de la cuenta', () => {
+  it('US-011-02 la ruta cuenta/entrar carga Iniciar sesión de forma lazy y va antes que :id', async () => {
+    const routes = buildRoutes(false);
+    const route = routes.find((r) => r.path === 'cuenta/entrar');
+    expect(route?.component).toBeUndefined();
+    expect(await route?.loadComponent?.()).toBe(SignIn);
+    const paths = routes.map((r) => r.path);
+    expect(paths.indexOf('cuenta/entrar')).toBeLessThan(paths.indexOf(':id'));
+  });
+
   it('US-011-01 la ruta cuenta/crear carga Crear cuenta de forma lazy y va antes que :id', async () => {
     const routes = buildRoutes(false);
     const route = routes.find((r) => r.path === 'cuenta/crear');

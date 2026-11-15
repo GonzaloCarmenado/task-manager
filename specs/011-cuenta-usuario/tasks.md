@@ -108,25 +108,25 @@
 
 ## Bloque 5 — Iniciar sesión y tareas de este móvil (US-011-02, P1)
 
-- [ ] T-011-79 (Red): `account.access.service.spec.ts` · `localTasks`: instantánea de pendientes y número de completadas de la identidad anónima; vacía si la sesión no es anónima
-- [ ] T-011-80 (Green): `localTasks` en `AccountAccessService`
-- [ ] T-011-81 (Red): `account.access.service.spec.ts` · `startSignIn`: comprueba credenciales sin cambiar de identidad, captura la instantánea, errores genéricos y límite; `cancelSignIn` deja la sesión anónima intacta
-- [ ] T-011-82 (Green): `startSignIn` y `cancelSignIn`
-- [ ] T-011-83 (Red): `account.access.service.spec.ts` · `finishSignIn('merge')`: completa el inicio de sesión y recrea **solo las pendientes** en la cuenta (sin XP ni completadas), guarda el buffer, lo borra al acabar, reintenta sin duplicar tras un fallo parcial; `'discard'` y `'none'` no recrean nada
-- [ ] T-011-84 (Green): `finishSignIn` y traspaso con buffer en `localStorage`
-- [ ] T-011-85 (Red): `account.access.service.spec.ts` · `resumePendingTransfer`: reanuda un buffer pendiente al arrancar con sesión de cuenta y no hace nada si no hay buffer o la sesión es anónima
-- [ ] T-011-86 (Green): `resumePendingTransfer` y su llamada desde `app.ts`
-- [ ] T-011-87 (Red): `sign-in.spec.ts` · formulario: bloque de bienvenida («RECUPERA TU NIVEL», «Bienvenido de nuevo»), entradas de 56 con iconos `id-card`/`lock`, «Identificador único», mostrar/ocultar, **sin** enlace de recuperación ni textos de seguridad, «Iniciar sesión» y «Cancelar», aviso «Acceso no válido» y de límite de intentos, banner sin conexión
-- [ ] T-011-88 (Green): `SignIn`: formulario, errores y estados
-- [ ] T-011-89 (Red): `local-tasks-sheet.spec.ts`: rol `dialog`/`aria-modal`; solo aparece con pendientes; cabecera, caja de recuento con N y «Pendientes», opción A (seleccionable con anillo, texto con N y nota de XP/completadas), opción B, «Traer tareas y continuar», «Cancelar inicio de sesión» y botón atrás cancelan
-- [ ] T-011-90 (Green): `LocalTasksSheet` (hoja inferior con asa, velo con desenfoque, opciones)
-- [ ] T-011-91 (Red): `discard-confirm.spec.ts`: rol `alertdialog`, N tareas, «Sí, descartar tareas locales» descarta y entra, «Volver a opciones» vuelve; variante derivada para solo completadas
-- [ ] T-011-92 (Green): `DiscardConfirm`
-- [ ] T-011-93 (Red→Green): `sign-in.spec.ts` · flujo: sin tareas locales entra directo a la lista; con pendientes → hoja → traer → aviso «Tareas añadidas a tu cuenta»; usar solo la cuenta → confirmación → «Sesión iniciada»; cancelar en cualquier punto deja la sesión anónima y los datos intactos
-- [ ] T-011-94 (Red→Green): `cypress/e2e/cuenta.cy.ts` · iniciar sesión: error genérico, límite, sin tareas locales, con pendientes (se traen sin XP), usar solo la cuenta, cancelar, los datos de la cuenta se ven al entrar y no se ven datos ajenos
-- [ ] T-011-95 (Refactor): limpiar con los tests en verde
-- [ ] T-011-96: **medidas** de Iniciar sesión (tarjeta de bienvenida 56, entradas 56 con radio 16, botones 52, aviso de error 36, hoja con asa 48×6 y radio superior 24, tarjetas de opción, caja de recuento, nota, botones 52/44, confirmación 56/50/46) frente al plan; **comparación** con `iniciar-sesion-y-tareas-de-este-movil/screen.png` y con el HTML de la hoja y de la confirmación (sin captura); claro y oscuro
-- [ ] T-011-97: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
+- [x] T-011-79 (Red): `account.access.service.spec.ts` · `localTasks`: instantánea de pendientes y número de completadas de la identidad anónima; vacía si la sesión no es anónima
+- [x] T-011-80 (Green): `localTasks` en `AccountAccessService`
+- [x] T-011-81 (Red): `account.access.service.spec.ts` · `startSignIn`: comprueba credenciales sin cambiar de identidad, captura la instantánea, errores genéricos y límite; `cancelSignIn` deja la sesión anónima intacta
+- [x] T-011-82 (Green): `startSignIn` y `cancelSignIn`
+- [x] T-011-83 (Red): `account.access.service.spec.ts` · `finishSignIn('merge')`: completa el inicio de sesión y recrea **solo las pendientes** en la cuenta (sin XP ni completadas), guarda el buffer, lo borra al acabar, reintenta sin duplicar tras un fallo parcial; `'discard'` y `'none'` no recrean nada
+- [x] T-011-84 (Green): `finishSignIn` y traspaso con buffer en `localStorage`
+- [x] T-011-85 (Red): `account.access.service.spec.ts` · `resumePendingTransfer`: reanuda un buffer pendiente al arrancar con sesión de cuenta y no hace nada si no hay buffer o la sesión es anónima
+- [x] T-011-86 (Green): `resumePendingTransfer` y su llamada desde `app.ts`
+- [x] T-011-87 (Red): `sign-in.spec.ts` · formulario: bloque de bienvenida («RECUPERA TU NIVEL», «Bienvenido de nuevo»), entradas de 56 con iconos `id-card`/`lock`, «Identificador único», mostrar/ocultar, **sin** enlace de recuperación ni textos de seguridad, «Iniciar sesión» y «Cancelar», aviso «Acceso no válido» y de límite de intentos, banner sin conexión
+- [x] T-011-88 (Green): `SignIn`: formulario, errores y estados
+- [x] T-011-89 (Red): `local-tasks-sheet.spec.ts`: rol `dialog`/`aria-modal`; solo aparece con pendientes; cabecera, caja de recuento con N y «Pendientes», opción A (seleccionable con anillo, texto con N y nota de XP/completadas), opción B, «Traer tareas y continuar», «Cancelar inicio de sesión» y botón atrás cancelan
+- [x] T-011-90 (Green): `LocalTasksSheet` (hoja inferior con asa, velo con desenfoque, opciones)
+- [x] T-011-91 (Red): `discard-confirm.spec.ts`: rol `alertdialog`, N tareas, «Sí, descartar tareas locales» descarta y entra, «Volver a opciones» vuelve; variante derivada para solo completadas
+- [x] T-011-92 (Green): `DiscardConfirm`
+- [x] T-011-93 (Red→Green): `sign-in.spec.ts` · flujo: sin tareas locales entra directo a la lista; con pendientes → hoja → traer → aviso «Tareas añadidas a tu cuenta»; usar solo la cuenta → confirmación → «Sesión iniciada»; cancelar en cualquier punto deja la sesión anónima y los datos intactos
+- [x] T-011-94 (Red→Green): `cypress/e2e/cuenta.cy.ts` · iniciar sesión: error genérico, límite, sin tareas locales, con pendientes (se traen sin XP), usar solo la cuenta, cancelar, los datos de la cuenta se ven al entrar y no se ven datos ajenos
+- [x] T-011-95 (Refactor): limpiar con los tests en verde
+- [x] T-011-96: **medidas** de Iniciar sesión (tarjeta de bienvenida 56, entradas 56 con radio 16, botones 52, aviso de error 36, hoja con asa 48×6 y radio superior 24, tarjetas de opción, caja de recuento, nota, botones 52/44, confirmación 56/50/46) frente al plan; **comparación** con `iniciar-sesion-y-tareas-de-este-movil/screen.png` y con el HTML de la hoja y de la confirmación (sin captura); claro y oscuro
+- [x] T-011-97: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
 
 ---
 

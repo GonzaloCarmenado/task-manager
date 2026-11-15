@@ -74,6 +74,12 @@ describe('AccountPreview (solo desarrollo)', () => {
     }
   });
 
+  it('US-011-02 la pantalla «entrar» muestra Iniciar sesión en todos sus estados', () => {
+    for (const state of ['form', 'error', 'limit', 'offline', 'sheet', 'completed']) {
+      expect(render('entrar', state).querySelector('app-sign-in'), state).not.toBeNull();
+    }
+  });
+
   it('US-011-01 usa ChangeDetectionStrategy.OnPush', () => {
     expect((AccountPreview as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });

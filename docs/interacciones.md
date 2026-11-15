@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 139 |
+| Turnos del usuario | 140 |
 | Preguntas `F` (funcionalidad) | 44 |
-| Preguntas `W` (flujo) | 66 |
-| **Total preguntas** | **110** |
+| Preguntas `W` (flujo) | 67 |
+| **Total preguntas** | **111** |
 
 ## Log
 
@@ -145,3 +145,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 136 | 2026-11-15 | "si" (commit de tokens e iconos) | 0 | Commit `4053694`. Bloque 2 completo en local: `AccountConstructorService`, `AccountHeader`, `AccountField`, `RuleList`, `OfflineBanner`, `AccountToast` (montado en `app.html`), `OverlayBack` y la vista previa `__dev/account/<pantalla>/<estado>`. Revisión en navegador con un marco de 390×844 del mismo origen (el redimensionado de ventana de la extensión no surte efecto): medidas del plan comprobadas, claro y oscuro, consola limpia; corregido el color de la indicación del campo según el diseño. |
 | 137 | 2026-11-15 | "si" (commit del Bloque 2) | 1 W | Commit `7e62db7`. Bloque 3: pantalla Cuenta (sin y con cuenta), diálogo de cerrar sesión, botón de perfil en la lista, `AccountAccessService`, simulador e2e multiusuario y 8 e2e de cuenta (50 en total). Hallazgo: con `scope: 'local'` la librería quita la sesión local antes de la petición, así que `signOut` cierra siempre en local y solo se rechaza antes si el móvil declara estar sin conexión (`canSignOut`); el diálogo se cierra antes de cerrar sesión para que el historial no deshaga la navegación. Revisión en navegador (marco 390×844, claro/oscuro) con medidas del plan. Pregunta W: commit del Bloque 3. |
 | 138 | 2026-11-15 | "si" (commit del Bloque 3) | 1 W | Commit `6ca34c3`. Bloque 4 completo en local: `createAccount` (valida y vincula conservando el `user_id`), motivo `invalid-username`, `blurred` en el campo, pantalla Crear cuenta (formulario, aviso con casilla, botón con tres estados, banner sin conexión, aviso de éxito), ruta `cuenta/crear`, vista previa `crear/<estado>` y 7 e2e nuevos (57 en total). Hallazgo: `auth-js` reintenta solo los fallos de red, así que el e2e simula una caída de varias peticiones. Revisión en navegador (390×844, claro y oscuro, estados normal/cargando/sin conexión/errores) con medidas del plan. Pregunta W: commit del Bloque 4. |
+| 139 | 2026-11-15 | "si" (commit del Bloque 4) | 1 W | Commit `9a27215`. Bloque 5 completo en local: tareas de este móvil, inicio de sesión en dos fases (`startSignIn`/`finishSignIn`/`cancelSignIn`), traspaso de pendientes con buffer en `localStorage` (origen y destino, reanudable sin duplicar ni mezclar cuentas) reanudado al arrancar, pantalla Iniciar sesión, hoja «Tareas de este móvil», confirmación de descarte (y variante solo completadas), ruta `cuenta/entrar`, vista previa `entrar/<estado>` y 17 e2e nuevos (67 en total). Hallazgos: (1) al retirar una capa por código su `history.back()` cerraba la de debajo; `OverlayBack` ahora distingue los retrocesos propios y tiene pila y `closeAll()`; (2) el router de Angular atiende su `popstate` en un `setTimeout(0)` y pisaba la navegación posterior: se espera una macrotarea. Revisión en navegador con medidas del plan. Pregunta W: commit del Bloque 5. |

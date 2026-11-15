@@ -293,4 +293,223 @@ describe('Cuenta (extremo a extremo)', () => {
       });
     });
   });
+
+  describe('iniciar sesión', () => {
+    const typeIn = (index: number, text: string) =>
+      cy.get('app-account-field').eq(index).find('input.input').clear().type(text);
+    const login = (name = 'ana', password = PASSWORD) => {
+      typeIn(0, name);
+      typeIn(1, password);
+      cy.get('button.submit').click();
+    };
+    const sheetButton = (text: string) => cy.contains('app-local-tasks-sheet button', text);
+
+    /** Una cuenta «ana» con dos tareas (una completada que da XP) y un móvil anónimo con sus tareas. */
+    const seedAccount = (
+      b: import('../support/backend').FakeBackend,
+      local: { pending: string[]; completed: string[] }
+    ) => {
+      const id = b.addAccount('ana', PASSWORD);
+      b.seed({ title: 'De la cuenta', user_id: id, due_date: TODAY });
+      b.seed({
+        title: 'Cuenta hecha',
+        user_id: id,
+        completed_at: '2026-11-14T08:00:00.000Z',
+        completed_day: TODAY,
+      });
+      local.pending.forEach((title) => b.seed({ title, due_date: TODAY }));
+      local.completed.forEach((title) => b.seedCompleted(title, TODAY));
+      return id;
+    };
+
+    it('credenciales incorrectas: aviso genérico, conserva lo escrito y no cambia nada', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => void seedAccount(b, { pending: ['Pendiente local'], completed: [] }),
+      }).then((backend) => {
+        login('ana', 'otra-clave-1');
+        cy.contains('[role="alert"]', 'Acceso no válido').should('be.visible');
+        cy.contains('Nombre de usuario o contraseña incorrectos').should('be.visible');
+        cy.get('app-account-field').eq(0).find('input.input').should('have.value', 'ana');
+        cy.location('pathname').should('eq', '/cuenta/entrar');
+        cy.wrap(null).should(() => expect(backend.signups).to.eq(1));
+
+        login('no_existe', PASSWORD); // un usuario inexistente da exactamente el mismo aviso
+        cy.contains('[role="alert"]', 'Nombre de usuario o contraseña incorrectos').should(
+          'be.visible'
+        );
+      });
+    });
+
+    it('demasiados intentos: lo explica con el mismo bloque', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => void seedAccount(b, { pending: [], completed: [] }),
+      }).then((backend) => {
+        backend.fail('rate-limit', 1);
+        login();
+        cy.contains('[role="alert"]', 'Demasiados intentos. Espera unos minutos.').should(
+          'be.visible'
+        );
+        cy.location('pathname').should('eq', '/cuenta/entrar');
+      });
+    });
+
+    it('sin tareas locales entra directo: ve las de su cuenta y ninguna ajena', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => void seedAccount(b, { pending: [], completed: [] }),
+      });
+      login();
+      cy.location('pathname').should('eq', '/');
+      cy.contains('[role="status"]', 'Sesión iniciada').should('be.visible');
+      cy.contains('.title', 'De la cuenta').should('be.visible');
+      cy.get('app-profile-button a').click();
+      cy.contains('.username', '@ana').should('be.visible');
+    });
+
+    it('con pendientes pregunta y «traer» las recrea en la cuenta, sin XP ni completadas', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) =>
+          void seedAccount(b, {
+            pending: ['Pendiente A', 'Pendiente B'],
+            completed: ['Hecha local'],
+          }),
+      }).then((backend) => {
+        const accountId = backend.accountByName('ana')?.id as string;
+        const xpBefore = backend.totalXp(accountId);
+        login();
+
+        cy.get('app-local-tasks-sheet [role="dialog"]').should('be.visible');
+        cy.contains('.count-text', '2 tareas locales sin cuenta').should('be.visible');
+        cy.contains('Nota: El XP y las tareas ya completadas de este móvil no se sumarán.').should(
+          'be.visible'
+        );
+        cy.location('pathname').should('eq', '/cuenta/entrar');
+
+        sheetButton('Traer tareas y continuar').click();
+        cy.location('pathname').should('eq', '/');
+        cy.contains('[role="status"]', 'Tareas añadidas a tu cuenta').should('be.visible');
+        cy.contains('.title', 'Pendiente A').should('be.visible');
+        cy.contains('.title', 'Pendiente B').should('be.visible');
+        cy.contains('.title', 'De la cuenta').should('be.visible');
+        cy.contains('.title', 'Hecha local').should('not.exist');
+
+        cy.wrap(null).should(() => {
+          const titles = backend.tasksOf(accountId).map((t) => t.title);
+          expect(titles).to.include.members(['De la cuenta', 'Pendiente A', 'Pendiente B']);
+          expect(titles).to.not.include('Hecha local');
+          expect(backend.totalXp(accountId)).to.eq(xpBefore); // el XP del móvil no se suma
+          expect(backend.byTitle('Pendiente A')?.xp_awarded).to.eq(0);
+        });
+      });
+    });
+
+    it('«usar solo mi cuenta» pide confirmar, descarta las del móvil y entra', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => void seedAccount(b, { pending: ['Pendiente A'], completed: [] }),
+      }).then((backend) => {
+        login();
+        sheetButton('Usar solo mi cuenta').click();
+        cy.get('app-discard-confirm [role="alertdialog"]')
+          .should('be.visible')
+          .and('contain', '¿Descartar tareas de este móvil?')
+          .and('contain', 'Esta acción no se puede deshacer');
+        cy.get('app-local-tasks-sheet').should('exist'); // la hoja sigue debajo
+
+        cy.contains('app-discard-confirm button', 'Sí, descartar tareas locales').click();
+        cy.location('pathname').should('eq', '/');
+        cy.contains('[role="status"]', 'Sesión iniciada').should('be.visible');
+        cy.contains('.title', 'De la cuenta').should('be.visible');
+        cy.contains('.title', 'Pendiente A').should('not.exist');
+        cy.wrap(null).should(() => {
+          const accountId = backend.accountByName('ana')?.id as string;
+          expect(backend.tasksOf(accountId).map((t) => t.title)).to.not.include('Pendiente A');
+        });
+      });
+    });
+
+    it('«Volver a opciones» cierra la confirmación y deja la hoja', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => void seedAccount(b, { pending: ['Pendiente A'], completed: [] }),
+      });
+      login();
+      sheetButton('Usar solo mi cuenta').click();
+      cy.contains('app-discard-confirm button', 'Volver a opciones').click();
+      cy.get('app-discard-confirm').should('not.exist');
+      cy.get('app-local-tasks-sheet [role="dialog"]').should('be.visible');
+    });
+
+    it('cancelar deja la sesión anónima y sus tareas intactas', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => void seedAccount(b, { pending: ['Pendiente A'], completed: [] }),
+      }).then((backend) => {
+        login();
+        sheetButton('Cancelar inicio de sesión').click();
+        cy.get('app-local-tasks-sheet').should('not.exist');
+        cy.location('pathname').should('eq', '/cuenta/entrar');
+        cy.get('app-account-header button.back').click();
+        cy.contains('Tus datos viven solo en este móvil').should('be.visible'); // sigue sin cuenta
+        cy.get('app-account-header button.back').click();
+        cy.contains('.title', 'Pendiente A').should('be.visible');
+        cy.wrap(null).should(() => {
+          expect(backend.signups).to.eq(1);
+          expect(backend.byTitle('Pendiente A')?.user_id).to.eq(USER_ID);
+        });
+      });
+    });
+
+    it('el botón atrás de Android cierra la hoja y cancela la entrada', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => void seedAccount(b, { pending: ['Pendiente A'], completed: [] }),
+      });
+      login();
+      cy.get('app-local-tasks-sheet [role="dialog"]').should('be.visible');
+      cy.go('back');
+      cy.get('app-local-tasks-sheet').should('not.exist');
+      cy.location('pathname').should('eq', '/cuenta/entrar');
+    });
+
+    it('solo completadas en el móvil: confirmación derivada y se entra sin ellas', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => void seedAccount(b, { pending: [], completed: ['Hecha local'] }),
+      });
+      login();
+      cy.get('app-local-tasks-sheet').should('not.exist');
+      cy.contains('app-discard-confirm h2', '¿Continuar sin las tareas de este móvil?').should(
+        'be.visible'
+      );
+      cy.contains('app-discard-confirm button', 'Sí, continuar').click();
+      cy.location('pathname').should('eq', '/');
+      cy.contains('.title', 'De la cuenta').should('be.visible');
+      cy.contains('.title', 'Hecha local').should('not.exist');
+    });
+
+    it('los datos de la cuenta reaparecen al cerrar sesión y volver a entrar', () => {
+      cy.boot({
+        seed: (b) => {
+          const id = b.addAccount('ana', PASSWORD);
+          b.seed({ title: 'De la cuenta', user_id: id, due_date: TODAY });
+        },
+        signedInAs: 'ana',
+      });
+      cy.get('app-profile-button a').click();
+      cy.contains('button.row', 'Cerrar sesión').click();
+      cy.contains('[role="alertdialog"] button', 'Sí, cerrar sesión').click();
+      cy.contains('h2', 'Todo despejado por aquí').should('be.visible');
+      cy.contains('.title', 'De la cuenta').should('not.exist');
+
+      cy.get('app-profile-button a').click();
+      cy.contains('a', 'Ya tengo cuenta, iniciar sesión').click();
+      login();
+      cy.location('pathname').should('eq', '/');
+      cy.contains('.title', 'De la cuenta').should('be.visible');
+    });
+  });
 });

@@ -1,0 +1,87 @@
+<app-account-header [title]="copy.title" (back)="goBack()" />
+
+<form class="page" novalidate (submit)="onSubmit($event)">
+  <section class="welcome">
+    <span class="halo" aria-hidden="true"></span>
+    <span class="tile" aria-hidden="true"><app-icon name="cloud-sync" [filled]="true" /></span>
+    <div class="welcome-text">
+      <span class="welcome-badge"><app-icon name="bolt" />{{ copy.badge }}</span>
+      <h2 class="welcome-title">{{ copy.welcome }}</h2>
+      <p class="welcome-body">{{ copy.welcomeBody }}</p>
+    </div>
+  </section>
+
+  @if (errorText(); as message) {
+  <div class="notice" role="alert">
+    <span class="notice-icon" aria-hidden="true"><app-icon name="alert-circle" /></span>
+    <div>
+      <p class="notice-title">{{ copy.errorTitle }}</p>
+      <p class="notice-body">{{ message }}</p>
+    </div>
+  </div>
+  } @if (offline()) {
+  <app-offline-banner (retry)="submit()" />
+  }
+
+  <app-account-field
+    variant="block"
+    [label]="copy.usernameLabel"
+    icon="id-card"
+    [side]="copy.usernameSide"
+    [placeholder]="copy.usernamePlaceholder"
+    autocomplete="username"
+    [value]="username()"
+    (valueChange)="onUsername($event)"
+  />
+
+  <app-account-field
+    variant="block"
+    [label]="copy.passwordLabel"
+    icon="lock"
+    type="password"
+    autocomplete="current-password"
+    toggleLabel="Mostrar u ocultar contraseña"
+    [value]="password()"
+    (valueChange)="onPassword($event)"
+  />
+
+  <div class="actions">
+    <button
+      class="submit"
+      type="submit"
+      [class.loading]="loading()"
+      [disabled]="loading()"
+      [attr.aria-busy]="loading()"
+    >
+      @if (loading()) {
+      <span class="spinner" aria-hidden="true"></span>
+      {{ copy.submitting }} } @else { {{ copy.submit }}
+      <app-icon name="arrow-right" />
+      }
+    </button>
+    <button class="cancel" type="button" (click)="goBack()">{{ copy.cancel }}</button>
+  </div>
+</form>
+
+@if (step() === 'sheet' || step() === 'discard') {
+<app-local-tasks-sheet
+  [count]="pendingCount()"
+  (bring)="finish('merge')"
+  (useOnly)="askDiscard()"
+  (cancel)="cancelFlow()"
+/>
+} @if (step() === 'discard') {
+<app-discard-confirm
+  variant="pending"
+  [count]="pendingCount()"
+  (confirm)="finish('discard')"
+  (back)="backToOptions()"
+/>
+} @if (step() === 'completed') {
+<app-discard-confirm
+  variant="completed"
+  [count]="completedCount()"
+  (confirm)="finish('none')"
+  (back)="cancelFlow()"
+/>
+}

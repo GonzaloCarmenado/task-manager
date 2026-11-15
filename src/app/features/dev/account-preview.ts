@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AccountResult } from '../../core/models/account';
+import { AccountResult, LocalTasksSnapshot } from '../../core/models/account';
 import { AccountAccessService } from '../account/account.access.service';
 import { AccountConstructorService } from '../account/account.constructor.service';
 import { AccountLogoutDialog } from '../account/account-logout-dialog/account-logout-dialog';
 import { AccountScreen } from '../account/account-screen/account-screen';
 import { CreateAccount } from '../account/create-account/create-account';
+import { SignIn } from '../account/sign-in/sign-in';
 import { AccountField } from '../account/shared/account-field/account-field';
 import { AccountHeader } from '../account/shared/account-header/account-header';
 import { AccountToastService } from '../account/shared/account-toast/account-toast.service';
@@ -22,6 +23,33 @@ function sampleCreate(state: string): () => Promise<AccountResult> {
   return async () => ({ ok: true });
 }
 
+/**
+ * Inicio de sesión simulado: `form` (entra sin tareas locales), `error`, `limit`, `offline`, `sheet`
+ * (2 pendientes y 1 completada) y `completed` (solo 3 completadas).
+ */
+function sampleSignIn(state: string) {
+  const snapshot = signal<LocalTasksSnapshot | null>(null);
+  const pending = [
+    { title: 'Comprar pan', dueDate: null, dueTime: null },
+    { title: 'Llamar al banco', dueDate: null, dueTime: null },
+  ];
+  return {
+    signInSnapshot: snapshot,
+    transferPending: signal(false),
+    startSignIn: async (): Promise<AccountResult> => {
+      if (state === 'error') return { ok: false, reason: 'invalid-credentials' };
+      if (state === 'limit') return { ok: false, reason: 'rate-limited' };
+      if (state === 'offline') return { ok: false, reason: 'network' };
+      if (state === 'sheet') snapshot.set({ pending, completed: 1 });
+      else if (state === 'completed') snapshot.set({ pending: [], completed: 3 });
+      else snapshot.set({ pending: [], completed: 0 });
+      return { ok: true };
+    },
+    finishSignIn: async (): Promise<AccountResult> => ({ ok: true }),
+    cancelSignIn: () => snapshot.set(null),
+  };
+}
+
 /** Datos de ejemplo de la pantalla Cuenta: `anonymous`, `account` o `dialog` (con cuenta y el diálogo abierto). */
 function sampleAccess(state: string) {
   const withAccount = state === 'account' || state === 'dialog';
@@ -32,6 +60,7 @@ function sampleAccess(state: string) {
     canSignOut: () => true,
     signOut: async () => ({ ok: true as const }),
     createAccount: sampleCreate(state),
+    ...sampleSignIn(state),
   };
 }
 
@@ -41,6 +70,7 @@ function sampleAccess(state: string) {
  * Pantalla `base`: campos y cabecera. Estados: `fields`, `errors`, `valid` y `toast`.
  * Pantalla `cuenta`: la pantalla Cuenta con datos de ejemplo. Estados: `anonymous`, `account` y `dialog`.
  * Pantalla `crear`: Crear cuenta con un servicio simulado. Estados: `normal`, `taken`, `offline` y `slow`.
+ * Pantalla `entrar`: Iniciar sesión. Estados: `form`, `error`, `limit`, `offline`, `sheet` y `completed`.
  */
 @Component({
   selector: 'app-account-preview',
@@ -52,6 +82,7 @@ function sampleAccess(state: string) {
     AccountScreen,
     AccountLogoutDialog,
     CreateAccount,
+    SignIn,
   ],
   providers: [
     {
@@ -62,6 +93,8 @@ function sampleAccess(state: string) {
   template: `
     @if (screen === 'crear') {
       <app-create-account />
+    } @else if (screen === 'entrar') {
+      <app-sign-in />
     } @else if (screen === 'cuenta') {
       <app-account-screen />
       @if (requested === 'dialog') {
