@@ -297,3 +297,17 @@ describe('RecurrenceConstructorService · fin de la repetición (US-012-06)', ()
     ).toBe('Se repetirá todos los días, hasta el 30 de diciembre');
   });
 });
+
+describe('RecurrenceConstructorService · plural de los días en el resumen', () => {
+  it('US-012-01 el resumen pone en plural sábado y domingo (los sábados y domingos)', () => {
+    const d = draft({ option: 'weekdays', weekdays: [6, 7] });
+    expect(service().summary(d, '2026-11-14', TODAY)?.rule).toBe(
+      'Se repetirá los sábados y domingos'
+    );
+  });
+
+  it('US-012-01 los días que ya acaban en «s» no cambian (lunes, miércoles)', () => {
+    const d = draft({ option: 'weekdays', weekdays: [1, 3] });
+    expect(service().summary(d, START, TODAY)?.rule).toBe('Se repetirá los lunes y miércoles');
+  });
+});

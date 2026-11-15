@@ -81,6 +81,7 @@ Los selectores de fecha y hora del formulario son los **nativos** del sistema (`
 - **Teclado virtual**: en Crear cuenta, Cambiar contraseña, Iniciar sesión y Borrar cuenta el teclado no debe tapar el campo activo ni el botón principal (la cabecera es fija y el contenido hace scroll). `adb shell input text` escribe en el campo enfocado.
 - **Arranque en frío, claro y oscuro**: cambiar el tema con la app abierta no recrea la barra de estado (ver spec 010); cerrar y abrir la app tras cambiarlo (`adb shell cmd uimode night yes`).
 - Si la app se cierra a mitad de un traspaso de tareas (entrar con tareas pendientes en el móvil), al abrirla de nuevo se reanuda sin duplicar (buffer en `localStorage`).
+- **Tareas repetitivas (spec 012)**: con el APK x86_64, crear una tarea que se repite, completarla (la siguiente aparece con candado), probar «Editar / Borrar → Solo esta / Toda la serie» con el botón atrás cerrando solo la hoja de arriba, y una ocurrencia con hora a pocos minutos (`adb shell dumpsys alarm` y `dumpsys notification`). Conceder antes `POST_NOTIFICATIONS` y `SCHEDULE_EXACT_ALARM` con `adb shell pm grant` y `appops set`.
 - Comprobación manual recomendada tras cambios en la cuenta: crear cuenta → cerrar sesión → entrar con tareas locales (traer y descartar) → cambiar contraseña → borrar cuenta, con el backend real (`pnpm tauri android dev`).
 
 ## Interfaz y diseño (spec 010)

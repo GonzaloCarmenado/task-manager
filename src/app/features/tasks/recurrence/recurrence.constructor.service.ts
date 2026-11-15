@@ -57,6 +57,9 @@ function shortDay(day: string): string {
   return `${d} ${MONTHS[month - 1]}`;
 }
 
+/** «sábado» → «sábados»; «lunes» se queda como está. */
+const plural = (name: string): string => (name.endsWith('s') ? name : `${name}s`);
+
 /** «lunes, miércoles y viernes». */
 function joinNatural(names: readonly string[]): string {
   if (names.length <= 1) return names.join('');
@@ -257,7 +260,7 @@ export class RecurrenceConstructorService {
   private sentence(rule: Recurrence): string {
     if (rule.kind === 'monthly') return `el día ${rule.monthDay} de cada mes`;
     if (rule.kind === 'weekly') {
-      const names = joinNatural(rule.weekdays.map((d) => DAYS[d - 1].name));
+      const names = joinNatural(rule.weekdays.map((d) => plural(DAYS[d - 1].name)));
       return rule.interval > 1 ? `cada ${rule.interval} semanas, los ${names}` : `los ${names}`;
     }
     return rule.interval > 1 ? `cada ${rule.interval} días` : 'todos los días';
