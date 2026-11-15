@@ -6,7 +6,7 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 158 |
+| Turnos del usuario | 160 |
 | Preguntas `F` (funcionalidad) | 46 |
 | Preguntas `W` (flujo) | 77 |
 | **Total preguntas** | **123** |
@@ -165,3 +165,5 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 156 | 2026-11-15 | "si aplica y si al commit" / "listo, ese es el proyecto" | 3 W | Commit `b8b0fb7` (bloques 1–4). La CLI de Supabase estaba en otra cuenta: parada, `logout`, y tras `login` del usuario se verificó la organización por id, `db:push:dry` y `db push --yes` (migración `task_series` aplicada). Implementados los Bloques 5 a 9 (lista, hojas «Solo esta / Toda la serie», intervalos, día del mes y fin, e2e, fidelidad, docs, `review.md`). 1181 tests unitarios, 138 de scripts y 135 e2e en verde. Preguntas: commit de los bloques 5–9, `verify:series` contra el remoto y comprobación en Android. |
 | 157 | 2026-11-15 | "sigue" | 2 W | Commit `b931d06` (bloques 5–9). `verify:series` 17/17 contra el remoto. Comprobación en Android (emulador x86_64, proyecto real): crear, completar con aviso, alarma real, atrás con las tres hojas, editar y borrar, arranque en frío; hallazgo: plural «domingos» corregido con test. `review.md` APROBADO, tareas 69/69. Preguntas: commit de cierre y subir la rama / actualizar la PR. |
 | 158 | 2026-11-15 | "si vamos" (commit de cierre, subir la rama y actualizar la PR) | 0 | Commit `b20a874`; auditoría de lo que viaja sin hallazgos; rama subida y PR #1 actualizada (título y descripción con la spec 012). Las dos preguntas `W` ya estaban contadas. |
+| 159 | 2026-11-15 | "si dale" + "siguiente spec: action para crear el compilado de Android en Releases; si necesitas algún secreto me dices" | 0 | Commit `203a700` del registro. `/specify`: creada `specs/013-release-android/spec.md` (Ciclo simple por decisión previa, sin frontal) y fila 013 en el índice. Pendiente de aprobación. |
+| 160 | 2026-11-15 | "me gusta" | 0 | Spec 013 aprobada. Siguiente paso: `/clarify`. |
