@@ -2,6 +2,7 @@
 export type AccountErrorReason =
   | 'invalid-credentials' // inicio de sesión o contraseña actual incorrectos (mensaje siempre igual)
   | 'username-taken' // «Nombre de usuario no disponible»
+  | 'invalid-username' // formato no válido (3–24 caracteres de a-z, 0-9, punto, guion y guion bajo)
   | 'weak-password' // el servicio rechazó la contraseña (mínimo remoto)
   | 'same-password' // la nueva es igual a la actual
   | 'rate-limited' // «Demasiados intentos. Espera unos minutos.»

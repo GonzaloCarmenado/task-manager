@@ -43,6 +43,7 @@
       [attr.aria-invalid]="error() ? 'true' : null"
       [attr.aria-describedby]="error() ? errorId : null"
       (input)="onInput($event)"
+      (blur)="blurred.emit()"
     />
     @if (isPassword()) {
     <button

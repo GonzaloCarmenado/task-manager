@@ -122,6 +122,7 @@ describe('AccountConstructorService · repetición de la contraseña', () => {
 describe('AccountConstructorService · textos de error por contexto', () => {
   const reasons: AccountErrorReason[] = [
     'invalid-credentials',
+    'invalid-username',
     'username-taken',
     'weak-password',
     'same-password',
@@ -140,8 +141,9 @@ describe('AccountConstructorService · textos de error por contexto', () => {
     expect(s.errorText('rate-limited', 'signin')).toBe('Demasiados intentos. Espera unos minutos.');
   });
 
-  it('US-011-02 crear cuenta: nombre no disponible y contraseña débil', () => {
+  it('US-011-02 crear cuenta: nombre no disponible, formato inválido y contraseña débil', () => {
     const s = setup();
+    expect(s.errorText('invalid-username', 'create')).toBe('El formato de usuario no es válido.');
     expect(s.errorText('username-taken', 'create')).toBe('Nombre de usuario no disponible');
     expect(s.errorText('weak-password', 'create')).toBe(
       'La contraseña debe cumplir con los requisitos.'

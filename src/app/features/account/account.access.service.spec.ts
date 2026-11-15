@@ -19,15 +19,25 @@ function setup(initial: AuthSession | null = ANONYMOUS) {
   const session = signal<AuthSession | null>(initial);
   const signOut = vi.fn<() => Promise<AccountResult>>(async () => ({ ok: true }));
   const canSignOut = vi.fn(() => true);
+  const linkAccount = vi.fn<(u: string, p: string) => Promise<AccountResult>>(async () => ({
+    ok: true,
+  }));
   const forget = vi.fn();
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
-      { provide: AuthAccessService, useValue: { session, signOut, canSignOut } },
+      { provide: AuthAccessService, useValue: { session, signOut, canSignOut, linkAccount } },
       { provide: TasksAccessService, useValue: { forget } },
     ],
   });
-  return { service: TestBed.inject(AccountAccessService), session, signOut, canSignOut, forget };
+  return {
+    service: TestBed.inject(AccountAccessService),
+    session,
+    signOut,
+    canSignOut,
+    linkAccount,
+    forget,
+  };
 }
 
 describe('AccountAccessService · sesión', () => {
@@ -91,5 +101,73 @@ describe('AccountAccessService · cerrar sesión', () => {
     expect(await service.signOut()).toEqual({ ok: false, reason: 'unauthorized' });
     expect(signOut).not.toHaveBeenCalled();
     expect(forget).not.toHaveBeenCalled();
+  });
+});
+
+describe('AccountAccessService · crear cuenta', () => {
+  const PASSWORD = ['Mi', 'Clave', 'Segura1'].join('');
+
+  it('US-011-01 vincula la sesión anónima con el nombre normalizado y la contraseña', async () => {
+    const { service, linkAccount } = setup(ANONYMOUS);
+
+    expect(await service.createAccount('  Carlos_Ritmo ', PASSWORD)).toEqual({ ok: true });
+
+    expect(linkAccount).toHaveBeenCalledTimes(1);
+    expect(linkAccount).toHaveBeenCalledWith('carlos_ritmo', PASSWORD);
+  });
+
+  it('US-011-01 conserva las tareas y el progreso: no se vacía nada de memoria', async () => {
+    const { service, forget } = setup(ANONYMOUS);
+    await service.createAccount('carlos_ritmo', PASSWORD);
+    expect(forget).not.toHaveBeenCalled();
+  });
+
+  it('US-011-01 un nombre con formato inválido se rechaza sin llamar al servidor', async () => {
+    const { service, linkAccount } = setup(ANONYMOUS);
+
+    for (const bad of ['ab', 'a'.repeat(25), 'ana lopez', 'ana@mail', '']) {
+      expect(await service.createAccount(bad, PASSWORD), bad).toEqual({
+        ok: false,
+        reason: 'invalid-username',
+      });
+    }
+    expect(linkAccount).not.toHaveBeenCalled();
+  });
+
+  it('US-011-01 una contraseña que no cumple las reglas se rechaza sin llamar al servidor', async () => {
+    const { service, linkAccount } = setup(ANONYMOUS);
+
+    expect(await service.createAccount('carlos_ritmo', 'corta')).toEqual({
+      ok: false,
+      reason: 'weak-password',
+    });
+    expect(await service.createAccount('carlos_ritmo', 'Carlos_Ritmo')).toEqual({
+      ok: false,
+      reason: 'weak-password',
+    });
+    expect(linkAccount).not.toHaveBeenCalled();
+  });
+
+  it('US-011-01 devuelve tal cual el motivo del servidor (nombre ocupado, sin red…)', async () => {
+    const { service, linkAccount } = setup(ANONYMOUS);
+    for (const reason of ['username-taken', 'network', 'timeout', 'rate-limited'] as const) {
+      linkAccount.mockResolvedValueOnce({ ok: false, reason });
+      expect(await service.createAccount('carlos_ritmo', PASSWORD)).toEqual({ ok: false, reason });
+    }
+  });
+
+  it('US-011-01 quien ya tiene cuenta, o no hay sesión, no puede crear otra', async () => {
+    const withAccount = setup(ACCOUNT);
+    expect(await withAccount.service.createAccount('otro_nombre', PASSWORD)).toEqual({
+      ok: false,
+      reason: 'unauthorized',
+    });
+    expect(withAccount.linkAccount).not.toHaveBeenCalled();
+
+    const none = setup(null);
+    expect(await none.service.createAccount('otro_nombre', PASSWORD)).toEqual({
+      ok: false,
+      reason: 'unauthorized',
+    });
   });
 });

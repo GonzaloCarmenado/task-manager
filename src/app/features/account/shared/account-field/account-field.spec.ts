@@ -132,6 +132,14 @@ describe('AccountField', () => {
     expect(a).not.toBe(b);
   });
 
+  it('US-011-02 emite blurred cuando la entrada pierde el foco (para mostrar los errores)', () => {
+    const { fixture, input } = render();
+    const blurred = vi.fn();
+    fixture.componentInstance.blurred.subscribe(blurred);
+    input.dispatchEvent(new Event('blur'));
+    expect(blurred).toHaveBeenCalledTimes(1);
+  });
+
   it('US-011-02 usa ChangeDetectionStrategy.OnPush', () => {
     expect((AccountField as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });

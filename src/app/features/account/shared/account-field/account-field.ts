@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, input, model, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  input,
+  model,
+  output,
+  signal,
+} from '@angular/core';
 import { RuleView } from '../../../../core/models/account';
 import { Icon, IconName } from '../../../../shared/components/icon/icon';
 import { RuleList } from '../rule-list/rule-list';
@@ -15,6 +23,8 @@ let nextId = 0;
 })
 export class AccountField {
   readonly value = model('');
+  /** La entrada perdió el foco: la pantalla decide entonces si muestra los errores. */
+  readonly blurred = output<void>();
 
   readonly label = input.required<string>();
   readonly icon = input.required<IconName>();

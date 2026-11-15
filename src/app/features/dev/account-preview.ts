@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { AccountResult } from '../../core/models/account';
 import { AccountAccessService } from '../account/account.access.service';
 import { AccountConstructorService } from '../account/account.constructor.service';
 import { AccountLogoutDialog } from '../account/account-logout-dialog/account-logout-dialog';
 import { AccountScreen } from '../account/account-screen/account-screen';
+import { CreateAccount } from '../account/create-account/create-account';
 import { AccountField } from '../account/shared/account-field/account-field';
 import { AccountHeader } from '../account/shared/account-header/account-header';
 import { AccountToastService } from '../account/shared/account-toast/account-toast.service';
@@ -11,6 +13,14 @@ import { OfflineBanner } from '../account/shared/offline-banner/offline-banner';
 
 const STATES = ['fields', 'errors', 'valid', 'toast'] as const;
 type PreviewState = (typeof STATES)[number];
+
+/** Resultado simulado de crear cuenta: `normal` (ok), `taken` (nombre ocupado), `offline` o `slow` (sin fin). */
+function sampleCreate(state: string): () => Promise<AccountResult> {
+  if (state === 'taken') return async () => ({ ok: false, reason: 'username-taken' });
+  if (state === 'offline') return async () => ({ ok: false, reason: 'network' });
+  if (state === 'slow') return () => new Promise<AccountResult>(() => undefined);
+  return async () => ({ ok: true });
+}
 
 /** Datos de ejemplo de la pantalla Cuenta: `anonymous`, `account` o `dialog` (con cuenta y el diálogo abierto). */
 function sampleAccess(state: string) {
@@ -21,6 +31,7 @@ function sampleAccess(state: string) {
     username: () => (withAccount ? 'carlos_ritmo' : null),
     canSignOut: () => true,
     signOut: async () => ({ ok: true as const }),
+    createAccount: sampleCreate(state),
   };
 }
 
@@ -29,11 +40,19 @@ function sampleAccess(state: string) {
  * en el navegador (`/__dev/account/<pantalla>/<estado>`). La ruta solo existe con `isDevMode()`.
  * Pantalla `base`: campos y cabecera. Estados: `fields`, `errors`, `valid` y `toast`.
  * Pantalla `cuenta`: la pantalla Cuenta con datos de ejemplo. Estados: `anonymous`, `account` y `dialog`.
+ * Pantalla `crear`: Crear cuenta con un servicio simulado. Estados: `normal`, `taken`, `offline` y `slow`.
  */
 @Component({
   selector: 'app-account-preview',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AccountHeader, AccountField, OfflineBanner, AccountScreen, AccountLogoutDialog],
+  imports: [
+    AccountHeader,
+    AccountField,
+    OfflineBanner,
+    AccountScreen,
+    AccountLogoutDialog,
+    CreateAccount,
+  ],
   providers: [
     {
       provide: AccountAccessService,
@@ -41,7 +60,9 @@ function sampleAccess(state: string) {
     },
   ],
   template: `
-    @if (screen === 'cuenta') {
+    @if (screen === 'crear') {
+      <app-create-account />
+    } @else if (screen === 'cuenta') {
       <app-account-screen />
       @if (requested === 'dialog') {
         <app-account-logout-dialog />

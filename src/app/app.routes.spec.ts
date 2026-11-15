@@ -10,6 +10,7 @@ import { PostponePreview } from './features/dev/postpone-preview';
 import { ProgressPreview } from './features/dev/progress-preview';
 import { AccountPreview } from './features/dev/account-preview';
 import { AccountScreen } from './features/account/account-screen/account-screen';
+import { CreateAccount } from './features/account/create-account/create-account';
 import { LevelUp } from './features/progress/level-up/level-up';
 import { ProgressScreen } from './features/progress/progress-screen/progress-screen';
 
@@ -54,6 +55,7 @@ describe('app.routes', () => {
       'progreso',
       'nivel/:level',
       'cuenta',
+      'cuenta/crear',
       ':id',
     ]);
   });
@@ -123,6 +125,15 @@ describe('app.routes', () => {
 });
 
 describe('rutas de la cuenta', () => {
+  it('US-011-01 la ruta cuenta/crear carga Crear cuenta de forma lazy y va antes que :id', async () => {
+    const routes = buildRoutes(false);
+    const route = routes.find((r) => r.path === 'cuenta/crear');
+    expect(route?.component).toBeUndefined();
+    expect(await route?.loadComponent?.()).toBe(CreateAccount);
+    const paths = routes.map((r) => r.path);
+    expect(paths.indexOf('cuenta/crear')).toBeLessThan(paths.indexOf(':id'));
+  });
+
   it('US-011-03 la ruta cuenta carga la pantalla Cuenta de forma lazy y va antes que :id', async () => {
     const routes = buildRoutes(false);
     const route = routes.find((r) => r.path === 'cuenta');

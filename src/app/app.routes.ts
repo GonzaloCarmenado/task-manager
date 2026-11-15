@@ -31,6 +31,11 @@ export function buildRoutes(devMode: boolean): Routes {
         import('./features/account/account-screen/account-screen').then((m) => m.AccountScreen),
     },
     {
+      path: 'cuenta/crear',
+      loadComponent: () =>
+        import('./features/account/create-account/create-account').then((m) => m.CreateAccount),
+    },
+    {
       path: ':id',
       loadComponent: () => import('./features/tasks/task-form/task-form').then((m) => m.TaskForm),
     },

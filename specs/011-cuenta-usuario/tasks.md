@@ -91,18 +91,18 @@
 
 ## Bloque 4 — Crear cuenta (US-011-01, P1)
 
-- [ ] T-011-67 (Red): `account.access.service.spec.ts` · `createAccount`: valida antes de llamar, vincula con `AuthAccessService.linkAccount`, conserva tareas y progreso (mismo `userId`), mapea ocupado/débil/red, devuelve el resultado
-- [ ] T-011-68 (Green): `AccountAccessService.createAccount`
-- [ ] T-011-69 (Red): `create-account.spec.ts` · formulario: tres campos con sus iconos, contador `0/24` en vivo, reglas que pasan de gris a verde/rojo al tocar, «Mín. 8», estado «Sin verificar / Coinciden / No coinciden», mensajes de error al perder el foco o al enviar, mostrar/ocultar contraseña, `autocomplete` correctos
-- [ ] T-011-70 (Green): `CreateAccount`: estructura y lógica de formulario con `AccountField` y `RuleList`
-- [ ] T-011-71 (Red): `create-account.spec.ts` · aviso y botón: el botón está deshabilitado con errores o sin casilla; habilitado solo con todo válido y marcada; texto de la casilla y frase en negrita; doble pulsación bloqueada
-- [ ] T-011-72 (Green): `CreateAccount`: bloque de aviso con casilla, acciones (deshabilitado/habilitado/cargando «Creando tu cuenta…») y «Cancelar y volver»
-- [ ] T-011-73 (Red): `create-account.spec.ts` · estados: nombre no disponible, sin conexión con banner y «Reintentar ahora» (conserva lo escrito), éxito (aviso «¡Cuenta creada con éxito!… Tus tareas y tu progreso siguen aquí.» y vuelta a Cuenta con cuenta), atrás conserva lo escrito
-- [ ] T-011-74 (Green): `CreateAccount`: estados, tarjeta ilustrada, banner y aviso de éxito
-- [ ] T-011-75 (Red→Green): `cypress/e2e/cuenta.cy.ts` · crear cuenta: reglas en vivo, botón deshabilitado hasta la casilla, nombre ocupado, sin conexión, éxito conservando tareas y XP, sesión tras recargar
-- [ ] T-011-76 (Refactor): limpiar con los tests en verde
-- [ ] T-011-77: **medidas** (cabecera, banner, tarjeta ilustrada 56/24, tarjetas de campo, entradas 48 y radio total, reglas 16/10/4, bloque de aviso 28/24, botones 52/44, aviso de éxito) frente al plan; **comparación** lado a lado con `crear-cuenta/screen.png` y con el HTML en cada estado (normal, errores, cargando, sin conexión); claro y oscuro; teclado virtual en el emulador más adelante
-- [ ] T-011-78: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
+- [x] T-011-67 (Red): `account.access.service.spec.ts` · `createAccount`: valida antes de llamar, vincula con `AuthAccessService.linkAccount`, conserva tareas y progreso (mismo `userId`), mapea ocupado/débil/red, devuelve el resultado
+- [x] T-011-68 (Green): `AccountAccessService.createAccount`
+- [x] T-011-69 (Red): `create-account.spec.ts` · formulario: tres campos con sus iconos, contador `0/24` en vivo, reglas que pasan de gris a verde/rojo al tocar, «Mín. 8», estado «Sin verificar / Coinciden / No coinciden», mensajes de error al perder el foco o al enviar, mostrar/ocultar contraseña, `autocomplete` correctos
+- [x] T-011-70 (Green): `CreateAccount`: estructura y lógica de formulario con `AccountField` y `RuleList`
+- [x] T-011-71 (Red): `create-account.spec.ts` · aviso y botón: el botón está deshabilitado con errores o sin casilla; habilitado solo con todo válido y marcada; texto de la casilla y frase en negrita; doble pulsación bloqueada
+- [x] T-011-72 (Green): `CreateAccount`: bloque de aviso con casilla, acciones (deshabilitado/habilitado/cargando «Creando tu cuenta…») y «Cancelar y volver»
+- [x] T-011-73 (Red): `create-account.spec.ts` · estados: nombre no disponible, sin conexión con banner y «Reintentar ahora» (conserva lo escrito), éxito (aviso «¡Cuenta creada con éxito!… Tus tareas y tu progreso siguen aquí.» y vuelta a Cuenta con cuenta), atrás conserva lo escrito
+- [x] T-011-74 (Green): `CreateAccount`: estados, tarjeta ilustrada, banner y aviso de éxito
+- [x] T-011-75 (Red→Green): `cypress/e2e/cuenta.cy.ts` · crear cuenta: reglas en vivo, botón deshabilitado hasta la casilla, nombre ocupado, sin conexión, éxito conservando tareas y XP, sesión tras recargar
+- [x] T-011-76 (Refactor): limpiar con los tests en verde
+- [x] T-011-77: **medidas** (cabecera, banner, tarjeta ilustrada 56/24, tarjetas de campo, entradas 48 y radio total, reglas 16/10/4, bloque de aviso 28/24, botones 52/44, aviso de éxito) frente al plan; **comparación** lado a lado con `crear-cuenta/screen.png` y con el HTML en cada estado (normal, errores, cargando, sin conexión); claro y oscuro; teclado virtual en el emulador más adelante
+- [x] T-011-78: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
 
 ---
 

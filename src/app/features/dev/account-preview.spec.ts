@@ -68,6 +68,12 @@ describe('AccountPreview (solo desarrollo)', () => {
     expect(el.querySelector('[role="alertdialog"]')).not.toBeNull();
   });
 
+  it('US-011-01 la pantalla «crear» muestra Crear cuenta en cualquiera de sus estados', () => {
+    for (const state of ['normal', 'taken', 'offline', 'slow']) {
+      expect(render('crear', state).querySelector('app-create-account'), state).not.toBeNull();
+    }
+  });
+
   it('US-011-01 usa ChangeDetectionStrategy.OnPush', () => {
     expect((AccountPreview as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });

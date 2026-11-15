@@ -242,6 +242,8 @@ export class AccountConstructorService {
           : 'Nombre de usuario o contraseña incorrectos. Comprueba tus datos e inténtalo de nuevo.';
       case 'username-taken':
         return 'Nombre de usuario no disponible';
+      case 'invalid-username':
+        return this.text.create.usernameError;
       case 'weak-password':
         return 'La contraseña debe cumplir con los requisitos.';
       case 'same-password':
