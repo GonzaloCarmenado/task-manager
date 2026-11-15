@@ -50,6 +50,12 @@ export const ICON_NAMES = [
   'info',
   'trash-sweep',
   'bolt',
+  'repeat',
+  'event-repeat',
+  'lock-clock',
+  'one',
+  'infinity',
+  'skip-next',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -319,6 +325,38 @@ export type IconName = (typeof ICON_NAMES)[number];
           }
           @case ('bolt') {
             <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />
+          }
+          @case ('repeat') {
+            <path d="M17 3l3 3-3 3" />
+            <path d="M4 11V9a3 3 0 0 1 3-3h13" />
+            <path d="M7 21l-3-3 3-3" />
+            <path d="M20 13v2a3 3 0 0 1-3 3H4" />
+          }
+          @case ('event-repeat') {
+            <rect x="3" y="5" width="18" height="16" rx="3" />
+            <path d="M8 3v4" />
+            <path d="M16 3v4" />
+            <path d="M3 10h18" />
+            <path class="cut" d="M9 15.5a3 3 0 0 1 5-1.5l1 1" />
+            <path class="cut" d="M15 17.5a3 3 0 0 1-5 1.5l-1-1" />
+          }
+          @case ('lock-clock') {
+            <rect x="3" y="11" width="11" height="10" rx="2" />
+            <path d="M5.5 11V8a3 3 0 0 1 6 0v3" />
+            <circle cx="17.5" cy="16.5" r="4.5" />
+            <path class="cut" d="M17.5 14.5v2l1.5 1" />
+          }
+          @case ('one') {
+            <circle cx="12" cy="12" r="9" />
+            <path class="cut" d="M10 9.5l2-1.5v8" />
+          }
+          @case ('infinity') {
+            <path d="M12 12c-2-3-3.5-4-5.5-4a4 4 0 0 0 0 8c2 0 3.5-1 5.5-4z" />
+            <path d="M12 12c2 3 3.5 4 5.5 4a4 4 0 0 0 0-8c-2 0-3.5 1-5.5 4z" />
+          }
+          @case ('skip-next') {
+            <path d="M6 5l9 7-9 7z" />
+            <path d="M18 5v14" />
           }
         }
       </svg>

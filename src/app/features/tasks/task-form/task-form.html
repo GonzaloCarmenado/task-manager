@@ -96,6 +96,22 @@
     }
   </section>
 
+  <section class="card">
+    <button type="button" class="repeat" [disabled]="dueDate() === null" (click)="startRepeat()">
+      <span class="repeat-icon"><app-icon name="repeat" /></span>
+      <span class="repeat-text">
+        <span class="repeat-label">{{ repeatCopy.row.label }}</span>
+        <span class="repeat-value">{{ repeatText() }}</span>
+      </span>
+      <app-icon name="chevron-right" />
+    </button>
+    @if (repeatCleared()) {
+    <p class="help">{{ repeatCopy.row.clearedByDate }}</p>
+    } @else if (dueDate() === null) {
+    <p class="help">{{ repeatCopy.row.needsDate }}</p>
+    }
+  </section>
+
   @if (error(); as message) {
   <p class="form-error" role="alert">{{ message }}</p>
   }
@@ -131,6 +147,13 @@
     [task]="target"
     (choose)="postpone(target, $event)"
     (dismiss)="postponing.set(null)"
+  />
+  } @if (choosingRepeat() && dueDate(); as day) {
+  <app-recurrence-sheet
+    [rule]="recurrence()"
+    [firstDate]="day"
+    (apply)="applyRepeat($event)"
+    (dismiss)="choosingRepeat.set(false)"
   />
   } @if (promptVisible()) {
   <div class="prompt-overlay">

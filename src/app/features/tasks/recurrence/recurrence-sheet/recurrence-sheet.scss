@@ -1,0 +1,238 @@
+@use 'mixins';
+@use 'type';
+
+:host {
+  display: block;
+}
+
+// Hoja inferior de nivel 3 con velo desenfocado (como la de posponer)
+.backdrop {
+  @include mixins.scrim;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  @include mixins.sheet;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 28rem;
+  max-height: 100%;
+  overflow: hidden;
+  padding: var(--space-4) 0 0;
+  font-family: var(--font-family);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-margin);
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft);
+  font-size: 1.125rem;
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  @include type.headline-sm;
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-high);
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--space-margin) var(--space-3);
+  overscroll-behavior: contain;
+}
+
+.group-label {
+  margin: 0;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  @include type.label-sm;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+// Opción de frecuencia: chip con la zona táctil ampliada; la elegida va en índigo
+.pill {
+  @include mixins.chip;
+
+  &[aria-checked='true'] {
+    border-color: transparent;
+    background: var(--color-primary-soft);
+    color: var(--color-on-primary-soft);
+    font-weight: 700;
+  }
+}
+
+.config {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-low);
+}
+
+.config-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.config-label {
+  @include type.label-md;
+  font-weight: 700;
+}
+
+.problem {
+  color: var(--color-error);
+  @include type.body-sm;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1);
+  justify-items: center;
+}
+
+// Día de la semana: círculo de 44 px, índigo si está marcado
+.day {
+  display: grid;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-high);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: transform 150ms ease;
+  @include type.label-lg;
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &[aria-pressed='true'] {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    box-shadow: var(--shadow-button);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-high);
+}
+
+.summary-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-primary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  @include type.label-sm;
+}
+
+.summary-rule {
+  margin: 0;
+  @include type.body-lg;
+  font-weight: 700;
+}
+
+.summary-first {
+  margin: 0;
+  color: var(--color-text-muted);
+  @include type.body-sm;
+}
+
+// Barra de acciones al alcance del pulgar
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-margin) calc(var(--space-4) + env(safe-area-inset-bottom));
+  background: var(--color-surface);
+  box-shadow: var(--shadow-header);
+}
+
+.discard {
+  flex: 1;
+  min-height: var(--control-height);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-high);
+  color: var(--color-text);
+  cursor: pointer;
+  @include type.label-lg;
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.done {
+  @include mixins.pill-button;
+  flex: 2;
+}

@@ -1,0 +1,1044 @@
+<!doctype html>
+
+<html class="light" lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_stack" name="shell-type" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100vw;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              tertiary: '#006c49',
+              'on-error-container': '#93000a',
+              'surface-container': '#efebff',
+              'secondary-fixed': '#ffddb8',
+              'tertiary-fixed-dim': '#4edea3',
+              'on-secondary-fixed': '#2a1700',
+              secondary: '#855300',
+              'surface-tint': '#494bd6',
+              'secondary-fixed-dim': '#ffb95f',
+              'on-tertiary-container': '#000703',
+              outline: '#767586',
+              'on-tertiary-fixed-variant': '#005236',
+              'surface-variant': '#e3dfff',
+              'tertiary-container': '#00885d',
+              'on-surface': '#181445',
+              'tertiary-fixed': '#6ffbbe',
+              'secondary-container': '#fea619',
+              'on-error': '#ffffff',
+              'on-primary-fixed': '#07006c',
+              'on-primary-fixed-variant': '#2f2ebe',
+              'inverse-primary': '#c0c1ff',
+              'surface-container-high': '#e9e5ff',
+              'on-secondary': '#ffffff',
+              'inverse-surface': '#2d2a5b',
+              'primary-fixed-dim': '#c0c1ff',
+              'on-primary-container': '#fffbff',
+              'surface-container-lowest': '#ffffff',
+              'inverse-on-surface': '#f3eeff',
+              'outline-variant': '#c7c4d7',
+              'primary-container': '#6063ee',
+              surface: '#fcf8ff',
+              'on-tertiary-fixed': '#002113',
+              'on-secondary-container': '#684000',
+              'on-secondary-fixed-variant': '#653e00',
+              background: '#fcf8ff',
+              'error-container': '#ffdad6',
+              'on-background': '#181445',
+              'surface-container-highest': '#e3dfff',
+              primary: '#4648d4',
+              'surface-dim': '#dad6ff',
+              error: '#ba1a1a',
+              'on-surface-variant': '#464554',
+              'primary-fixed': '#e1e0ff',
+              'surface-bright': '#fcf8ff',
+              'surface-container-low': '#f6f2ff',
+              'on-tertiary': '#ffffff',
+              'on-primary': '#ffffff',
+            },
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+            spacing: {
+              'space-lg': '1.5rem',
+              'space-xs': '0.25rem',
+              'space-sm': '0.5rem',
+              'space-md': '1rem',
+              gutter: '1rem',
+              'space-xl': '2.25rem',
+              margin: '1.25rem',
+            },
+            fontFamily: {
+              'label-lg': ['Plus Jakarta Sans'],
+              'display-lg': ['Plus Jakarta Sans'],
+              'headline-sm': ['Plus Jakarta Sans'],
+              'body-sm': ['Plus Jakarta Sans'],
+              'label-sm': ['Plus Jakarta Sans'],
+              'body-md': ['Plus Jakarta Sans'],
+              'headline-md': ['Plus Jakarta Sans'],
+              'headline-lg': ['Plus Jakarta Sans'],
+              'label-md': ['Plus Jakarta Sans'],
+              'body-lg': ['Plus Jakarta Sans'],
+            },
+            fontSize: {
+              'label-lg': [
+                '14px',
+                { lineHeight: '20px', letterSpacing: '0.01em', fontWeight: '700' },
+              ],
+              'display-lg': [
+                '36px',
+                { lineHeight: '44px', letterSpacing: '-0.03em', fontWeight: '800' },
+              ],
+              'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+              'body-sm': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+              'label-sm': [
+                '10px',
+                { lineHeight: '14px', letterSpacing: '0.04em', fontWeight: '700' },
+              ],
+              'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+              'headline-md': [
+                '22px',
+                { lineHeight: '28px', letterSpacing: '-0.01em', fontWeight: '700' },
+              ],
+              'headline-lg': [
+                '28px',
+                { lineHeight: '36px', letterSpacing: '-0.02em', fontWeight: '700' },
+              ],
+              'label-md': [
+                '12px',
+                { lineHeight: '16px', letterSpacing: '0.02em', fontWeight: '600' },
+              ],
+              'body-lg': ['16px', { lineHeight: '24px', fontWeight: '500' }],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-container"
+  >
+    <header
+      class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl pt-safe shadow-[0_1px_8px_rgba(0,0,0,0.04)]"
+    >
+      <div class="h-16 px-margin flex items-center justify-between">
+        <div class="flex items-center gap-space-sm">
+          <button
+            aria-label="Volver"
+            class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container active:scale-95 transition-all"
+            onclick="history.back()"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+          </button>
+          <h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">
+            Task Form
+          </h1>
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <button
+            class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all"
+            type="button"
+          >
+            <span class="material-symbols-outlined text-[22px]">more_vert</span>
+          </button>
+          <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="flex-1 flex flex-col w-full pt-16 pb-safe bg-surface px-margin">
+      <div class="flex flex-col w-full pb-28 space-y-5">
+        <!-- Demo Mode Interactive Switcher (Top Testing Pill) -->
+        <div class="w-full bg-surface-container-low p-2 rounded-2xl flex flex-col gap-2 shadow-sm">
+          <div class="flex items-center justify-between px-2 pt-1">
+            <span class="font-label-sm text-label-sm text-primary flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">tune</span> MODO DEMO INTERACTIVO
+            </span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant text-[11px]"
+              >Cambia el estado visual</span
+            >
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 p-1 bg-surface-container-highest rounded-xl">
+            <button
+              class="demo-tab-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm text-center transition-all bg-surface-container-lowest text-primary shadow-sm font-semibold"
+              id="btn-demo-normal"
+              onclick="setDemoState('normal')"
+              type="button"
+            >
+              Con Repetición
+            </button>
+            <button
+              class="demo-tab-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm text-center transition-all text-on-surface-variant hover:text-on-surface"
+              id="btn-demo-modal"
+              onclick="setDemoState('modal')"
+              type="button"
+            >
+              Hoja Abierta
+            </button>
+            <button
+              class="demo-tab-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm text-center transition-all text-on-surface-variant hover:text-on-surface"
+              id="btn-demo-nodate"
+              onclick="setDemoState('nodate')"
+              type="button"
+            >
+              Sin Fecha
+            </button>
+          </div>
+        </div>
+        <!-- Screen Header Contextual Strip -->
+        <div class="flex items-center justify-between px-1">
+          <div class="flex items-center gap-2">
+            <span class="font-headline-md text-headline-md text-on-surface tracking-tight"
+              >Editar Tarea</span
+            >
+            <span
+              class="bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm"
+            >
+              <span
+                class="material-symbols-outlined text-[13px]"
+                style="font-variation-settings: 'FILL' 1"
+                >bolt</span
+              >
+              +25 XP
+            </span>
+          </div>
+          <button
+            class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface px-3 py-1.5 rounded-full hover:bg-surface-container transition-all"
+            type="button"
+          >
+            ✕ Cancelar
+          </button>
+        </div>
+        <!-- Task Title Input Card -->
+        <div
+          class="bg-surface-container-lowest p-space-md rounded-2xl shadow-[0_4px_20px_-2px_rgba(70,72,212,0.08)] flex flex-col gap-2 transition-all"
+        >
+          <div class="flex items-center justify-between">
+            <label
+              class="font-label-sm text-label-sm text-primary uppercase tracking-wider"
+              for="task-title-input"
+              >Nombre del hábito o tarea</label
+            >
+            <span class="font-label-sm text-label-sm text-outline" id="char-counter">25/120</span>
+          </div>
+          <div class="relative flex items-center">
+            <input
+              class="w-full bg-surface-container-low text-on-surface font-headline-sm text-headline-sm px-4 py-3 rounded-xl focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all"
+              id="task-title-input"
+              maxlength="120"
+              oninput="updateCharCount(this)"
+              placeholder="¿Qué vas a conquistar hoy?"
+              type="text"
+              value="Hacer ejercicio funcional"
+            />
+          </div>
+        </div>
+        <!-- Date & Time Section -->
+        <div
+          class="bg-surface-container-lowest p-space-md rounded-2xl shadow-[0_4px_20px_-2px_rgba(70,72,212,0.08)] space-y-3"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div
+                class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed"
+              >
+                <span class="material-symbols-outlined text-[18px]">calendar_today</span>
+              </div>
+              <span class="font-headline-sm text-headline-sm text-on-surface">Programación</span>
+            </div>
+            <button
+              class="font-label-md text-label-md text-primary hover:text-primary-container transition-colors"
+              id="btn-toggle-date"
+              onclick="toggleTaskDate()"
+              type="button"
+            >
+              Quitar fecha
+            </button>
+          </div>
+          <!-- Date & Time Chips -->
+          <div class="flex flex-wrap items-center gap-2 pt-1" id="date-time-chips-container">
+            <!-- Date Chip -->
+            <button
+              class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-surface-container text-on-surface font-label-md text-label-md shadow-sm active:scale-95 transition-transform"
+              id="date-active-chip"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[18px] text-primary"
+                >event_available</span
+              >
+              <span id="date-chip-label">Hoy, 24 Octubre</span>
+              <span class="material-symbols-outlined text-[16px] text-outline"
+                >arrow_drop_down</span
+              >
+            </button>
+            <!-- Time Chip -->
+            <button
+              class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-surface-container text-on-surface font-label-md text-label-md shadow-sm active:scale-95 transition-transform"
+              id="time-active-chip"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[18px] text-tertiary">schedule</span>
+              <span>08:30 AM</span>
+              <span class="material-symbols-outlined text-[16px] text-outline"
+                >arrow_drop_down</span
+              >
+            </button>
+          </div>
+        </div>
+        <!-- Repeat Spec Row (Key Feature) -->
+        <div class="flex flex-col gap-2">
+          <div
+            class="w-full bg-surface-container-lowest p-space-md rounded-2xl shadow-[0_4px_20px_-2px_rgba(70,72,212,0.08)] cursor-pointer active:scale-[0.99] transition-all flex items-center justify-between relative overflow-hidden group"
+            id="repeat-interactive-row"
+            onclick="handleRepeatRowClick()"
+          >
+            <div class="flex items-start gap-3.5 flex-1 min-w-0">
+              <div
+                class="w-10 h-10 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-md"
+                id="repeat-icon-wrap"
+              >
+                <span class="material-symbols-outlined text-[22px]">sync</span>
+              </div>
+              <div class="flex flex-col min-w-0 pr-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-headline-sm text-headline-sm text-on-surface">Repetir</span>
+                  <span
+                    class="bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded-full inline-flex items-center gap-0.5"
+                    id="repeat-badge-active"
+                  >
+                    <span class="material-symbols-outlined text-[12px]">check</span> Activa
+                  </span>
+                </div>
+                <p
+                  class="font-body-md text-body-md text-primary font-semibold truncate pt-0.5"
+                  id="repeat-description-text"
+                >
+                  Cada semana: Lun, Mié, Vie · Termina el 30 dic
+                </p>
+                <p
+                  class="font-body-sm text-body-sm text-outline hidden pt-0.5"
+                  id="repeat-disabled-helper"
+                >
+                  Elige una fecha para repetir la tarea
+                </p>
+              </div>
+            </div>
+            <div
+              class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant group-hover:bg-primary-fixed group-hover:text-primary transition-colors shrink-0"
+            >
+              <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+            </div>
+          </div>
+          <!-- Informational recurrence tip -->
+          <div
+            class="flex items-start gap-2.5 px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant"
+            id="repeat-info-tip"
+          >
+            <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5"
+              >info</span
+            >
+            <p class="font-body-sm text-body-sm leading-tight text-on-surface-variant">
+              Al guardar una tarea que ya se repite se te preguntará si deseas aplicar los cambios a
+              solo esta o a toda la serie.
+            </p>
+          </div>
+        </div>
+        <!-- Gamified streak motivator card (delight factor) -->
+        <div
+          class="bg-gradient-to-r from-surface-container-high to-surface-container p-4 rounded-2xl flex items-center justify-between shadow-sm"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-[0_4px_16px_rgba(254,166,25,0.3)]"
+            >
+              <span
+                class="material-symbols-outlined text-[22px]"
+                style="font-variation-settings: 'FILL' 1"
+                >local_fire_department</span
+              >
+            </div>
+            <div>
+              <h2 class="font-label-lg text-label-lg text-on-surface">Racha de 6 días</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">
+                Completa los 3 días de la semana para racha perfecta
+              </p>
+            </div>
+          </div>
+          <span class="font-label-lg text-label-lg text-secondary-container font-black"
+            >x1.5 XP</span
+          >
+        </div>
+        <!-- BOTTOM FIXED PRIMARY SAVE DOCK -->
+        <div
+          class="fixed bottom-0 left-0 right-0 p-margin bg-surface/90 backdrop-blur-xl border-t-0 shadow-[0_-8px_24px_rgba(24,20,69,0.06)] z-40 max-w-lg mx-auto"
+        >
+          <div class="flex items-center gap-3">
+            <button
+              class="flex-1 h-14 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-[0_8px_24px_-4px_rgba(70,72,212,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              id="btn-save-task"
+              onclick="triggerSaveAnimation()"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              <span>Guardar cambios</span>
+              <span
+                class="bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded-full font-bold ml-1"
+              >
+                +10 XP
+              </span>
+            </button>
+          </div>
+        </div>
+        <!-- ========================================================================= -->
+        <!-- BOTTOM SHEET / MODAL: AJUSTE DE REPETICIÓN (Desplegable y ergonómico)      -->
+        <!-- ========================================================================= -->
+        <div
+          class="fixed inset-0 bg-inverse-surface/40 backdrop-blur-sm z-50 flex flex-col justify-end transition-opacity duration-300 pointer-events-none opacity-0"
+          id="recurrence-sheet-backdrop"
+          onclick="closeRecurrenceSheet(event)"
+        >
+          <div
+            class="w-full bg-surface-container-lowest rounded-t-[2.5rem] shadow-[0_20px_40px_-8px_rgba(15,14,23,0.35)] flex flex-col max-h-[777px] overflow-hidden transform translate-y-full transition-transform duration-300 ease-out"
+            id="recurrence-sheet-panel"
+            onclick="event.stopPropagation()"
+          >
+            <!-- Drag Handle & Header -->
+            <div
+              class="pt-3 pb-2 px-space-md flex flex-col items-center bg-surface-container-lowest shrink-0"
+            >
+              <div class="w-12 h-1.5 rounded-full bg-outline-variant mb-3"></div>
+              <div class="w-full flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined text-[18px]">sync</span>
+                  </div>
+                  <h2 class="font-headline-sm text-headline-sm text-on-surface">
+                    Configurar repetición
+                  </h2>
+                </div>
+                <button
+                  aria-label="Cerrar"
+                  class="w-9 h-9 rounded-full bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center active:scale-95 transition-all"
+                  onclick="closeRecurrenceSheet()"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+              </div>
+            </div>
+            <!-- Scrollable Sheet Content -->
+            <div class="overflow-y-auto px-margin py-3 space-y-5 flex-1 overscroll-contain">
+              <!-- Frequency Selector Pills -->
+              <div class="space-y-2">
+                <label
+                  class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
+                  >Frecuencia</label
+                >
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    class="freq-pill px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant transition-all"
+                    onclick="selectFrequency('none', this)"
+                    type="button"
+                  >
+                    No se repite
+                  </button>
+                  <button
+                    class="freq-pill px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant transition-all"
+                    onclick="selectFrequency('daily', this)"
+                    type="button"
+                  >
+                    Todos los días
+                  </button>
+                  <button
+                    class="freq-pill px-3.5 py-2 rounded-full font-label-md text-label-md bg-primary-container text-on-primary-container shadow-sm font-bold transition-all"
+                    onclick="selectFrequency('weekly', this)"
+                    type="button"
+                  >
+                    Días de la semana
+                  </button>
+                  <button
+                    class="freq-pill px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant transition-all"
+                    onclick="selectFrequency('ndays', this)"
+                    type="button"
+                  >
+                    Cada N días
+                  </button>
+                  <button
+                    class="freq-pill px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant transition-all"
+                    onclick="selectFrequency('nweeks', this)"
+                    type="button"
+                  >
+                    Cada N semanas
+                  </button>
+                  <button
+                    class="freq-pill px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant transition-all"
+                    onclick="selectFrequency('monthly', this)"
+                    type="button"
+                  >
+                    Un día del mes
+                  </button>
+                </div>
+              </div>
+              <!-- Dynamic Frequency Sub-Config: Section A (Weekdays Selector) -->
+              <div
+                class="space-y-2 p-3.5 bg-surface-container-low rounded-2xl"
+                id="subconfig-weekly"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="font-label-sm text-label-sm text-on-surface font-semibold"
+                    >Repetir los días:</span
+                  >
+                  <span class="font-body-sm text-body-sm text-outline">Elige al menos un día</span>
+                </div>
+                <div class="grid grid-cols-7 gap-1.5 pt-1">
+                  <!-- Lunes (Active) -->
+                  <button
+                    class="day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-primary text-on-primary shadow-sm"
+                    data-day="Lun"
+                    onclick="toggleDayPill(this)"
+                    type="button"
+                  >
+                    L
+                  </button>
+                  <!-- Martes -->
+                  <button
+                    class="day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-surface-container text-on-surface"
+                    data-day="Mar"
+                    onclick="toggleDayPill(this)"
+                    type="button"
+                  >
+                    M
+                  </button>
+                  <!-- Miércoles (Active) -->
+                  <button
+                    class="day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-primary text-on-primary shadow-sm"
+                    data-day="Mié"
+                    onclick="toggleDayPill(this)"
+                    type="button"
+                  >
+                    X
+                  </button>
+                  <!-- Jueves -->
+                  <button
+                    class="day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-surface-container text-on-surface"
+                    data-day="Jue"
+                    onclick="toggleDayPill(this)"
+                    type="button"
+                  >
+                    J
+                  </button>
+                  <!-- Viernes (Active) -->
+                  <button
+                    class="day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-primary text-on-primary shadow-sm"
+                    data-day="Vie"
+                    onclick="toggleDayPill(this)"
+                    type="button"
+                  >
+                    V
+                  </button>
+                  <!-- Sábado -->
+                  <button
+                    class="day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-surface-container text-on-surface"
+                    data-day="Sáb"
+                    onclick="toggleDayPill(this)"
+                    type="button"
+                  >
+                    S
+                  </button>
+                  <!-- Domingo -->
+                  <button
+                    class="day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-surface-container text-on-surface"
+                    data-day="Dom"
+                    onclick="toggleDayPill(this)"
+                    type="button"
+                  >
+                    D
+                  </button>
+                </div>
+              </div>
+              <!-- Dynamic Frequency Sub-Config: Section B (Stepper for N days / N weeks) -->
+              <div
+                class="space-y-2 p-3.5 bg-surface-container-low rounded-2xl hidden"
+                id="subconfig-stepper"
+              >
+                <div class="flex items-center justify-between">
+                  <span
+                    class="font-label-sm text-label-sm text-on-surface font-semibold"
+                    id="stepper-label"
+                    >Intervalo de recurrencia</span
+                  >
+                  <span
+                    class="font-body-sm text-body-sm text-primary font-semibold"
+                    id="stepper-val-text"
+                    >Cada 2 días</span
+                  >
+                </div>
+                <div class="flex items-center justify-center gap-6 py-2">
+                  <button
+                    class="w-12 h-12 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center shadow-sm active:scale-95 text-2xl font-bold"
+                    onclick="adjustStepper(-1)"
+                    type="button"
+                  >
+                    −
+                  </button>
+                  <div class="flex items-baseline gap-1">
+                    <span class="font-display-lg text-display-lg text-primary" id="stepper-count"
+                      >2</span
+                    >
+                    <span
+                      class="font-label-lg text-label-lg text-on-surface-variant"
+                      id="stepper-unit"
+                      >días</span
+                    >
+                  </div>
+                  <button
+                    class="w-12 h-12 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center shadow-sm active:scale-95 text-2xl font-bold"
+                    onclick="adjustStepper(1)"
+                    type="button"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              <!-- Dynamic Frequency Sub-Config: Section C (Day of Month) -->
+              <div
+                class="space-y-2 p-3.5 bg-surface-container-low rounded-2xl hidden"
+                id="subconfig-monthly"
+              >
+                <div class="flex items-center justify-between">
+                  <span class="font-label-sm text-label-sm text-on-surface font-semibold"
+                    >Día del mes programado</span
+                  >
+                  <span class="font-label-md text-label-md text-primary font-bold">Día 24</span>
+                </div>
+                <div class="flex items-center gap-2 overflow-x-auto py-2">
+                  <div class="flex gap-2">
+                    <span
+                      class="px-3 py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md"
+                      >El día 24 de cada mes</span
+                    >
+                    <span
+                      class="px-3 py-1.5 rounded-xl bg-surface-container text-on-surface font-label-md text-label-md"
+                      >El cuarto viernes</span
+                    >
+                  </div>
+                </div>
+                <p class="font-body-sm text-body-sm text-outline italic">
+                  * En los meses que no tengan ese día, se programará automáticamente para el último
+                  día del mes.
+                </p>
+              </div>
+              <!-- Bloque 'Termina' (End conditions) -->
+              <div class="space-y-3 pt-2">
+                <label
+                  class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider"
+                  >Finalización</label
+                >
+                <div class="grid grid-cols-2 gap-2">
+                  <button
+                    class="end-opt-btn p-3 rounded-2xl flex flex-col gap-1 text-left bg-surface-container text-on-surface transition-all"
+                    onclick="setEndOption('never', this)"
+                    type="button"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="font-label-md text-label-md font-bold">Nunca</span>
+                      <span class="material-symbols-outlined text-[18px] opacity-0 check-indicator"
+                        >check_circle</span
+                      >
+                    </div>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant"
+                      >Sin límite de tiempo</span
+                    >
+                  </button>
+                  <button
+                    class="end-opt-btn p-3 rounded-2xl flex flex-col gap-1 text-left bg-primary-container text-on-primary-container shadow-sm transition-all"
+                    onclick="setEndOption('date', this)"
+                    type="button"
+                  >
+                    <div class="flex items-center justify-between">
+                      <span class="font-label-md text-label-md font-bold">El día...</span>
+                      <span class="material-symbols-outlined text-[18px] check-indicator"
+                        >check_circle</span
+                      >
+                    </div>
+                    <span
+                      class="font-body-sm text-body-sm text-on-primary-container/80"
+                      id="end-date-display"
+                      >30 Dic 2025</span
+                    >
+                  </button>
+                </div>
+                <!-- Date picker simulation & Validation trigger -->
+                <div
+                  class="flex items-center justify-between p-3 bg-surface-container-low rounded-xl"
+                  id="end-date-selector-row"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[20px] text-primary">event</span>
+                    <span class="font-label-md text-label-md text-on-surface font-semibold"
+                      >Fecha de finalización:</span
+                    >
+                  </div>
+                  <button
+                    class="px-3 py-1 rounded-full bg-surface-container font-label-sm text-label-sm text-primary hover:bg-surface-container-high transition-colors"
+                    onclick="simulateDateValidationError()"
+                    type="button"
+                  >
+                    30 de Dic de 2025
+                  </button>
+                </div>
+                <!-- Error Alert Pill (Validation check) -->
+                <div
+                  class="hidden p-3 rounded-xl bg-error-container text-on-error-container flex items-center gap-2 animate-bounce"
+                  id="end-date-error"
+                >
+                  <span class="material-symbols-outlined text-[20px] text-error">error</span>
+                  <span class="font-body-sm text-body-sm font-semibold"
+                    >La fecha de fin debe ser posterior a la primera ocurrencia.</span
+                  >
+                </div>
+              </div>
+              <!-- Natural Language Summary Banner -->
+              <div class="p-4 rounded-2xl bg-surface-container-high space-y-1.5 shadow-sm">
+                <div class="flex items-center gap-1.5 text-primary">
+                  <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+                  <span class="font-label-sm text-label-sm uppercase tracking-wider font-bold"
+                    >Resumen de repetición</span
+                  >
+                </div>
+                <p
+                  class="font-body-lg text-body-lg text-on-surface font-semibold"
+                  id="summary-rule"
+                >
+                  Se repetirá: Los lunes, miércoles y viernes
+                </p>
+                <p
+                  class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-[14px]">flag</span> Primera
+                  ocurrencia: Hoy a las 08:30 AM
+                </p>
+              </div>
+            </div>
+            <!-- Ergonomic Thumb Action Bar (Modal bottom) -->
+            <div
+              class="p-space-md bg-surface-container-lowest flex items-center gap-3 shrink-0 shadow-[0_-8px_20px_rgba(0,0,0,0.04)]"
+            >
+              <button
+                class="flex-1 h-12 rounded-full bg-surface-container text-on-surface hover:bg-surface-container-high font-label-lg text-label-lg active:scale-95 transition-all text-center"
+                onclick="closeRecurrenceSheet()"
+                type="button"
+              >
+                Descartar
+              </button>
+              <button
+                class="flex-[2] h-12 rounded-full bg-primary text-on-primary font-label-lg text-label-lg shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+                onclick="applyRecurrenceSettings()"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[18px]">done</span>
+                <span>Listo</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        let hasDate = true;
+        let currentFreq = 'weekly';
+        let stepperValue = 2;
+        let activeDays = ['Lun', 'Mié', 'Vie'];
+        let endType = 'date';
+        let endDateText = '30 dic';
+
+        function updateCharCount(input) {
+          const counter = document.getElementById('char-counter');
+          if (counter) {
+            counter.textContent = `${input.value.length}/120`;
+          }
+        }
+
+        function handleRepeatRowClick() {
+          if (!hasDate) {
+            // Shake animation to indicate disabled
+            const row = document.getElementById('repeat-interactive-row');
+            row.classList.add('translate-x-1');
+            setTimeout(() => row.classList.remove('translate-x-1'), 150);
+            return;
+          }
+          openRecurrenceSheet();
+        }
+
+        function openRecurrenceSheet() {
+          const backdrop = document.getElementById('recurrence-sheet-backdrop');
+          const panel = document.getElementById('recurrence-sheet-panel');
+          backdrop.classList.remove('pointer-events-none', 'opacity-0');
+          backdrop.classList.add('opacity-100');
+          panel.classList.remove('translate-y-full');
+          panel.classList.add('translate-y-0');
+        }
+
+        function closeRecurrenceSheet(e) {
+          if (e && e.target !== e.currentTarget && e.target.id !== 'recurrence-sheet-backdrop')
+            return;
+          const backdrop = document.getElementById('recurrence-sheet-backdrop');
+          const panel = document.getElementById('recurrence-sheet-panel');
+          backdrop.classList.add('opacity-0');
+          backdrop.classList.add('pointer-events-none');
+          panel.classList.remove('translate-y-0');
+          panel.classList.add('translate-y-full');
+        }
+
+        function toggleTaskDate() {
+          hasDate = !hasDate;
+          const btn = document.getElementById('btn-toggle-date');
+          const chips = document.getElementById('date-time-chips-container');
+          const repeatRow = document.getElementById('repeat-interactive-row');
+          const repeatDesc = document.getElementById('repeat-description-text');
+          const repeatHelp = document.getElementById('repeat-disabled-helper');
+          const badge = document.getElementById('repeat-badge-active');
+          const repeatIconWrap = document.getElementById('repeat-icon-wrap');
+
+          if (hasDate) {
+            btn.textContent = 'Quitar fecha';
+            chips.style.opacity = '1';
+            chips.style.pointerEvents = 'auto';
+            repeatRow.classList.remove('opacity-50', 'bg-surface-container-low');
+            repeatRow.classList.add('bg-surface-container-lowest');
+            repeatDesc.classList.remove('hidden');
+            repeatHelp.classList.add('hidden');
+            badge.classList.remove('hidden');
+            repeatIconWrap.className =
+              'w-10 h-10 rounded-2xl bg-primary-container text-on-primary-container flex items-center justify-center shrink-0 shadow-md';
+          } else {
+            btn.textContent = 'Asignar fecha';
+            chips.style.opacity = '0.4';
+            chips.style.pointerEvents = 'none';
+            repeatRow.classList.add('opacity-50', 'bg-surface-container-low');
+            repeatRow.classList.remove('bg-surface-container-lowest');
+            repeatDesc.classList.add('hidden');
+            repeatHelp.classList.remove('hidden');
+            badge.classList.add('hidden');
+            repeatIconWrap.className =
+              'w-10 h-10 rounded-2xl bg-surface-container text-on-surface-variant flex items-center justify-center shrink-0';
+          }
+        }
+
+        function selectFrequency(type, btnElem) {
+          currentFreq = type;
+          document.querySelectorAll('.freq-pill').forEach((pill) => {
+            pill.className =
+              'freq-pill px-3.5 py-2 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant transition-all';
+          });
+          btnElem.className =
+            'freq-pill px-3.5 py-2 rounded-full font-label-md text-label-md bg-primary-container text-on-primary-container shadow-sm font-bold transition-all';
+
+          const weeklyBlock = document.getElementById('subconfig-weekly');
+          const stepperBlock = document.getElementById('subconfig-stepper');
+          const monthlyBlock = document.getElementById('subconfig-monthly');
+
+          weeklyBlock.classList.add('hidden');
+          stepperBlock.classList.add('hidden');
+          monthlyBlock.classList.add('hidden');
+
+          const summaryRule = document.getElementById('summary-rule');
+
+          if (type === 'weekly') {
+            weeklyBlock.classList.remove('hidden');
+            summaryRule.textContent = 'Se repetirá: Los lunes, miércoles y viernes';
+          } else if (type === 'daily') {
+            summaryRule.textContent = 'Se repetirá: Todos los días';
+          } else if (type === 'ndays') {
+            stepperBlock.classList.remove('hidden');
+            document.getElementById('stepper-label').textContent = 'Cada cuántos días:';
+            document.getElementById('stepper-unit').textContent = 'días';
+            document.getElementById('stepper-val-text').textContent = `Cada ${stepperValue} días`;
+            summaryRule.textContent = `Se repetirá: Cada ${stepperValue} días`;
+          } else if (type === 'nweeks') {
+            stepperBlock.classList.remove('hidden');
+            document.getElementById('stepper-label').textContent = 'Cada cuántas semanas:';
+            document.getElementById('stepper-unit').textContent = 'semanas';
+            document.getElementById('stepper-val-text').textContent =
+              `Cada ${stepperValue} semanas`;
+            summaryRule.textContent = `Se repetirá: Cada ${stepperValue} semanas`;
+          } else if (type === 'monthly') {
+            monthlyBlock.classList.remove('hidden');
+            summaryRule.textContent = 'Se repetirá: El día 24 de cada mes';
+          } else if (type === 'none') {
+            summaryRule.textContent = 'No se repetirá la tarea';
+          }
+        }
+
+        function toggleDayPill(btn) {
+          const isSelected = btn.classList.contains('bg-primary');
+          if (isSelected) {
+            btn.className =
+              'day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-surface-container text-on-surface';
+          } else {
+            btn.className =
+              'day-btn h-11 w-11 rounded-full flex items-center justify-center font-label-lg text-label-lg transition-transform active:scale-90 bg-primary text-on-primary shadow-sm';
+          }
+
+          const selectedBtns = document.querySelectorAll('.day-btn.bg-primary');
+          const days = Array.from(selectedBtns).map((b) => b.getAttribute('data-day'));
+          const summaryRule = document.getElementById('summary-rule');
+          if (days.length > 0) {
+            summaryRule.textContent = `Se repetirá: ${days.join(', ')}`;
+          } else {
+            summaryRule.textContent = 'Elige al menos un día de la semana';
+          }
+        }
+
+        function adjustStepper(delta) {
+          stepperValue = Math.max(1, Math.min(30, stepperValue + delta));
+          document.getElementById('stepper-count').textContent = stepperValue;
+          const unit = document.getElementById('stepper-unit').textContent;
+          document.getElementById('stepper-val-text').textContent = `Cada ${stepperValue} ${unit}`;
+          document.getElementById('summary-rule').textContent =
+            `Se repetirá: Cada ${stepperValue} ${unit}`;
+        }
+
+        function setEndOption(opt, btn) {
+          endType = opt;
+          document.querySelectorAll('.end-opt-btn').forEach((b) => {
+            b.className =
+              'end-opt-btn p-3 rounded-2xl flex flex-col gap-1 text-left bg-surface-container text-on-surface transition-all';
+            const icon = b.querySelector('.check-indicator');
+            if (icon) icon.classList.add('opacity-0');
+          });
+          btn.className =
+            'end-opt-btn p-3 rounded-2xl flex flex-col gap-1 text-left bg-primary-container text-on-primary-container shadow-sm transition-all';
+          const icon = btn.querySelector('.check-indicator');
+          if (icon) icon.classList.remove('opacity-0');
+
+          const errBox = document.getElementById('end-date-error');
+          errBox.classList.add('hidden');
+        }
+
+        function simulateDateValidationError() {
+          const errBox = document.getElementById('end-date-error');
+          errBox.classList.toggle('hidden');
+        }
+
+        function applyRecurrenceSettings() {
+          const repeatDesc = document.getElementById('repeat-description-text');
+          const badge = document.getElementById('repeat-badge-active');
+
+          if (currentFreq === 'none') {
+            repeatDesc.textContent = 'No se repite';
+            badge.classList.add('hidden');
+          } else if (currentFreq === 'weekly') {
+            repeatDesc.textContent = 'Cada semana: Lun, Mié, Vie · Termina el 30 dic';
+            badge.classList.remove('hidden');
+          } else if (currentFreq === 'daily') {
+            repeatDesc.textContent = 'Todos los días';
+            badge.classList.remove('hidden');
+          } else {
+            repeatDesc.textContent = document
+              .getElementById('summary-rule')
+              .textContent.replace('Se repetirá: ', '');
+            badge.classList.remove('hidden');
+          }
+
+          closeRecurrenceSheet();
+        }
+
+        function triggerSaveAnimation() {
+          const btn = document.getElementById('btn-save-task');
+          btn.innerHTML = `<span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span> Guardando...`;
+          setTimeout(() => {
+            btn.innerHTML = `<span class="material-symbols-outlined text-[20px]">verified</span> ¡Guardado con éxito! +10 XP`;
+            btn.className =
+              'flex-1 h-14 rounded-full bg-tertiary text-on-tertiary font-label-lg text-label-lg shadow-lg flex items-center justify-center gap-2 transition-all';
+            setTimeout(() => {
+              btn.className =
+                'flex-1 h-14 rounded-full bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-[0_8px_24px_-4px_rgba(70,72,212,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-2';
+              btn.innerHTML = `<span class="material-symbols-outlined text-[20px]">check_circle</span> <span>Guardar cambios</span> <span class="bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded-full font-bold ml-1">+10 XP</span>`;
+            }, 2000);
+          }, 700);
+        }
+
+        // Demo Switcher Controller
+        function setDemoState(state) {
+          document.querySelectorAll('.demo-tab-btn').forEach((btn) => {
+            btn.className =
+              'demo-tab-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm text-center transition-all text-on-surface-variant hover:text-on-surface';
+          });
+
+          if (state === 'normal') {
+            document.getElementById('btn-demo-normal').className =
+              'demo-tab-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm text-center transition-all bg-surface-container-lowest text-primary shadow-sm font-semibold';
+            if (!hasDate) toggleTaskDate();
+            closeRecurrenceSheet();
+          } else if (state === 'modal') {
+            document.getElementById('btn-demo-modal').className =
+              'demo-tab-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm text-center transition-all bg-surface-container-lowest text-primary shadow-sm font-semibold';
+            if (!hasDate) toggleTaskDate();
+            openRecurrenceSheet();
+          } else if (state === 'nodate') {
+            document.getElementById('btn-demo-nodate').className =
+              'demo-tab-btn py-1.5 px-2 rounded-lg font-label-sm text-label-sm text-center transition-all bg-surface-container-lowest text-primary shadow-sm font-semibold';
+            if (hasDate) toggleTaskDate();
+            closeRecurrenceSheet();
+          }
+        }
+      </script>
+    </main>
+  </body>
+</html>

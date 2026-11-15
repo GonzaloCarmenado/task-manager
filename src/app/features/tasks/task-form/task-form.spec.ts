@@ -20,6 +20,8 @@ const EXISTING: Task = {
   completedAt: null,
   createdAt: '2026-11-01T10:00:00.000Z',
   postponedCount: 0,
+  seriesId: null,
+  seriesDate: null,
 };
 
 const flush = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
@@ -59,6 +61,25 @@ function setup(
       void target;
       return ok();
     }),
+    updateSeries: vi.fn((id: string, input: TaskInput) => {
+      void id;
+      void input;
+      return ok();
+    }),
+    updateOccurrence: vi.fn((id: string, input: TaskInput) => {
+      void id;
+      void input;
+      return ok();
+    }),
+    removeOccurrence: vi.fn((id: string) => {
+      void id;
+      return ok();
+    }),
+    removeSeries: vi.fn((id: string) => {
+      void id;
+      return ok();
+    }),
+    seriesOf: vi.fn((): undefined => undefined),
   };
 
   TestBed.resetTestingModule();
@@ -616,5 +637,182 @@ describe('TaskForm · posponer', () => {
     expect(f.navigate).not.toHaveBeenCalled();
     expect(f.text()).toContain('No se pudo posponer la tarea. Inténtalo de nuevo.');
     expect(f.el.querySelector('app-postpone-sheet')).toBeNull();
+  });
+});
+
+describe('TaskForm · repetición (spec 012)', () => {
+  // La fecha por defecto es hoy: sábado... en este reloj, 2026-11-13 es viernes.
+  const rowButton = (f: ReturnType<typeof setup>) =>
+    f.el.querySelector<HTMLButtonElement>('button.repeat') as HTMLButtonElement;
+  const sheet = (f: ReturnType<typeof setup>) => f.el.querySelector('app-recurrence-sheet');
+  const pick = (f: ReturnType<typeof setup>, label: string) => {
+    const radio = Array.from(
+      f.el.querySelectorAll<HTMLElement>('app-recurrence-sheet [role="radio"]')
+    ).find((r) => r.textContent?.includes(label));
+    radio?.click();
+    f.detect();
+  };
+  const toggleDay = (f: ReturnType<typeof setup>, name: string) => {
+    f.el.querySelector<HTMLElement>(`app-recurrence-sheet .day[aria-label="${name}"]`)?.click();
+    f.detect();
+  };
+  const done = (f: ReturnType<typeof setup>) => {
+    f.el.querySelector<HTMLElement>('app-recurrence-sheet .done')?.click();
+    f.detect();
+  };
+
+  it('US-012-01 muestra la fila «Repetir» con «No se repite» por defecto', () => {
+    const f = setup();
+    expect(rowButton(f).textContent).toContain('Repetir');
+    expect(rowButton(f).textContent).toContain('No se repite');
+    expect(rowButton(f).disabled).toBe(false);
+    expect(sheet(f)).toBeNull();
+  });
+
+  it('US-012-01 sin fecha, la fila queda desactivada y explica por qué', () => {
+    const f = setup();
+    f.setDate('');
+    expect(rowButton(f).disabled).toBe(true);
+    expect(f.text()).toContain('Elige una fecha para repetir la tarea');
+  });
+
+  it('US-012-01 tocar la fila abre la hoja y «Listo» deja la regla en la fila', () => {
+    const f = setup();
+    rowButton(f).click();
+    f.detect();
+    expect(sheet(f)).not.toBeNull();
+
+    pick(f, 'Todos los días');
+    done(f);
+
+    expect(sheet(f)).toBeNull();
+    expect(rowButton(f).textContent).toContain('Todos los días');
+  });
+
+  it('US-012-01 «Descartar» cierra la hoja sin cambiar la regla', () => {
+    const f = setup();
+    rowButton(f).click();
+    f.detect();
+    pick(f, 'Todos los días');
+    f.el.querySelector<HTMLElement>('app-recurrence-sheet .discard')?.click();
+    f.detect();
+
+    expect(sheet(f)).toBeNull();
+    expect(rowButton(f).textContent).toContain('No se repite');
+  });
+
+  it('US-012-01 guardar con «Todos los días» crea la serie desde la fecha elegida', async () => {
+    const f = setup();
+    f.type('Tomar la pastilla');
+    rowButton(f).click();
+    f.detect();
+    pick(f, 'Todos los días');
+    done(f);
+
+    await f.save();
+
+    expect(f.access.create).toHaveBeenCalledWith({
+      title: 'Tomar la pastilla',
+      dueDate: '2026-11-13',
+      dueTime: null,
+      recurrence: {
+        kind: 'daily',
+        interval: 1,
+        weekdays: [],
+        monthDay: null,
+        startDate: '2026-11-13',
+        until: null,
+      },
+    });
+  });
+
+  it('US-012-01 si la fecha no cae en un día marcado, la primera ocurrencia es el siguiente día válido', async () => {
+    const f = setup();
+    f.type('Gimnasio');
+    f.setDate('2026-11-14'); // sábado
+    rowButton(f).click();
+    f.detect();
+    pick(f, 'Días de la semana');
+    toggleDay(f, 'sábado'); // quita el sábado, marcado por defecto
+    toggleDay(f, 'lunes');
+    done(f);
+
+    await f.save();
+
+    expect(f.access.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dueDate: '2026-11-16',
+        recurrence: expect.objectContaining({
+          kind: 'weekly',
+          weekdays: [1],
+          startDate: '2026-11-14',
+        }),
+      })
+    );
+  });
+
+  it('US-012-01 si se cambia la fecha después de elegir la regla, la regla empieza en la fecha final', async () => {
+    const f = setup();
+    f.type('Pastilla');
+    rowButton(f).click();
+    f.detect();
+    pick(f, 'Todos los días');
+    done(f);
+    f.setDate('2026-11-20');
+
+    await f.save();
+
+    expect(f.access.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dueDate: '2026-11-20',
+        recurrence: expect.objectContaining({ startDate: '2026-11-20' }),
+      })
+    );
+  });
+
+  it('US-012-01 quitar la fecha de una tarea con repetición la deja en «No se repite» y avisa', () => {
+    const f = setup();
+    rowButton(f).click();
+    f.detect();
+    pick(f, 'Todos los días');
+    done(f);
+
+    f.button(f.copy.form.clearDate)?.click();
+    f.detect();
+
+    expect(rowButton(f).textContent).toContain('No se repite');
+    expect(f.text()).toContain('Sin fecha la tarea ya no se repite.');
+  });
+
+  it('US-012-01 una tarea sin repetición se guarda como hasta ahora', async () => {
+    const f = setup();
+    f.type('Comprar pan');
+
+    await f.save();
+
+    expect(f.access.create).toHaveBeenCalledWith({
+      title: 'Comprar pan',
+      dueDate: '2026-11-13',
+      dueTime: null,
+    });
+  });
+
+  it('US-012-01 al editar una tarea suelta y ponerle repetición, se convierte en serie', async () => {
+    const f = setup({ id: 'abc' });
+    rowButton(f).click();
+    f.detect();
+    pick(f, 'Todos los días');
+    done(f);
+
+    await f.save();
+
+    expect(f.access.updateSeries).toHaveBeenCalledWith(
+      'abc',
+      expect.objectContaining({
+        title: 'Comprar pan',
+        recurrence: expect.objectContaining({ kind: 'daily', startDate: '2026-11-13' }),
+      })
+    );
+    expect(f.access.update).not.toHaveBeenCalled();
   });
 });

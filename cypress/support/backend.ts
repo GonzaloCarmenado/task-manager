@@ -24,6 +24,23 @@ export interface Row {
   xp_awarded: number;
   xp_day: string | null;
   postponed_count: number;
+  series_id: string | null;
+  series_date: string | null;
+  created_at: string;
+}
+
+/** Fila de `task_series` tal como la devuelve el servidor. */
+export interface SeriesRecord {
+  id: string;
+  user_id: string;
+  title: string;
+  due_time: string | null;
+  kind: 'daily' | 'weekly' | 'monthly';
+  interval_n: number;
+  weekdays: number[];
+  month_day: number | null;
+  start_date: string;
+  until_date: string | null;
   created_at: string;
 }
 
@@ -50,6 +67,8 @@ export type Failure =
   | 'create'
   | 'update'
   | 'delete'
+  | 'series-load'
+  | 'series-write'
   | 'progress'
   | 'signin'
   | 'link'
@@ -103,6 +122,7 @@ const idle = (): FailureState => ({ count: 0, network: false });
 
 export class FakeBackend {
   tasks: Row[] = [];
+  series: SeriesRecord[] = [];
   signups = 0;
   logouts = 0;
   accounts: Account[] = [];
@@ -118,6 +138,8 @@ export class FakeBackend {
     create: idle(),
     update: idle(),
     delete: idle(),
+    'series-load': idle(),
+    'series-write': idle(),
     progress: idle(),
     signin: idle(),
     link: idle(),
@@ -170,6 +192,39 @@ export class FakeBackend {
     return JSON.stringify(this.sessionBody(account.id));
   }
 
+  seriesOf(userId: string): SeriesRecord[] {
+    return this.series.filter((x) => x.user_id === userId);
+  }
+
+  /** Ocurrencias de una serie (pendientes y completadas), como las vería la base de datos. */
+  occurrences(seriesId: string): Row[] {
+    return this.tasks.filter((t) => t.series_id === seriesId);
+  }
+
+  pendingOf(seriesId: string): Row[] {
+    return this.occurrences(seriesId).filter((t) => t.completed_at === null);
+  }
+
+  /** Serie ya guardada en el servidor. */
+  seedSeries(partial: Partial<SeriesRecord> & { title: string }): SeriesRecord {
+    this.counter += 1;
+    const series: SeriesRecord = {
+      id: `40000000-0000-4000-8000-${String(this.counter).padStart(12, '0')}`,
+      user_id: USER_ID,
+      due_time: null,
+      kind: 'daily',
+      interval_n: 1,
+      weekdays: [],
+      month_day: null,
+      start_date: TODAY,
+      until_date: null,
+      created_at: new Date(NOW.getTime() - 3_600_000 + this.counter * 1000).toISOString(),
+      ...partial,
+    };
+    this.series.push(series);
+    return series;
+  }
+
   tasksOf(userId: string): Row[] {
     return this.tasks.filter((t) => t.user_id === userId);
   }
@@ -186,6 +241,8 @@ export class FakeBackend {
       xp_awarded: 0,
       xp_day: null,
       postponed_count: 0,
+      series_id: null,
+      series_date: null,
       created_at: new Date(NOW.getTime() - 3_600_000 + this.counter * 1000).toISOString(),
       ...partial,
     };
@@ -278,11 +335,34 @@ export class FakeBackend {
       'completed_at',
       'completed_day',
       'postponed_count',
+      'series_id',
+      'series_date',
     ]) {
       if (key in body) target[key] = key === 'due_time' ? normalizeTime(body[key]) : body[key];
     }
     if (!wasDone && row.completed_at !== null && row.completed_day) this.award(row);
-    else if (wasDone && row.completed_at === null) this.revoke(row);
+    else if (wasDone && row.completed_at === null) {
+      this.revoke(row);
+      // Disparador: al desmarcar, la pendiente generada después deja de existir.
+      if (row.series_id !== null) {
+        this.tasks = this.tasks.filter(
+          (t) => !(t.series_id === row.series_id && t.completed_at === null && t.id !== row.id)
+        );
+      }
+    }
+  }
+
+  /** Disparador de guarda: una ocurrencia futura no se completa hasta su día. */
+  private completesFuture(row: Row, body: Record<string, unknown>): boolean {
+    if (row.series_id === null || row.completed_at !== null) return false;
+    if (typeof body['completed_at'] !== 'string') return false;
+    const day = body['completed_day'];
+    return typeof day === 'string' && row.due_date !== null && row.due_date > day;
+  }
+
+  /** Índice único parcial: una sola ocurrencia pendiente por serie. */
+  private duplicatesPending(seriesId: unknown): boolean {
+    return typeof seriesId === 'string' && this.pendingOf(seriesId).length > 0;
   }
 
   /** Gasta uno de los fallos programados de ese tipo sin responder (quien llama elige la respuesta). */
@@ -443,6 +523,7 @@ export class FakeBackend {
       this.accounts = this.accounts.filter((a) => a.id !== actor);
       this.tasks = this.tasks.filter((t) => t.user_id !== actor);
       this.events = this.events.filter((e) => e.user !== actor);
+      this.series = this.series.filter((x) => x.user_id !== actor);
       req.reply({ statusCode: 204, body: '' });
     });
 
@@ -463,11 +544,17 @@ export class FakeBackend {
       if (req.method === 'POST') {
         if (this.shouldFail('create', req)) return;
         const input = req.body as Record<string, unknown>;
+        if (this.duplicatesPending(input['series_id'])) {
+          req.reply({ statusCode: 409, body: { code: '23505', message: 'duplicate key' } });
+          return;
+        }
         const row = this.seed({
           user_id: this.actor,
           title: String(input['title']),
           due_date: (input['due_date'] as string | null) ?? null,
           due_time: normalizeTime(input['due_time']),
+          series_id: (input['series_id'] as string | null) ?? null,
+          series_date: (input['series_date'] as string | null) ?? null,
           created_at: new Date(NOW.getTime() + (this.counter + 1) * 1000).toISOString(),
         });
         req.reply({ statusCode: 201, body: this.wantsObject(req) ? row : [row] });
@@ -487,7 +574,12 @@ export class FakeBackend {
           });
           return;
         }
-        this.applyPatch(row, req.body as Record<string, unknown>);
+        const patch = req.body as Record<string, unknown>;
+        if (this.completesFuture(row, patch)) {
+          req.reply({ statusCode: 400, body: { code: 'P0001', message: 'future occurrence' } });
+          return;
+        }
+        this.applyPatch(row, patch);
         if (!prefersBody) req.reply({ statusCode: 204, body: '' });
         else req.reply({ statusCode: 200, body: this.wantsObject(req) ? row : [row] });
         return;
@@ -496,6 +588,80 @@ export class FakeBackend {
       if (req.method === 'DELETE') {
         if (this.shouldFail('delete', req)) return;
         this.tasks = this.tasks.filter((t) => !(t.id === id && t.user_id === this.actor));
+        req.reply({ statusCode: 204, body: '' });
+        return;
+      }
+      req.continue();
+    });
+
+    cy.intercept({ pathname: '/rest/v1/task_series' }, (req) => {
+      this.record(req);
+      this.actor = subOf(req.headers['authorization']);
+      const prefersBody = String(req.headers['prefer'] ?? '').includes('return=representation');
+
+      if (req.method === 'GET') {
+        if (this.shouldFail('series-load', req)) return;
+        req.reply({ statusCode: 200, body: this.seriesOf(this.actor) });
+        return;
+      }
+
+      if (req.method === 'POST') {
+        if (this.shouldFail('series-write', req)) return;
+        const input = req.body as Record<string, unknown>;
+        const series = this.seedSeries({
+          user_id: this.actor,
+          title: String(input['title']),
+          due_time: normalizeTime(input['due_time']),
+          kind: input['kind'] as SeriesRecord['kind'],
+          interval_n: Number(input['interval_n'] ?? 1),
+          weekdays: (input['weekdays'] as number[] | undefined) ?? [],
+          month_day: (input['month_day'] as number | null | undefined) ?? null,
+          start_date: String(input['start_date']),
+          until_date: (input['until_date'] as string | null | undefined) ?? null,
+        });
+        req.reply({ statusCode: 201, body: this.wantsObject(req) ? series : [series] });
+        return;
+      }
+
+      const id = this.idFilter(req);
+      const series = this.series.find((x) => x.id === id && x.user_id === this.actor);
+
+      if (req.method === 'PATCH') {
+        if (this.shouldFail('series-write', req)) return;
+        if (!series) {
+          const single = this.wantsObject(req);
+          req.reply({
+            statusCode: single ? 406 : 204,
+            body: single ? { message: 'sin filas' } : '',
+          });
+          return;
+        }
+        const patch = req.body as Record<string, unknown>;
+        const target = series as unknown as Record<string, unknown>;
+        for (const key of [
+          'title',
+          'due_time',
+          'kind',
+          'interval_n',
+          'weekdays',
+          'month_day',
+          'start_date',
+          'until_date',
+        ]) {
+          if (key in patch) {
+            target[key] = key === 'due_time' ? normalizeTime(patch[key]) : patch[key];
+          }
+        }
+        if (!prefersBody) req.reply({ statusCode: 204, body: '' });
+        else req.reply({ statusCode: 200, body: this.wantsObject(req) ? series : [series] });
+        return;
+      }
+
+      if (req.method === 'DELETE') {
+        if (this.shouldFail('series-write', req)) return;
+        // `on delete set null`: las ocurrencias quedan como tareas sueltas.
+        for (const t of this.tasks) if (t.series_id === id) t.series_id = null;
+        this.series = this.series.filter((x) => !(x.id === id && x.user_id === this.actor));
         req.reply({ statusCode: 204, body: '' });
         return;
       }

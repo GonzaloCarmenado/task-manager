@@ -225,3 +225,61 @@
   overflow-y: auto;
   background: var(--color-bg);
 }
+
+// Fila «Repetir»: abre la hoja de repetición; toda la fila es la zona táctil
+.repeat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.repeat-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft);
+  font-size: 1.25rem;
+}
+
+.repeat-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.repeat-label {
+  @include type.label-lg;
+  font-weight: 700;
+}
+
+.repeat-value {
+  overflow: hidden;
+  color: var(--color-primary-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  @include type.body-md;
+}

@@ -5,6 +5,7 @@ import { AuthSession } from '../../core/models/auth-session';
 import { AuthAccessService } from '../../core/services/auth.access.service';
 import { TasksAccessService } from '../tasks/tasks.access.service';
 import { Progress } from '../../core/models/progress';
+import { Recurrence, TaskSeries } from '../../core/models/recurrence';
 import { Task, TaskInput } from '../../core/models/task';
 import { CLOCK } from '../../core/services/clock';
 import { ProgressAccessService } from '../progress/progress.access.service';
@@ -190,13 +191,20 @@ function task(over: Partial<Task> & { title: string }): Task {
     completedAt: null,
     createdAt: '2026-11-14T10:00:00.000Z',
     postponedCount: 0,
+    seriesId: null,
+    seriesDate: null,
     ...over,
   };
 }
 
 function flowSetup(
   initial: AuthSession | null = ANONYMOUS,
-  options: { tasks?: Task[]; status?: TasksStatus; stored?: string } = {}
+  options: {
+    tasks?: Task[];
+    status?: TasksStatus;
+    stored?: string;
+    series?: Record<string, TaskSeries>;
+  } = {}
 ) {
   const session = signal<AuthSession | null>(initial);
   const tasksList = signal<Task[]>(options.tasks ?? []);
@@ -231,6 +239,9 @@ function flowSetup(
     return { ok: true };
   });
   const forget = vi.fn();
+  const seriesOf = vi.fn((t: Task) =>
+    t.seriesId === null ? undefined : options.series?.[t.seriesId]
+  );
 
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -246,7 +257,10 @@ function flowSetup(
           deleteOwnAccount,
         },
       },
-      { provide: TasksAccessService, useValue: { tasks: tasksList, status, load, create, forget } },
+      {
+        provide: TasksAccessService,
+        useValue: { tasks: tasksList, status, load, create, forget, seriesOf },
+      },
       { provide: ACCOUNT_STORAGE, useValue: storage },
       {
         provide: ProgressAccessService,
@@ -756,5 +770,128 @@ describe('AccountAccessService · borrar la cuenta', () => {
     const { service, deleteOwnAccount } = flowSetup(ANONYMOUS);
     expect(await service.deleteAccount(PASS)).toEqual({ ok: false, reason: 'unauthorized' });
     expect(deleteOwnAccount).not.toHaveBeenCalled();
+  });
+});
+
+// ---- Tareas repetitivas en el traspaso (spec 012) ---------------------------------------------------
+const RULE: Recurrence = {
+  kind: 'weekly',
+  interval: 1,
+  weekdays: [1, 4],
+  monthDay: null,
+  startDate: '2026-11-09',
+  until: null,
+};
+const SERIES: Record<string, TaskSeries> = {
+  s1: { id: 's1', title: 'Gimnasio', dueTime: '19:00', recurrence: RULE },
+};
+const OCCURRENCE = task({
+  title: 'Gimnasio',
+  dueDate: '2026-11-16',
+  dueTime: '19:00',
+  seriesId: 's1',
+  seriesDate: '2026-11-12',
+});
+
+describe('AccountAccessService · tareas repetitivas (spec 012)', () => {
+  const ACCOUNT_9: AuthSession = {
+    user: { id: NEW_ID, isAnonymous: false, username: 'ana' },
+    expiresAt: 0,
+  };
+  const PASS = ['Clave', 'Segura', '123'].join('');
+
+  it('US-012-01 la instantánea incluye la regla y el día previsto de las pendientes que son serie', () => {
+    const { service } = flowSetup(ANONYMOUS, {
+      tasks: [OCCURRENCE, task({ title: 'Suelta' })],
+      series: SERIES,
+    });
+
+    expect(service.localTasks().pending).toEqual([
+      {
+        title: 'Gimnasio',
+        dueDate: '2026-11-16',
+        dueTime: '19:00',
+        recurrence: RULE,
+        seriesDate: '2026-11-12',
+      },
+      { title: 'Suelta', dueDate: null, dueTime: null },
+    ]);
+  });
+
+  it('US-012-01 «traer» recrea la serie con su regla y su día previsto de origen', async () => {
+    const { service, create } = flowSetup(ANONYMOUS, { tasks: [OCCURRENCE], series: SERIES });
+    await service.startSignIn('ana', PASS);
+
+    await service.finishSignIn('merge');
+
+    expect(create).toHaveBeenCalledWith({
+      title: 'Gimnasio',
+      dueDate: '2026-11-16',
+      dueTime: '19:00',
+      recurrence: RULE,
+      seriesDate: '2026-11-12',
+    });
+  });
+
+  it('US-012-01 el buffer guardado conserva la regla para reanudar sin perderla', async () => {
+    const { service, create, store } = flowSetup(ANONYMOUS, {
+      tasks: [OCCURRENCE, task({ title: 'Suelta' })],
+      series: SERIES,
+    });
+    await service.startSignIn('ana', PASS);
+    create.mockResolvedValueOnce({ ok: false, reason: 'network' });
+
+    await service.finishSignIn('merge');
+
+    expect(JSON.parse(store.get(STORE_KEY) as string).tasks[0].recurrence).toEqual(RULE);
+  });
+
+  it('US-012-01 un buffer antiguo, sin regla, sigue siendo válido', async () => {
+    const stored = JSON.stringify({
+      source: 'anon-1',
+      target: NEW_ID,
+      tasks: [{ title: 'Pendiente', dueDate: null, dueTime: null }],
+    });
+    const { service, create } = flowSetup(ACCOUNT_9, { stored });
+
+    await service.resumePendingTransfer();
+
+    expect(create).toHaveBeenCalledWith({ title: 'Pendiente', dueDate: null, dueTime: null });
+  });
+
+  it('US-012-01 un buffer con la regla corrupta se descarta sin crear nada', async () => {
+    const stored = JSON.stringify({
+      source: 'anon-1',
+      target: NEW_ID,
+      tasks: [
+        {
+          title: 'X',
+          dueDate: '2026-11-16',
+          dueTime: null,
+          recurrence: { kind: 'rara', interval: 'mucho' },
+        },
+      ],
+    });
+    const { service, create, store } = flowSetup(ACCOUNT_9, { stored });
+
+    await service.resumePendingTransfer();
+
+    expect(create).not.toHaveBeenCalled();
+    expect(store.has(STORE_KEY)).toBe(false);
+  });
+
+  it('US-012-01 las series completadas no se traspasan (solo la pendiente)', async () => {
+    const { service, create } = flowSetup(ANONYMOUS, {
+      tasks: [
+        { ...OCCURRENCE, id: 'hecha', completedAt: '2026-11-12T09:00:00.000Z' },
+        { ...OCCURRENCE, id: 'pendiente' },
+      ],
+      series: SERIES,
+    });
+    await service.startSignIn('ana', PASS);
+
+    await service.finishSignIn('merge');
+
+    expect(create).toHaveBeenCalledTimes(1);
   });
 });

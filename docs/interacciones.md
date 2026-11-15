@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 144 |
-| Preguntas `F` (funcionalidad) | 44 |
-| Preguntas `W` (flujo) | 70 |
-| **Total preguntas** | **114** |
+| Turnos del usuario | 155 |
+| Preguntas `F` (funcionalidad) | 46 |
+| Preguntas `W` (flujo) | 72 |
+| **Total preguntas** | **118** |
 
 ## Log
 
@@ -150,3 +150,15 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 141 | 2026-11-15 | "si dale" (commit del Bloque 6) | 1 W | Commit `7f02a79`. Bloque 7 completo en local: `changePassword` y `deleteAccount` en `AccountAccessService` (validan antes, no cambian nada si falla; tras borrar limpian tareas, progreso y buffer), `forget` en el progreso, pantallas Cambiar contraseña y Borrar cuenta derivadas de Crear cuenta y de la zona de peligro, rutas `cuenta/contrasena` y `cuenta/borrar`, vista previa y 10 e2e nuevos (85 en total). Revisión en navegador (390×844, claro y oscuro) con los mismos valores que Crear cuenta y la zona de peligro de Cuenta. Pregunta W: commit del Bloque 7. |
 | 142 | 2026-11-15 | "si" (commit del Bloque 7) | 1 W | Commit `c36847f`. Bloque 9 (cierre) en local: build sin avisos (lógica de cuenta cargada bajo demanda −14 kB; avisos de presupuesto a 560 kB y 10 kB con test), e2e de fidelidad a 390 px (98 e2e en total), documentación (`supabase.md`, `setup-android.md`, `CLAUDE.md`) y `review.md`. Pendientes por requerir emulador y confirmación: comprobación en Android (T-011-130) y `verify:account` final (T-011-131). Pregunta W: commit del cierre y cómo seguir con lo pendiente. |
 | 143 | 2026-11-15 | "arranca el emulador y lo probamos todo" | 0 | Emulador Android (APK debug x86_64, proyecto real) con toques reales y teclado virtual: crear cuenta, cerrar sesión, iniciar sesión con tareas locales (traer/descartar, atrás con capas apiladas), cambiar contraseña (la antigua deja de valer), borrar cuenta, sin conexión con «Reintentar ahora», arranque en frío claro y oscuro, persistencia. Hallazgo: el WebView conserva el scroll entre rutas → `scrollPositionRestoration: 'top'` (con test) verificado en el emulador. `verify:account` final: 11/11, sin usuarios de prueba. `review.md` aprobado; spec Implementada. |
+| 144 | 2026-11-15 | "si" (subir la rama y actualizar la PR) | 0 | Rama subida (`8e81fb7`) y PR #1 actualizada (título y descripción con la spec 011). La pregunta `W` ya estaba contada. |
+| 145 | 2026-11-15 | "sigue" | 0 | Registro de los turnos 144 y 145. Sin trabajo pendiente en la spec 011. |
+| 146 | 2026-11-15 | "dejamos deepseek y seguimos" | 0 | Se descarta la revisión cruzada de DeepSeek de la 011 (sin saldo). Índice de specs corregido (cambio de usuario descartado). |
+| 147 | 2026-11-15 | "vamos a hacer tareas repetitivas (todos los días, lunes, varios días, etc.)" | 0 | `/specify`: creada `specs/012-tareas-repetitivas/spec.md` (Ciclo simple por decisión previa del usuario, sin pregunta; Frontal sí) y fila 012 en el índice. Pendiente de aprobación. |
+| 148 | 2026-11-15 | "apruebo" | 0 | Spec 012 aprobada. Siguiente paso: `/clarify`. |
+| 149 | 2026-11-15 | "vamos" (`/clarify` 012) | 2 F | Clarify cerrado: alcance P1 + P2 (P3 fuera) y las ocurrencias futuras no se pueden completar hasta su día. Valores por defecto aplicados: repetir desde la fecha prevista, una sola atrasada por serie, historial conservado. Spec actualizada. |
+| 150 | 2026-11-15 | "dale" (`/stitch-prompt` 012) | 0 | Generado `specs/012-tareas-repetitivas/stitch-prompt.md` (6 pantallas: fila Repetir del formulario, hoja de ajuste, configuración por tipo, lista con indicador y completar desactivado en futuras, hojas Solo esta / Toda la serie al editar y borrar). Espera el diseño de Stitch. |
+| 151 | 2026-11-15 | "aquí lo tienes (diseño de Stitch), dime si es correcto" | 0 | Diseño revisado: 2 pantallas con los estados pedidos. Copiado a `specs/012-tareas-repetitivas/design/` (hashes verificados) con `README.md` (qué se ignora y qué se corrige). Sin decisiones de producto pendientes. |
+| 152 | 2026-11-15 | "vamos" (`/sdd-plan` 012) | 0 | Generado `specs/012-tareas-repetitivas/plan.md`: tabla `task_series` + `series_id`/`series_date` en `tasks`, índice único parcial y disparador de guarda, cálculo de fechas puro en TypeScript, autorreparación al cargar, hojas `RecurrenceSheet` y `SeriesChoiceSheet`, 9 bloques TDD. Espera aprobación. |
+| 153 | 2026-11-15 | "esta perfecto" | 0 | Plan 012 aprobado. Siguiente paso: `/task`. |
+| 154 | 2026-11-15 | "vamos" (`/task` 012) | 0 | Generado `specs/012-tareas-repetitivas/tasks.md`: 69 tareas en 9 bloques (BBDD, reglas puras, acceso a datos y simulador, US-01, US-02, US-03, US-04, US-05/06 y cierre), Red antes que Green, `db push` marcado como requiere confirmación. Espera aprobación. |
+| 155 | 2026-11-15 | "vamos" (aprobar tareas y `/implement` 012) | 2 W | Implementados los Bloques 1 a 4 (migración sin aplicar al remoto, reglas de fechas, simulador y acceso a datos, traspaso, hoja de repetición y fila «Repetir» con revisión visual de la hoja en claro y oscuro). 1099 tests unitarios, 132 de scripts y 98 e2e en verde. Preguntas: aplicar la migración con `db push` y hacer el commit de los bloques 1–4. |

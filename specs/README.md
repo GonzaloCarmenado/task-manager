@@ -1,6 +1,6 @@
 # task-manager — Índice de Especificaciones
 
-**Siguiente número disponible**: `012`
+**Siguiente número disponible**: `013`
 
 ---
 
@@ -18,7 +18,8 @@
 | [008](./008-gamificacion/spec.md) | Gamificación: XP, niveles y rachas | Implementada | 10 XP por tarea completada, niveles, rachas de días y pantallas de progreso |
 | [009](./009-e2e-cypress/spec.md) | Pruebas e2e con Cypress | Implementada | 42 pruebas de flujos completos con Supabase simulado (`pnpm e2e`) |
 | [010](./010-interfaz-stitch/spec.md) | Interfaz fiel al sistema de diseño de Stitch | Implementada | Adoptar tipografía, paleta, formas, sombras y componentes de «Playful Momentum» en todas las pantallas, sin funcionalidad nueva |
-| [011](./011-cuenta-usuario/spec.md) | Cuenta de usuario | Implementada | Usuario y contraseña (sin correo) conservando lo anónimo, pantalla Cuenta, cerrar sesión, cambiar contraseña y usuario, borrar cuenta |
+| [011](./011-cuenta-usuario/spec.md) | Cuenta de usuario | Implementada | Usuario y contraseña (sin correo) conservando lo anónimo, pantalla Cuenta, cerrar sesión, cambiar contraseña y borrar cuenta (el cambio de usuario se descartó) |
+| [012](./012-tareas-repetitivas/spec.md) | Tareas repetitivas | Clarify cerrado | Repetir una tarea cada día, días de la semana, cada N días/semanas o un día del mes, con fin opcional y edición «solo esta / toda la serie» |
 
 ---
 

@@ -1,9 +1,11 @@
 import { DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Recurrence } from '../../../core/models/recurrence';
 import { TITLE_MAX, Task, TaskInput } from '../../../core/models/task';
 import { AlarmsConstructorService } from '../../../core/services/alarms.constructor.service';
 import { CLOCK } from '../../../core/services/clock';
+import { firstOnOrAfter } from '../../../core/utils/recurrence';
 import { Icon } from '../../../shared/components/icon/icon';
 import { AlarmPermissionPrompt } from '../alarms/alarm-permission-prompt/alarm-permission-prompt';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
@@ -12,7 +14,9 @@ import {
   PostponeTarget,
 } from '../postpone/postpone.constructor.service';
 import { PostponeSheet } from '../postpone/postpone-sheet/postpone-sheet';
-import { TasksAccessService } from '../tasks.access.service';
+import { RecurrenceConstructorService } from '../recurrence/recurrence.constructor.service';
+import { RecurrenceSheet } from '../recurrence/recurrence-sheet/recurrence-sheet';
+import { TaskOpResult, TasksAccessService } from '../tasks.access.service';
 import { TasksConstructorService } from '../tasks.constructor.service';
 import { TasksNoticeService } from '../tasks-notice.service';
 
@@ -20,12 +24,13 @@ import { TasksNoticeService } from '../tasks-notice.service';
 @Component({
   selector: 'app-task-form',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [Icon, AlarmPermissionPrompt, PostponeSheet],
+  imports: [Icon, AlarmPermissionPrompt, PostponeSheet, RecurrenceSheet],
   templateUrl: './task-form.html',
   styleUrl: './task-form.scss',
 })
 export class TaskForm {
   protected readonly copy = inject(TasksConstructorService);
+  protected readonly repeatCopy = inject(RecurrenceConstructorService);
   private readonly access = inject(TasksAccessService);
   private readonly router = inject(Router);
   private readonly alarms = inject(AlarmsAccessService);
@@ -51,6 +56,18 @@ export class TaskForm {
   protected readonly promptBusy = signal(false);
   /** Tarea que se está posponiendo (hoja abierta). */
   protected readonly postponing = signal<Task | null>(null);
+  /** Regla de repetición elegida (`null` = no se repite). */
+  protected readonly recurrence = signal<Recurrence | null>(null);
+  protected readonly choosingRepeat = signal(false);
+  /** Se quitó la fecha de una tarea con repetición: se avisa de que ya no se repite. */
+  protected readonly repeatCleared = signal(false);
+  /** Regla con la que se abrió la tarea (para saber si cambió). */
+  private originalRule: Recurrence | null = null;
+
+  protected readonly repeatText = computed(() => {
+    const rule = this.recurrence();
+    return rule === null ? this.repeatCopy.row.none : this.repeatCopy.describe(rule);
+  });
 
   private readonly trimmed = computed(() => this.title().trim());
   /** Lo que se guarda: sin los espacios de los extremos (el contador y la validación coinciden). */
@@ -86,7 +103,26 @@ export class TaskForm {
 
   protected setDate(day: string | null): void {
     this.dueDate.set(day === '' ? null : day);
-    if (this.dueDate() === null) this.dueTime.set(null);
+    if (this.dueDate() === null) {
+      this.dueTime.set(null);
+      // Repetir exige fecha: sin ella la tarea ya no se repite.
+      if (this.recurrence() !== null) {
+        this.recurrence.set(null);
+        this.repeatCleared.set(true);
+      }
+    } else {
+      this.repeatCleared.set(false);
+    }
+  }
+
+  protected startRepeat(): void {
+    if (this.dueDate() !== null) this.choosingRepeat.set(true);
+  }
+
+  protected applyRepeat(rule: Recurrence | null): void {
+    this.recurrence.set(rule);
+    this.repeatCleared.set(false);
+    this.choosingRepeat.set(false);
   }
 
   protected onDate(event: Event): void {
@@ -106,15 +142,23 @@ export class TaskForm {
     if (!this.canSave()) return;
     this.saving.set(true);
     this.error.set(null);
-    const input = {
+    const date = this.dueDate();
+    const chosen = this.recurrence();
+    // La regla empieza en la fecha final del formulario, aunque se cambiara después de elegirla.
+    const rule: Recurrence | null =
+      date !== null && chosen !== null ? { ...chosen, startDate: date } : null;
+    const first = rule === null || date === null ? null : firstOnOrAfter(rule, date);
+    if (rule !== null && first === null) {
+      this.saving.set(false);
+      this.error.set(this.copy.form.saveError);
+      return;
+    }
+    const input: TaskInput = {
       title: this.trimmed(),
-      dueDate: this.dueDate(),
-      dueTime: this.dueDate() === null ? null : this.dueTime(),
+      dueDate: this.taskId === null && first !== null ? first : date,
+      dueTime: date === null ? null : this.dueTime(),
     };
-    const result =
-      this.taskId === null
-        ? await this.access.create(input)
-        : await this.access.update(this.taskId, input);
+    const result = await this.persist(input, rule);
     this.saving.set(false);
     if (!result.ok) {
       this.error.set(this.copy.form.saveError);
@@ -122,6 +166,23 @@ export class TaskForm {
     }
     if (this.shouldAskAlarmPermission(input)) this.promptVisible.set(true);
     else void this.router.navigate(['/']);
+  }
+
+  /** Crea o edita según haya o no repetición. */
+  private async persist(input: TaskInput, rule: Recurrence | null): Promise<TaskOpResult> {
+    if (this.taskId === null) {
+      return this.access.create(rule === null ? input : { ...input, recurrence: rule });
+    }
+    const existing = this.access.get(this.taskId);
+    const inSeries = existing?.seriesId !== null && existing?.seriesId !== undefined;
+    if (!inSeries) {
+      return rule === null
+        ? this.access.update(this.taskId, input)
+        : this.access.updateSeries(this.taskId, { ...input, recurrence: rule });
+    }
+    return sameRule(rule, this.originalRule)
+      ? this.access.updateOccurrence(this.taskId, input)
+      : this.access.updateSeries(this.taskId, { ...input, recurrence: rule });
   }
 
   /** Tras «Permitir»: pide el permiso del sistema y vuelve a la lista. */
@@ -152,6 +213,8 @@ export class TaskForm {
       completedAt: null,
       createdAt: '',
       postponedCount: 0,
+      seriesId: null,
+      seriesDate: null,
     };
     return this.alarmsCopy.hasAlarm(probe, this.clock());
   }
@@ -215,5 +278,20 @@ export class TaskForm {
     this.title.set(task.title);
     this.dueDate.set(task.dueDate);
     this.dueTime.set(task.dueTime);
+    const series = task.seriesId === null ? undefined : this.access.seriesOf(task);
+    this.originalRule = series?.recurrence ?? null;
+    this.recurrence.set(this.originalRule);
   }
+}
+
+/** Misma repetición, sin contar el día de inicio (que sigue a la fecha del formulario). */
+function sameRule(a: Recurrence | null, b: Recurrence | null): boolean {
+  if (a === null || b === null) return a === b;
+  return (
+    a.kind === b.kind &&
+    a.interval === b.interval &&
+    a.monthDay === b.monthDay &&
+    a.until === b.until &&
+    a.weekdays.join() === b.weekdays.join()
+  );
 }

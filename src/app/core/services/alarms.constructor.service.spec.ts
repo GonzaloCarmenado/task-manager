@@ -14,6 +14,8 @@ function task(over: Partial<Task> = {}): Task {
     completedAt: null,
     createdAt: `2026-11-01T10:${String(seq % 60).padStart(2, '0')}:00.000Z`,
     postponedCount: 0,
+    seriesId: null,
+    seriesDate: null,
     ...over,
   };
 }

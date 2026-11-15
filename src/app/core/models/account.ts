@@ -1,3 +1,4 @@
+import { Recurrence } from './recurrence';
 /** Motivo por el que falló una operación de cuenta (sin detalles técnicos). */
 export type AccountErrorReason =
   | 'invalid-credentials' // inicio de sesión o contraseña actual incorrectos (mensaje siempre igual)
@@ -34,6 +35,10 @@ export interface LocalTask {
   readonly title: string;
   readonly dueDate: string | null;
   readonly dueTime: string | null;
+  /** Solo si es una ocurrencia de una serie (spec 012): la regla viaja con la tarea. */
+  readonly recurrence?: Recurrence;
+  /** Día previsto original de esa ocurrencia. */
+  readonly seriesDate?: string | null;
 }
 
 /** Tareas anónimas del móvil, capturadas antes de iniciar sesión. */

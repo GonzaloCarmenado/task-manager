@@ -32,6 +32,9 @@ const ACCOUNT_ICONS = [
   'bolt',
 ];
 
+// Spec 012: tareas repetitivas.
+const REPEAT_ICONS = ['repeat', 'event-repeat', 'lock-clock', 'one', 'infinity', 'skip-next'];
+
 type ComponentDef = { ɵcmp: { onPush: boolean } };
 
 function render(name: string, label?: string) {
@@ -72,6 +75,7 @@ describe('Icon', () => {
         'trophy',
         'wifi-off',
         ...ACCOUNT_ICONS,
+        ...REPEAT_ICONS,
       ].sort()
     );
   });

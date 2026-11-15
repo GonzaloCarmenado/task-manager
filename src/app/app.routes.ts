@@ -81,6 +81,11 @@ export function buildRoutes(devMode: boolean): Routes {
               import('./features/dev/account-preview').then((m) => m.AccountPreview),
           },
           {
+            path: '__dev/recurrence/:state',
+            loadComponent: () =>
+              import('./features/dev/recurrence-preview').then((m) => m.RecurrencePreview),
+          },
+          {
             path: '__dev/biometric/:state',
             loadComponent: () =>
               import('./features/dev/biometric-preview').then((m) => m.BiometricPreview),

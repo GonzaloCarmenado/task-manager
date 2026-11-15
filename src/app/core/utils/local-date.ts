@@ -21,3 +21,23 @@ export function addDays(day: string, days: number): string {
 export function formatTime(time: string | null): string | null {
   return time === null ? null : time.slice(0, 5);
 }
+
+/** Días naturales de `from` a `to` (negativo si `to` es anterior). Con `Date.UTC`: inmune al cambio de hora. */
+export function daysBetween(from: string, to: string): number {
+  const utc = (day: string): number => {
+    const [y, m, d] = day.split('-').map(Number);
+    return Date.UTC(y, m - 1, d);
+  };
+  return Math.round((utc(to) - utc(from)) / 86_400_000);
+}
+
+/** Días que tiene el mes del día indicado (28 a 31). */
+export function daysInMonth(day: string): number {
+  const [y, m] = day.split('-').map(Number);
+  return new Date(Date.UTC(y, m, 0)).getUTCDate();
+}
+
+/** Día de la semana: 1 = lunes … 7 = domingo. */
+export function weekdayOf(day: string): number {
+  return ((parseLocalDay(day).getDay() + 6) % 7) + 1;
+}

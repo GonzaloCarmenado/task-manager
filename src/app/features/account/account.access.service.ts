@@ -5,6 +5,8 @@ import {
   LocalTasksSnapshot,
   REMINDER_SNOOZE_DAYS,
 } from '../../core/models/account';
+import { Recurrence } from '../../core/models/recurrence';
+import { TaskInput } from '../../core/models/task';
 import { CLOCK } from '../../core/services/clock';
 import { AuthAccessService } from '../../core/services/auth.access.service';
 import { normalizeUsername } from '../../core/utils/username';
@@ -32,13 +34,31 @@ interface TransferBuffer {
   readonly tasks: readonly LocalTask[];
 }
 
+function isRecurrenceShape(value: unknown): value is Recurrence {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return (
+    (v['kind'] === 'daily' || v['kind'] === 'weekly' || v['kind'] === 'monthly') &&
+    typeof v['interval'] === 'number' &&
+    Array.isArray(v['weekdays']) &&
+    v['weekdays'].every((d) => typeof d === 'number') &&
+    (v['monthDay'] === null || typeof v['monthDay'] === 'number') &&
+    typeof v['startDate'] === 'string' &&
+    (v['until'] === null || typeof v['until'] === 'string')
+  );
+}
+
 function isLocalTask(value: unknown): value is LocalTask {
   if (typeof value !== 'object' || value === null) return false;
   const v = value as Record<string, unknown>;
   return (
     typeof v['title'] === 'string' &&
     (v['dueDate'] === null || typeof v['dueDate'] === 'string') &&
-    (v['dueTime'] === null || typeof v['dueTime'] === 'string')
+    (v['dueTime'] === null || typeof v['dueTime'] === 'string') &&
+    (v['recurrence'] === undefined || isRecurrenceShape(v['recurrence'])) &&
+    (v['seriesDate'] === undefined ||
+      v['seriesDate'] === null ||
+      typeof v['seriesDate'] === 'string')
   );
 }
 
@@ -84,7 +104,13 @@ export class AccountAccessService {
     return {
       pending: all
         .filter((t) => t.completedAt === null)
-        .map((t) => ({ title: t.title, dueDate: t.dueDate, dueTime: t.dueTime })),
+        .map((t): LocalTask => {
+          const base = { title: t.title, dueDate: t.dueDate, dueTime: t.dueTime };
+          const series = t.seriesId === null ? undefined : this.tasks.seriesOf(t);
+          return series === undefined
+            ? base
+            : { ...base, recurrence: series.recurrence, seriesDate: t.seriesDate };
+        }),
       completed: all.filter((t) => t.completedAt !== null).length,
     };
   });
@@ -228,8 +254,12 @@ export class AccountAccessService {
     if (buffer === null) return;
     const remaining = [...buffer.tasks];
     while (remaining.length > 0) {
-      const { title, dueDate, dueTime } = remaining[0];
-      const result = await this.tasks.create({ title, dueDate, dueTime });
+      const { title, dueDate, dueTime, recurrence, seriesDate } = remaining[0];
+      const input: TaskInput =
+        recurrence === undefined
+          ? { title, dueDate, dueTime }
+          : { title, dueDate, dueTime, recurrence, seriesDate };
+      const result = await this.tasks.create(input);
       if (!result.ok) return;
       remaining.shift();
       if (remaining.length > 0) this.writeBuffer({ ...buffer, tasks: remaining });

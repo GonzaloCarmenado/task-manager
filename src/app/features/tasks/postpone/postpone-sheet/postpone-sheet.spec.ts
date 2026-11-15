@@ -17,6 +17,8 @@ const TASK: Task = {
   completedAt: null,
   createdAt: '2026-11-01T10:00:00.000Z',
   postponedCount: 0,
+  seriesId: null,
+  seriesDate: null,
 };
 
 describe('PostponeSheet', () => {
