@@ -13,6 +13,9 @@ function task(over: Partial<Task> = {}): Task {
     dueTime: null,
     completedAt: null,
     createdAt: `2026-11-01T10:${String(seq % 60).padStart(2, '0')}:00.000Z`,
+    postponedCount: 0,
+    seriesId: null,
+    seriesDate: null,
     ...over,
   };
 }
@@ -200,5 +203,57 @@ describe('TasksConstructorService · textos', () => {
     const s = setup(NOON);
     expect(s.form.titleRequired).toBe('Escribe un título para tu tarea.');
     expect(s.form.titleTooLong).toContain('120');
+  });
+});
+
+describe('TasksConstructorService · repetitivas (spec 012)', () => {
+  const occurrence = (over: Partial<Task> = {}): Task =>
+    task({ seriesId: 's1', seriesDate: '2026-11-13', dueDate: '2026-11-13', ...over });
+
+  it('US-012-02 una ocurrencia con fecha posterior a hoy es futura (aún no se puede completar)', () => {
+    const s = setup(NOON);
+    expect(s.isFuture(occurrence({ dueDate: '2026-11-14' }))).toBe(true);
+    expect(s.isFuture(occurrence({ dueDate: '2026-11-20' }))).toBe(true);
+  });
+
+  it('US-012-02 la de hoy y las atrasadas no son futuras', () => {
+    const s = setup(NOON);
+    expect(s.isFuture(occurrence({ dueDate: '2026-11-13' }))).toBe(false);
+    expect(s.isFuture(occurrence({ dueDate: '2026-11-10' }))).toBe(false);
+  });
+
+  it('US-012-02 una tarea suelta con fecha futura sí se puede completar (como hasta ahora)', () => {
+    const s = setup(NOON);
+    expect(s.isFuture(task({ dueDate: '2026-11-20' }))).toBe(false);
+  });
+
+  it('US-012-02 una ocurrencia ya completada no es futura', () => {
+    const s = setup(NOON);
+    const done = occurrence({ dueDate: '2026-11-20', completedAt: '2026-11-13T10:00:00.000Z' });
+    expect(s.isFuture(done)).toBe(false);
+  });
+
+  it('US-012-02 indica cuándo estará disponible: mañana, el día de la semana o la fecha', () => {
+    const s = setup(NOON);
+    expect(s.availableLabel(occurrence({ dueDate: '2026-11-14' }))).toBe('Disponible mañana');
+    expect(s.availableLabel(occurrence({ dueDate: '2026-11-19' }))).toBe('Disponible el jueves');
+    expect(s.availableLabel(occurrence({ dueDate: '2026-11-30' }))).toBe(
+      'Disponible el 30 de noviembre'
+    );
+  });
+
+  it('US-012-02 el aviso tras completar nombra la siguiente ocurrencia', () => {
+    const s = setup(NOON);
+    expect(s.completedNotice('2026-11-19')).toBe('Hecho. Próxima: jueves 19 de noviembre');
+  });
+
+  it('US-012-06 si no hay siguiente, avisa de que era la última repetición', () => {
+    const s = setup(NOON);
+    expect(s.completedNotice(null)).toBe('Hecho. Era la última repetición');
+  });
+
+  it('US-012-02 sin serie, el aviso es el de siempre', () => {
+    const s = setup(NOON);
+    expect(s.completedNotice(undefined)).toBe(s.list.doneNotice);
   });
 });

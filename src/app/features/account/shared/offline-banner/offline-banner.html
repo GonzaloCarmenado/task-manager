@@ -1,0 +1,11 @@
+<div class="banner" role="alert">
+  <app-icon class="lead" name="wifi-off" />
+  <div class="content">
+    <p class="title">{{ copy.offlineTitle }}</p>
+    <p class="body">{{ copy.offlineBody }}</p>
+    <button class="retry" type="button" (click)="retry.emit()">
+      <app-icon name="refresh" />
+      {{ copy.retry }}
+    </button>
+  </div>
+</div>

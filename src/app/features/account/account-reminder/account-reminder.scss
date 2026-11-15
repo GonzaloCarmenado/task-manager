@@ -1,0 +1,138 @@
+@use 'type';
+
+:host {
+  display: block;
+  margin: var(--space-4) 0;
+}
+
+.card {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  box-shadow: var(--shadow-reminder);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-1);
+}
+
+.who {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft-strong);
+  --icon-cut: var(--color-primary-soft);
+
+  app-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.label {
+  margin: 0;
+  color: var(--color-primary-text);
+  @include type.label-sm;
+  text-transform: none;
+}
+
+.title {
+  margin: 0;
+  @include type.body-lg;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+// Alto visible de 32 px con zona táctil de 44 px
+.close {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
+
+  app-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.body {
+  margin: 10px 0 0;
+  color: var(--color-text-muted);
+  @include type.body-md;
+  line-height: 1.625;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.create {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 46px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--shadow-cta-sm);
+  text-decoration: none;
+  @include type.label-lg;
+  transition: transform 150ms;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  app-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.later {
+  height: 46px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  @include type.label-sm;
+  font-weight: 600;
+  text-transform: none;
+}

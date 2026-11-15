@@ -97,6 +97,8 @@ async function main() {
     check('El título vacío se rechaza', empty.error !== null);
     const timeNoDate = await a.from('tasks').insert({ title: 'Hora sin fecha', due_time: '09:00' });
     check('La hora sin fecha se rechaza', timeNoDate.error !== null);
+    const negative = await a.from('tasks').insert({ title: 'Pospuesta negativa', postponed_count: -1 });
+    check('El contador de pospuestas no admite negativos (spec 007)', negative.error !== null);
   } finally {
     // Limpieza: A borra lo suyo (y comprueba que no queda nada).
     await a.from('tasks').delete().not('id', 'is', null);

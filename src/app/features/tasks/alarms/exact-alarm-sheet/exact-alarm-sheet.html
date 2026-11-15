@@ -1,0 +1,11 @@
+<div class="backdrop">
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="exact-alarm-title">
+    <div class="badge"><app-icon name="clock" /></div>
+    <h2 id="exact-alarm-title" class="title">{{ copy.exact.title }}</h2>
+    <p class="description">{{ copy.exact.description }}</p>
+    <button type="button" class="primary" (click)="openSettings.emit()">
+      {{ copy.exact.openSettings }}
+    </button>
+    <button type="button" class="link" (click)="skip.emit()">{{ copy.exact.skip }}</button>
+  </section>
+</div>

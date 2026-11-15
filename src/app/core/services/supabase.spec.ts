@@ -1,16 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { SUPABASE_CONFIG, SupabaseConfig } from './supabase.config';
-import { AUTH_STORAGE_KEY, SupabaseService } from './supabase';
+import { AUTH_STORAGE_KEY, SUPABASE_CLIENT_FACTORY, SupabaseService } from './supabase';
 
 const mocks = vi.hoisted(() => ({
   createClient: vi.fn((..._args: unknown[]) => ({ auth: {} })),
 }));
 
-vi.mock('@supabase/supabase-js', () => ({ createClient: mocks.createClient }));
-
 function setup(config: SupabaseConfig): SupabaseService {
   TestBed.resetTestingModule();
-  TestBed.configureTestingModule({ providers: [{ provide: SUPABASE_CONFIG, useValue: config }] });
+  // El constructor del cliente se inyecta: no se simula el módulo (un `vi.mock` sobre `@supabase/supabase-js`
+  // dependía del orden en que otros specs cargaban el módulo real y fallaba de forma intermitente).
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: SUPABASE_CONFIG, useValue: config },
+      { provide: SUPABASE_CLIENT_FACTORY, useValue: mocks.createClient },
+    ],
+  });
   return TestBed.inject(SupabaseService);
 }
 
@@ -68,5 +73,57 @@ describe('SupabaseService', () => {
     expect(() => setup({ url: valid.url, key: 'YOUR_SUPABASE_PUBLISHABLE_KEY' })).toThrow(
       /environment/i
     );
+  });
+
+  it('US-011-02 el cliente sonda no persiste nada: sin sesión guardada, sin refresco y con almacenamiento en memoria', () => {
+    const service = setup(valid);
+    mocks.createClient.mockClear();
+
+    const probe = service.createProbeClient();
+
+    expect(mocks.createClient).toHaveBeenCalledTimes(1);
+    expect(mocks.createClient.mock.calls[0][0]).toBe(valid.url);
+    expect(mocks.createClient.mock.calls[0][1]).toBe(valid.key);
+    const options = mocks.createClient.mock.calls[0][2] as {
+      auth: {
+        persistSession: boolean;
+        autoRefreshToken: boolean;
+        detectSessionInUrl: boolean;
+        storageKey: string;
+        storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
+      };
+    };
+    expect(options.auth.persistSession).toBe(false);
+    expect(options.auth.autoRefreshToken).toBe(false);
+    expect(options.auth.detectSessionInUrl).toBe(false);
+    expect(options.auth.storageKey).not.toBe(AUTH_STORAGE_KEY);
+    expect(probe).toBe(mocks.createClient.mock.results[0].value);
+  });
+
+  it('US-011-02 el almacenamiento del cliente sonda vive en memoria y no toca localStorage', () => {
+    const service = setup(valid);
+    mocks.createClient.mockClear();
+    window.localStorage.removeItem('sonda-prueba');
+
+    service.createProbeClient();
+    const storage = (mocks.createClient.mock.calls[0][2] as { auth: { storage: Storage } }).auth
+      .storage;
+    storage.setItem('sonda-prueba', 'valor');
+
+    expect(storage.getItem('sonda-prueba')).toBe('valor');
+    expect(window.localStorage.getItem('sonda-prueba')).toBeNull();
+    storage.removeItem('sonda-prueba');
+    expect(storage.getItem('sonda-prueba')).toBeNull();
+  });
+
+  it('US-011-02 cada llamada crea un cliente sonda nuevo y distinto del principal', () => {
+    const service = setup(valid);
+    mocks.createClient.mockImplementation(() => ({ auth: {} }));
+
+    const a = service.createProbeClient();
+    const b = service.createProbeClient();
+
+    expect(a).not.toBe(b);
+    expect(a).not.toBe(service.client);
   });
 });

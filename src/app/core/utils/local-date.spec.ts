@@ -1,4 +1,12 @@
-import { addDays, formatTime, parseLocalDay, toLocalDay } from './local-date';
+import {
+  addDays,
+  daysBetween,
+  daysInMonth,
+  formatTime,
+  parseLocalDay,
+  toLocalDay,
+  weekdayOf,
+} from './local-date';
 
 describe('local-date', () => {
   it('US-005-02 toLocalDay usa la fecha local, también cerca de la medianoche', () => {
@@ -36,5 +44,30 @@ describe('local-date', () => {
     expect(formatTime('09:30:00')).toBe('09:30');
     expect(formatTime('16:05')).toBe('16:05');
     expect(formatTime(null)).toBeNull();
+  });
+
+  it('US-012-05 daysBetween cuenta días naturales, también con cambio de hora', () => {
+    expect(daysBetween('2026-11-15', '2026-11-15')).toBe(0);
+    expect(daysBetween('2026-11-15', '2026-11-20')).toBe(5);
+    expect(daysBetween('2026-11-20', '2026-11-15')).toBe(-5);
+    expect(daysBetween('2026-03-28', '2026-03-30')).toBe(2);
+    expect(daysBetween('2026-10-24', '2026-10-26')).toBe(2);
+    expect(daysBetween('2026-12-31', '2027-01-01')).toBe(1);
+  });
+
+  it('US-012-05 daysInMonth respeta los meses cortos y los años bisiestos', () => {
+    expect(daysInMonth('2026-01-10')).toBe(31);
+    expect(daysInMonth('2026-04-10')).toBe(30);
+    expect(daysInMonth('2026-02-10')).toBe(28);
+    expect(daysInMonth('2028-02-10')).toBe(29);
+    expect(daysInMonth('2100-02-10')).toBe(28);
+    expect(daysInMonth('2000-02-10')).toBe(29);
+  });
+
+  it('US-012-01 weekdayOf numera de lunes (1) a domingo (7)', () => {
+    expect(weekdayOf('2026-11-16')).toBe(1);
+    expect(weekdayOf('2026-11-19')).toBe(4);
+    expect(weekdayOf('2026-11-21')).toBe(6);
+    expect(weekdayOf('2026-11-22')).toBe(7);
   });
 });

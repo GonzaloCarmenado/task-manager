@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-schedule-alarms"
+description = "Enables the schedule_alarms command without any pre-configured scope."
+commands.allow = ["schedule_alarms"]
+
+[[permission]]
+identifier = "deny-schedule-alarms"
+description = "Denies the schedule_alarms command without any pre-configured scope."
+commands.deny = ["schedule_alarms"]

@@ -1,0 +1,122 @@
+@use 'mixins';
+@use 'type';
+
+:host {
+  display: block;
+}
+
+// Tarjeta de nivel: bloque principal de gamificación (relleno `space-lg`)
+.summary {
+  @include mixins.card;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 3.5rem;
+  padding: var(--space-6);
+  border: 0;
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &.state {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-6);
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.level {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-primary-text);
+  @include type.headline-md;
+}
+
+// Pastilla de racha: ámbar con borde cálido; con racha viva, halo de nivel 2
+.streak.pill {
+  @include mixins.pill;
+  min-height: 2rem;
+  padding: 0 var(--space-3);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: var(--color-secondary-soft);
+  color: var(--color-on-secondary-soft);
+  @include type.label-lg;
+
+  &.alive {
+    box-shadow: var(--shadow-streak);
+  }
+
+  &.none {
+    border-color: var(--color-outline);
+    background: var(--color-surface-soft);
+    color: var(--color-text-muted);
+  }
+}
+
+// Barra de nivel: pista y relleno en píldora, relleno en degradado primario → esmeralda
+.bar {
+  display: block;
+  height: 0.75rem;
+  overflow: hidden;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--gradient-progress);
+  transition: width 300ms ease;
+}
+
+.xp {
+  color: var(--color-text-muted);
+  @include type.label-md;
+}
+
+.hint {
+  margin-left: auto;
+  color: var(--color-secondary);
+  text-align: right;
+  @include type.label-md;
+}
+
+.message {
+  color: var(--color-text-muted);
+  @include type.body-md;
+}
+
+.retry {
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft);
+  cursor: pointer;
+  @include type.label-lg;
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}

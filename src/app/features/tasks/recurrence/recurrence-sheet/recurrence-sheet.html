@@ -1,0 +1,178 @@
+<div class="backdrop" (click)="dismiss.emit()">
+  <section
+    class="sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="recurrence-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="head">
+      <div class="badge"><app-icon name="repeat" /></div>
+      <h2 id="recurrence-title" class="title">{{ copy.sheet.title }}</h2>
+      <button
+        type="button"
+        class="close"
+        [attr.aria-label]="copy.sheet.close"
+        (click)="dismiss.emit()"
+      >
+        <app-icon name="x" />
+      </button>
+    </header>
+
+    <div class="body">
+      <p class="group-label" id="recurrence-frequency">{{ copy.sheet.frequency }}</p>
+      <div class="pills" role="radiogroup" aria-labelledby="recurrence-frequency">
+        @for (option of copy.frequencies; track option.value) {
+        <button
+          type="button"
+          class="pill"
+          role="radio"
+          [attr.aria-checked]="draft().option === option.value"
+          (click)="choose(option.value)"
+        >
+          {{ option.label }}
+        </button>
+        }
+      </div>
+
+      @if (needsInterval()) {
+      <div class="config">
+        <div class="config-head">
+          <span class="config-label">{{ copy.sheet.every }}</span>
+        </div>
+        <div class="stepper">
+          <button
+            type="button"
+            class="step minus"
+            [attr.aria-label]="copy.sheet.less"
+            [disabled]="draft().interval <= copy.intervalMin"
+            (click)="stepInterval(-1)"
+          >
+            −
+          </button>
+          <span class="reading"
+            ><span class="value">{{ draft().interval }}</span
+            ><span class="unit">{{ intervalUnit() }}</span></span
+          >
+          <button
+            type="button"
+            class="step plus"
+            [attr.aria-label]="copy.sheet.more"
+            [disabled]="draft().interval >= copy.intervalMax"
+            (click)="stepInterval(1)"
+          >
+            +
+          </button>
+        </div>
+      </div>
+      } @if (needsDays()) {
+      <div class="config">
+        <div class="config-head">
+          <span class="config-label" id="recurrence-days">{{ copy.sheet.weekdaysLabel }}</span>
+          @if (daysProblem(); as message) {
+          <span class="problem" role="alert">{{ message }}</span>
+          }
+        </div>
+        <div class="days" role="group" aria-labelledby="recurrence-days">
+          @for (day of copy.days; track day.value) {
+          <button
+            type="button"
+            class="day"
+            [attr.aria-label]="day.name"
+            [attr.aria-pressed]="draft().weekdays.includes(day.value)"
+            (click)="toggleDay(day.value)"
+          >
+            {{ day.letter }}
+          </button>
+          }
+        </div>
+      </div>
+      } @if (isMonthly()) {
+      <div class="config">
+        <div class="config-head">
+          <span class="config-label">{{ copy.sheet.monthDayLabel }}</span>
+        </div>
+        <div class="stepper">
+          <button
+            type="button"
+            class="step minus"
+            [attr.aria-label]="copy.sheet.less"
+            [disabled]="draft().monthDay <= 1"
+            (click)="stepMonthDay(-1)"
+          >
+            −
+          </button>
+          <span class="reading"><span class="value">{{ draft().monthDay }}</span></span>
+          <button
+            type="button"
+            class="step plus"
+            [attr.aria-label]="copy.sheet.more"
+            [disabled]="draft().monthDay >= 31"
+            (click)="stepMonthDay(1)"
+          >
+            +
+          </button>
+        </div>
+        @if (monthHint(); as hint) {
+        <p class="hint">{{ hint }}</p>
+        }
+      </div>
+      } @if (draft().option !== 'none') {
+      <div class="ending">
+        <p class="group-label">{{ copy.sheet.ending }}</p>
+        <div class="end-options">
+          <button
+            type="button"
+            class="end"
+            [attr.aria-pressed]="draft().until === null"
+            (click)="setEnd(false)"
+          >
+            <span class="end-title">{{ copy.sheet.never }}</span>
+            <span class="end-detail">{{ copy.sheet.neverDetail }}</span>
+          </button>
+          <button
+            type="button"
+            class="end"
+            [attr.aria-pressed]="draft().until !== null"
+            (click)="setEnd(true)"
+          >
+            <span class="end-title">{{ copy.sheet.onDate }}</span>
+            <span class="end-detail">{{ copy.sheet.onDateDetail }}</span>
+          </button>
+        </div>
+        @if (draft().until !== null) {
+        <label class="end-field">
+          <span class="end-field-label">{{ copy.sheet.endDate }}</span>
+          <input
+            type="date"
+            class="end-date"
+            [min]="firstDate()"
+            [value]="draft().until"
+            [attr.aria-invalid]="untilProblem() !== null"
+            (change)="onEndDate($event)"
+          />
+        </label>
+        } @if (untilProblem(); as message) {
+        <p class="problem" role="alert">{{ message }}</p>
+        }
+      </div>
+      } @if (summary(); as info) {
+      <div class="summary" aria-live="polite">
+        <p class="summary-title"><app-icon name="star" />{{ copy.sheet.summaryTitle }}</p>
+        <p class="summary-rule">{{ info.rule }}</p>
+        <p class="summary-first">{{ info.first }}</p>
+      </div>
+      }
+    </div>
+
+    <footer class="actions">
+      <button type="button" class="discard" (click)="dismiss.emit()">
+        {{ copy.sheet.discard }}
+      </button>
+      <button type="button" class="done" [disabled]="problem() !== null" (click)="done()">
+        <app-icon name="check" />
+        <span>{{ copy.sheet.done }}</span>
+      </button>
+    </footer>
+  </section>
+</div>

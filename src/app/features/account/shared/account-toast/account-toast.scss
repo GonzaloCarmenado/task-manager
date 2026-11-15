@@ -1,0 +1,80 @@
+@use 'type';
+
+:host {
+  display: contents;
+}
+
+.toast {
+  position: fixed;
+  z-index: 50;
+  left: 20px;
+  right: 20px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-pop);
+  animation: toast-in 300ms ease-out;
+  pointer-events: none;
+}
+
+// Aviso pequeño: píldora inversa centrada
+.toast[data-kind='small'] {
+  width: fit-content;
+  max-width: calc(100% - 40px);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--color-inverse-surface);
+  color: var(--color-inverse-on-surface);
+
+  .icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--color-tertiary-soft-dim);
+    --icon-cut: var(--color-inverse-surface);
+  }
+
+  .text {
+    margin: 0;
+    @include type.label-lg;
+  }
+}
+
+// Aviso de éxito de Crear cuenta
+.toast[data-kind='success'] {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-tertiary);
+  color: var(--color-on-tertiary);
+
+  .icon {
+    flex: none;
+    width: 24px;
+    height: 24px;
+  }
+
+  .title {
+    margin: 0;
+    @include type.label-lg;
+  }
+
+  .body {
+    margin: 0;
+    opacity: 0.9;
+    @include type.body-sm;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,14 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = """
+Permite consultar si se pueden programar alarmas exactas y abrir los ajustes del sistema
+de notificaciones y de alarmas y recordatorios. No da acceso a datos ni a ficheros.
+"""
+permissions = [
+  "allow-can-schedule-exact-alarms",
+  "allow-open-notification-settings",
+  "allow-open-exact-alarm-settings",
+  "allow-launch-notification-id",
+  "allow-schedule-alarms",
+]

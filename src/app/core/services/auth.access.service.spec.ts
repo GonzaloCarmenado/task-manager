@@ -6,6 +6,11 @@ import { AUTH_STORAGE_KEY, SupabaseService } from './supabase';
 type Listener = (event: string, session: unknown) => void;
 
 const UID = '11111111-1111-1111-1111-111111111111';
+const PW_ACCOUNT = 'MiRitmoSeguro2025';
+const PW_CURRENT = 'ClaveActual123';
+const PW_NEXT = 'ClaveNueva456';
+const ACCOUNT_ACCESS = 'acceso-de-la-cuenta-CCC';
+const ACCOUNT_REFRESH = 'refresco-de-la-cuenta-DDD';
 const SECRET_ACCESS = 'access-token-ficticio-AAA';
 const SECRET_REFRESH = 'refresh-token-ficticio-BBB';
 
@@ -43,6 +48,9 @@ function setup(options: { stored?: string | null; storageThrows?: boolean } = {}
       return { data: { subscription: { unsubscribe } } };
     }),
   };
+  const rpc = vi.fn();
+  const probeAuth = { signInWithPassword: vi.fn() };
+  const createProbeClient = vi.fn(() => ({ auth: probeAuth }));
   const storage = {
     getItem: vi.fn((key: string) => {
       if (options.storageThrows) throw new Error('storage no disponible');
@@ -53,14 +61,25 @@ function setup(options: { stored?: string | null; storageThrows?: boolean } = {}
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
-      { provide: SupabaseService, useValue: { client: { auth } } },
+      { provide: SupabaseService, useValue: { client: { auth, rpc }, createProbeClient } },
       { provide: AUTH_STORAGE, useValue: storage },
     ],
   });
   const service = TestBed.inject(AuthAccessService);
   const emit = (event: string, session: unknown = null) =>
     listeners.forEach((listener) => listener(event, session));
-  return { service, signInAnonymously, getSession, storage, emit, unsubscribe, auth };
+  return {
+    service,
+    signInAnonymously,
+    getSession,
+    storage,
+    emit,
+    unsubscribe,
+    auth,
+    probeAuth,
+    createProbeClient,
+    rpc,
+  };
 }
 
 async function flush(): Promise<void> {
@@ -788,5 +807,882 @@ describe('AuthAccessService · eventos de supabase-js, cambio de identidad y log
     const output = logged(spies);
     expect(output).not.toContain(SECRET_ACCESS);
     expect(output).not.toContain(SECRET_REFRESH);
+  });
+});
+
+describe('AuthAccessService · cuenta: nombre de usuario en la sesión (spec 011)', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    TestBed.resetTestingModule();
+  });
+
+  it('US-011-02 una sesión de cuenta expone el nombre de usuario derivado del identificador interno', () => {
+    const { service } = setup({
+      stored: storedSession({
+        user: { id: UID, is_anonymous: false, email: 'Carlos_Ritmo@cuenta.invalid' },
+      }),
+    });
+
+    service.initialize();
+
+    expect(service.session()?.user).toEqual({
+      id: UID,
+      isAnonymous: false,
+      username: 'carlos_ritmo',
+    });
+  });
+
+  it('US-011-02 una sesión anónima no tiene nombre de usuario', () => {
+    const { service } = setup({ stored: storedSession() });
+
+    service.initialize();
+
+    expect(service.session()?.user.username).toBeNull();
+  });
+
+  it('US-011-02 un correo de otro dominio nunca se expone como nombre de usuario', () => {
+    const { service } = setup({
+      stored: storedSession({
+        user: { id: UID, is_anonymous: false, email: 'alguien@example.com' },
+      }),
+    });
+
+    service.initialize();
+
+    expect(service.session()?.user.username).toBeNull();
+    expect(JSON.stringify(service.session())).not.toContain('example.com');
+  });
+
+  it('US-011-01 USER_UPDATED (vincular la cuenta) actualiza la sesión sin cambiar el user_id', () => {
+    const { service, emit } = setup({ stored: storedSession() });
+    service.initialize();
+    expect(service.session()?.user.isAnonymous).toBe(true);
+
+    emit('USER_UPDATED', {
+      ...anonymousSession(),
+      user: { id: UID, is_anonymous: false, email: 'ana@cuenta.invalid' },
+    });
+
+    expect(service.userId()).toBe(UID);
+    expect(service.session()?.user).toEqual({ id: UID, isAnonymous: false, username: 'ana' });
+    expect(service.status()).toBe('ready');
+  });
+
+  it('US-011-01 USER_UPDATED sin sesión válida se ignora', () => {
+    const { service, emit } = setup({ stored: storedSession() });
+    service.initialize();
+
+    emit('USER_UPDATED', null);
+
+    expect(service.session()?.user.id).toBe(UID);
+  });
+});
+
+function accountSetup(stored = storedSession()) {
+  const base = setup({ stored });
+  const updateUser = vi.fn();
+  Object.assign(base.auth, { updateUser });
+  base.service.initialize();
+  return { ...base, updateUser };
+}
+
+describe('AuthAccessService · cuenta: vincular (spec 011)', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    TestBed.resetTestingModule();
+  });
+
+  const linked = (over: Record<string, unknown> = {}) => ({
+    data: { user: { id: UID, is_anonymous: false, email: 'carlos_ritmo@cuenta.invalid', ...over } },
+    error: null,
+  });
+
+  it('US-011-01 vincula con el identificador interno y la contraseña, conservando el user_id', async () => {
+    const { service, updateUser } = accountSetup();
+    updateUser.mockResolvedValue(linked());
+
+    const result = await service.linkAccount('  Carlos_Ritmo ', 'MiRitmoSeguro2025');
+
+    expect(result).toEqual({ ok: true });
+    expect(updateUser).toHaveBeenCalledTimes(1);
+    expect(updateUser).toHaveBeenCalledWith({
+      email: 'carlos_ritmo@cuenta.invalid',
+      password: PW_ACCOUNT,
+    });
+    expect(service.userId()).toBe(UID);
+    expect(service.session()?.user).toEqual({
+      id: UID,
+      isAnonymous: false,
+      username: 'carlos_ritmo',
+    });
+    expect(service.status()).toBe('ready');
+  });
+
+  it('US-011-01 si el servicio deja la cuenta pendiente de verificar (sigue anónima), no cuenta como éxito', async () => {
+    const { service, updateUser } = accountSetup();
+    updateUser.mockResolvedValue(linked({ is_anonymous: true }));
+
+    const result = await service.linkAccount('carlos_ritmo', 'MiRitmoSeguro2025');
+
+    expect(result).toEqual({ ok: false, reason: 'unknown' });
+    expect(service.session()?.user.isAnonymous).toBe(true);
+  });
+
+  it('US-011-01 nombre de usuario ya existente → username-taken y la sesión no cambia', async () => {
+    const { service, updateUser } = accountSetup();
+    updateUser.mockResolvedValue({
+      data: { user: null },
+      error: Object.assign(new Error('exists'), {
+        name: 'AuthApiError',
+        status: 422,
+        code: 'email_exists',
+      }),
+    });
+
+    const result = await service.linkAccount('ocupado', 'MiRitmoSeguro2025');
+
+    expect(result).toEqual({ ok: false, reason: 'username-taken' });
+    expect(service.session()?.user.isAnonymous).toBe(true);
+  });
+
+  it('US-011-01 contraseña débil para el servicio → weak-password', async () => {
+    const { service, updateUser } = accountSetup();
+    updateUser.mockResolvedValue({
+      data: { user: null },
+      error: Object.assign(new Error('weak'), {
+        name: 'AuthApiError',
+        status: 422,
+        code: 'weak_password',
+      }),
+    });
+
+    expect(await service.linkAccount('carlos', 'corta')).toEqual({
+      ok: false,
+      reason: 'weak-password',
+    });
+  });
+
+  it('US-011-01 sin red → network; una excepción de la librería nunca se propaga', async () => {
+    const { service, updateUser } = accountSetup();
+    updateUser.mockRejectedValue(new TypeError('Failed to fetch'));
+
+    expect(await service.linkAccount('carlos', 'MiRitmoSeguro2025')).toEqual({
+      ok: false,
+      reason: 'network',
+    });
+  });
+
+  it('US-011-01 sin respuesta en el plazo → timeout', async () => {
+    const { service, updateUser } = accountSetup();
+    updateUser.mockReturnValue(new Promise(() => undefined));
+
+    const pending = service.linkAccount('carlos', 'MiRitmoSeguro2025');
+    await vi.advanceTimersByTimeAsync(20_000);
+
+    expect(await pending).toEqual({ ok: false, reason: 'timeout' });
+  });
+
+  it('US-011-01 una cuenta ya vinculada no puede volver a vincularse', async () => {
+    const { service, updateUser } = accountSetup(
+      storedSession({ user: { id: UID, is_anonymous: false, email: 'ana@cuenta.invalid' } })
+    );
+
+    expect(await service.linkAccount('otra', 'MiRitmoSeguro2025')).toEqual({
+      ok: false,
+      reason: 'unauthorized',
+    });
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it('US-011-01 una segunda llamada mientras hay otra en curso se rechaza sin llamar al servidor', async () => {
+    const { service, updateUser } = accountSetup();
+    updateUser.mockReturnValue(new Promise(() => undefined));
+
+    void service.linkAccount('carlos', 'MiRitmoSeguro2025');
+    const second = await service.linkAccount('carlos', 'MiRitmoSeguro2025');
+
+    expect(second).toEqual({ ok: false, reason: 'unknown' });
+    expect(updateUser).toHaveBeenCalledTimes(1);
+  });
+
+  it('US-011-01 ni la contraseña ni el identificador interno llegan a la consola ni a la sesión', async () => {
+    const spies = [
+      vi.spyOn(console, 'log').mockImplementation(() => undefined),
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined),
+      vi.spyOn(console, 'error').mockImplementation(() => undefined),
+    ];
+    const { service, updateUser } = accountSetup();
+    updateUser.mockResolvedValue(linked());
+
+    await service.linkAccount('carlos_ritmo', 'MiRitmoSeguro2025');
+
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
+    const exposed = JSON.stringify(service.session());
+    expect(exposed).not.toContain('MiRitmoSeguro2025');
+    expect(exposed).not.toContain('cuenta.invalid');
+  });
+});
+
+describe('AuthAccessService · cuenta: inicio de sesión en dos fases (spec 011)', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    TestBed.resetTestingModule();
+  });
+
+  const ACCOUNT_ID = '22222222-2222-2222-2222-222222222222';
+  const probeSession = {
+    access_token: ACCOUNT_ACCESS,
+    refresh_token: ACCOUNT_REFRESH,
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    user: { id: ACCOUNT_ID, is_anonymous: false, email: 'ana@cuenta.invalid' },
+  };
+
+  function signInSetup() {
+    const base = accountSetup();
+    const setSession = vi.fn();
+    Object.assign(base.auth, { setSession });
+    return { ...base, setSession };
+  }
+
+  it('US-011-02 checkCredentials usa un cliente sonda con el identificador interno y NO cambia la sesión', async () => {
+    const { service, probeAuth, createProbeClient, setSession } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: probeSession },
+      error: null,
+    });
+
+    const result = await service.checkCredentials('  Ana ', 'MiRitmoSeguro2025');
+
+    expect(result).toEqual({ ok: true });
+    expect(createProbeClient).toHaveBeenCalledTimes(1);
+    expect(probeAuth.signInWithPassword).toHaveBeenCalledWith({
+      email: 'ana@cuenta.invalid',
+      password: PW_ACCOUNT,
+    });
+    expect(setSession).not.toHaveBeenCalled();
+    expect(service.userId()).toBe(UID); // sigue la sesión anónima
+    expect(service.session()?.user.isAnonymous).toBe(true);
+  });
+
+  it('US-011-02 credenciales incorrectas → invalid-credentials y nada queda pendiente', async () => {
+    const { service, probeAuth } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: null },
+      error: Object.assign(new Error('bad'), {
+        name: 'AuthApiError',
+        status: 400,
+        code: 'invalid_credentials',
+      }),
+    });
+
+    expect(await service.checkCredentials('ana', 'mala')).toEqual({
+      ok: false,
+      reason: 'invalid-credentials',
+    });
+    expect(await service.completeSignIn()).toEqual({ ok: false, reason: 'unauthorized' });
+  });
+
+  it('US-011-02 límite de intentos → rate-limited; sin red → network; sin respuesta → timeout', async () => {
+    const { service, probeAuth } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValueOnce({
+      data: { session: null },
+      error: Object.assign(new Error('429'), { name: 'AuthApiError', status: 429 }),
+    });
+    expect(await service.checkCredentials('ana', 'x')).toEqual({
+      ok: false,
+      reason: 'rate-limited',
+    });
+
+    probeAuth.signInWithPassword.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    expect(await service.checkCredentials('ana', 'x')).toEqual({ ok: false, reason: 'network' });
+
+    probeAuth.signInWithPassword.mockReturnValueOnce(new Promise(() => undefined));
+    const pending = service.checkCredentials('ana', 'x');
+    await vi.advanceTimersByTimeAsync(20_000);
+    expect(await pending).toEqual({ ok: false, reason: 'timeout' });
+  });
+
+  it('US-011-02 completeSignIn aplica la sesión comprobada y cambia la identidad', async () => {
+    const { service, probeAuth, setSession } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: probeSession },
+      error: null,
+    });
+    setSession.mockResolvedValue({ data: { session: probeSession }, error: null });
+    await service.checkCredentials('ana', 'MiRitmoSeguro2025');
+
+    const result = await service.completeSignIn();
+
+    expect(result).toEqual({ ok: true });
+    expect(setSession).toHaveBeenCalledWith({
+      access_token: ACCOUNT_ACCESS,
+      refresh_token: ACCOUNT_REFRESH,
+    });
+    expect(service.userId()).toBe(ACCOUNT_ID);
+    expect(service.session()?.user).toEqual({
+      id: ACCOUNT_ID,
+      isAnonymous: false,
+      username: 'ana',
+    });
+    expect(service.status()).toBe('ready');
+  });
+
+  it('US-011-02 completeSignIn solo vale una vez: la segunda no hace nada', async () => {
+    const { service, probeAuth, setSession } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: probeSession },
+      error: null,
+    });
+    setSession.mockResolvedValue({ data: { session: probeSession }, error: null });
+    await service.checkCredentials('ana', 'x');
+    await service.completeSignIn();
+
+    expect(await service.completeSignIn()).toEqual({ ok: false, reason: 'unauthorized' });
+    expect(setSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('US-011-02 cancelSignIn descarta lo comprobado y la sesión anónima sigue intacta', async () => {
+    const { service, probeAuth, setSession } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: probeSession },
+      error: null,
+    });
+    await service.checkCredentials('ana', 'x');
+
+    service.cancelSignIn();
+
+    expect(await service.completeSignIn()).toEqual({ ok: false, reason: 'unauthorized' });
+    expect(setSession).not.toHaveBeenCalled();
+    expect(service.userId()).toBe(UID);
+    expect(service.session()?.user.isAnonymous).toBe(true);
+  });
+
+  it('US-011-02 lo comprobado caduca a los 10 minutos', async () => {
+    const { service, probeAuth, setSession } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: probeSession },
+      error: null,
+    });
+    await service.checkCredentials('ana', 'x');
+
+    await vi.advanceTimersByTimeAsync(10 * 60 * 1000 + 1000);
+
+    expect(await service.completeSignIn()).toEqual({ ok: false, reason: 'unauthorized' });
+    expect(setSession).not.toHaveBeenCalled();
+  });
+
+  it('US-011-02 si falla setSession por red se puede reintentar', async () => {
+    const { service, probeAuth, setSession } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: probeSession },
+      error: null,
+    });
+    await service.checkCredentials('ana', 'x');
+
+    setSession.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    expect(await service.completeSignIn()).toEqual({ ok: false, reason: 'network' });
+    setSession.mockResolvedValueOnce({ data: { session: probeSession }, error: null });
+    expect(await service.completeSignIn()).toEqual({ ok: true });
+  });
+
+  it('US-011-02 una sesión que ya es de cuenta no puede iniciar otra sin cerrar la actual', async () => {
+    const base = accountSetup(
+      storedSession({ user: { id: UID, is_anonymous: false, email: 'ana@cuenta.invalid' } })
+    );
+
+    expect(await base.service.checkCredentials('otra', 'x')).toEqual({
+      ok: false,
+      reason: 'unauthorized',
+    });
+    expect(base.probeAuth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it('US-011-02 los tokens y la contraseña no llegan a la consola ni a la sesión expuesta', async () => {
+    const spies = [
+      vi.spyOn(console, 'log').mockImplementation(() => undefined),
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined),
+      vi.spyOn(console, 'error').mockImplementation(() => undefined),
+    ];
+    const { service, probeAuth, setSession } = signInSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: probeSession },
+      error: null,
+    });
+    setSession.mockResolvedValue({ data: { session: probeSession }, error: null });
+
+    await service.checkCredentials('ana', 'MiRitmoSeguro2025');
+    await service.completeSignIn();
+
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
+    const exposed = JSON.stringify(service.session());
+    for (const secret of [
+      'acceso-de-la-cuenta-CCC',
+      'refresco-de-la-cuenta-DDD',
+      'MiRitmoSeguro2025',
+      'cuenta.invalid',
+    ]) {
+      expect(exposed).not.toContain(secret);
+    }
+  });
+});
+
+describe('AuthAccessService · cuenta: cerrar sesión (spec 011)', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    TestBed.resetTestingModule();
+  });
+
+  const ACCOUNT_STORED = () =>
+    storedSession({ user: { id: UID, is_anonymous: false, email: 'ana@cuenta.invalid' } });
+  const NEW_ID = '33333333-3333-3333-3333-333333333333';
+
+  function signOutSetup() {
+    const base = accountSetup(ACCOUNT_STORED());
+    const signOut = vi.fn(async () => {
+      base.emit('SIGNED_OUT'); // la librería emite el evento antes de resolver
+      return { error: null };
+    });
+    Object.assign(base.auth, { signOut });
+    return { ...base, signOut };
+  }
+
+  it('US-011-03 cierra solo esta sesión (scope local), no las de otros móviles de la cuenta', async () => {
+    const { service, signOut, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+
+    await service.signOut();
+
+    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
+  });
+
+  it('US-011-03 deja una sesión anónima nueva y vuelve a estar lista, creándola una sola vez', async () => {
+    const { service, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+
+    const result = await service.signOut();
+    expect(result).toEqual({ ok: true });
+
+    await flush();
+
+    expect(signInAnonymously).toHaveBeenCalledTimes(1);
+    expect(service.status()).toBe('ready');
+    expect(service.userId()).toBe(NEW_ID);
+    expect(service.session()?.user).toEqual({ id: NEW_ID, isAnonymous: true, username: null });
+  });
+
+  it('US-011-03 el cierre esperado no se registra como «sesión rechazada por el servidor»', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { service, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+
+    await service.signOut();
+    await flush();
+
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('US-011-03 un SIGNED_OUT inesperado posterior vuelve a tratarse como rechazo del servidor', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { service, signInAnonymously, emit } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+    await service.signOut();
+    await flush();
+
+    emit('SIGNED_OUT');
+
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('US-011-03 la librería quita la sesión local antes de la petición: un fallo al revocar no impide cerrar', async () => {
+    const { service, auth, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+    Object.assign(auth, {
+      signOut: vi.fn().mockRejectedValue(new TypeError('Failed to fetch')),
+    });
+
+    const result = await service.signOut();
+    await flush();
+
+    expect(result).toEqual({ ok: true });
+    expect(service.userId()).toBe(NEW_ID);
+    expect(service.session()?.user.isAnonymous).toBe(true);
+  });
+
+  it('US-011-03 un error devuelto por la librería (sin revocar) también deja la sesión cerrada', async () => {
+    const { service, auth, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+    Object.assign(auth, {
+      signOut: vi.fn().mockResolvedValue({
+        error: Object.assign(new Error('x'), { name: 'AuthRetryableFetchError', status: 0 }),
+      }),
+    });
+
+    expect(await service.signOut()).toEqual({ ok: true });
+    await flush();
+    expect(service.userId()).toBe(NEW_ID);
+  });
+
+  it('US-011-03 sin respuesta del servidor tampoco bloquea el cierre: ya está cerrada en local', async () => {
+    const { service, auth, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+    Object.assign(auth, { signOut: vi.fn().mockReturnValue(new Promise(() => undefined)) });
+
+    const pending = service.signOut();
+    await vi.advanceTimersByTimeAsync(20_000);
+
+    expect(await pending).toEqual({ ok: true });
+    await flush();
+    expect(service.userId()).toBe(NEW_ID);
+  });
+
+  it('US-011-03 con el móvil sin conexión no se cierra: se avisa antes de tocar nada', async () => {
+    const { service, signOut, signInAnonymously } = signOutSetup();
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    expect(await service.signOut()).toEqual({ ok: false, reason: 'network' });
+
+    expect(signOut).not.toHaveBeenCalled();
+    expect(signInAnonymously).not.toHaveBeenCalled();
+    expect(service.userId()).toBe(UID);
+    expect(service.status()).toBe('ready');
+  });
+
+  it('US-011-03 canSignOut: solo hay sesión que cerrar con cuenta y con red', () => {
+    const { service } = signOutSetup();
+    expect(service.canSignOut()).toBe(true);
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    expect(service.canSignOut()).toBe(false);
+  });
+
+  it('US-011-03 una sesión anónima no tiene nada que cerrar', async () => {
+    const base = accountSetup();
+    const signOut = vi.fn();
+    Object.assign(base.auth, { signOut });
+
+    expect(await base.service.signOut()).toEqual({ ok: false, reason: 'unauthorized' });
+    expect(signOut).not.toHaveBeenCalled();
+  });
+
+  it('US-011-03 cerrar sesión descarta cualquier inicio de sesión comprobado a medias', async () => {
+    const { service, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+    await service.signOut();
+    await flush();
+
+    expect(await service.completeSignIn()).toEqual({ ok: false, reason: 'unauthorized' });
+  });
+});
+
+describe('AuthAccessService · cuenta: cambiar contraseña (spec 011)', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    TestBed.resetTestingModule();
+  });
+
+  const ACCOUNT_STORED = () =>
+    storedSession({ user: { id: UID, is_anonymous: false, email: 'ana@cuenta.invalid' } });
+  const reauthOk = { data: { session: { access_token: 'a', refresh_token: 'b' } }, error: null };
+  const apiError = (code: string, status = 422) => ({
+    data: { user: null },
+    error: Object.assign(new Error('x'), { name: 'AuthApiError', status, code }),
+  });
+
+  function changeSetup(stored = ACCOUNT_STORED()) {
+    return accountSetup(stored);
+  }
+
+  it('US-011-05 cambia la contraseña tras re-autenticar con la actual en el cliente sonda', async () => {
+    const { service, probeAuth, updateUser } = changeSetup();
+    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
+    updateUser.mockResolvedValue({
+      data: { user: { id: UID, email: 'ana@cuenta.invalid' } },
+      error: null,
+    });
+
+    const result = await service.changePassword('ClaveActual123', 'ClaveNueva456');
+
+    expect(result).toEqual({ ok: true });
+    expect(probeAuth.signInWithPassword).toHaveBeenCalledWith({
+      email: 'ana@cuenta.invalid',
+      password: PW_CURRENT,
+    });
+    expect(updateUser).toHaveBeenCalledTimes(1);
+    expect(updateUser).toHaveBeenCalledWith({ password: PW_NEXT });
+    expect(service.userId()).toBe(UID);
+    expect(service.session()?.user.username).toBe('ana');
+  });
+
+  it('US-011-05 contraseña actual incorrecta → invalid-credentials y no se cambia nada', async () => {
+    const { service, probeAuth, updateUser } = changeSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: null },
+      error: Object.assign(new Error('x'), {
+        name: 'AuthApiError',
+        status: 400,
+        code: 'invalid_credentials',
+      }),
+    });
+
+    expect(await service.changePassword('mala', 'ClaveNueva456')).toEqual({
+      ok: false,
+      reason: 'invalid-credentials',
+    });
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it('US-011-05 una nueva igual a la actual se rechaza sin llamar al servidor', async () => {
+    const { service, probeAuth, updateUser } = changeSetup();
+
+    expect(await service.changePassword('ClaveActual123', 'ClaveActual123')).toEqual({
+      ok: false,
+      reason: 'same-password',
+    });
+    expect(probeAuth.signInWithPassword).not.toHaveBeenCalled();
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it('US-011-05 el servicio rechaza la nueva por débil o igual → weak-password / same-password', async () => {
+    const { service, probeAuth, updateUser } = changeSetup();
+    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
+    updateUser.mockResolvedValueOnce(apiError('weak_password'));
+    expect(await service.changePassword('ClaveActual123', 'corta')).toEqual({
+      ok: false,
+      reason: 'weak-password',
+    });
+    updateUser.mockResolvedValueOnce(apiError('same_password'));
+    expect(await service.changePassword('ClaveActual123', 'ClaveNueva456')).toEqual({
+      ok: false,
+      reason: 'same-password',
+    });
+  });
+
+  it('US-011-05 una sesión anónima no puede cambiar contraseña', async () => {
+    const { service, probeAuth, updateUser } = accountSetup();
+
+    expect(await service.changePassword('a', 'b')).toEqual({ ok: false, reason: 'unauthorized' });
+    expect(probeAuth.signInWithPassword).not.toHaveBeenCalled();
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it('US-011-05 sin red o sin respuesta se explica y no se cambia nada a medias', async () => {
+    const { service, probeAuth, updateUser } = changeSetup();
+    probeAuth.signInWithPassword.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    expect(await service.changePassword('ClaveActual123', 'ClaveNueva456')).toEqual({
+      ok: false,
+      reason: 'network',
+    });
+    expect(updateUser).not.toHaveBeenCalled();
+
+    probeAuth.signInWithPassword.mockResolvedValueOnce(reauthOk);
+    updateUser.mockReturnValueOnce(new Promise(() => undefined));
+    const pending = service.changePassword('ClaveActual123', 'ClaveNueva456');
+    await vi.advanceTimersByTimeAsync(40_000);
+    expect(await pending).toEqual({ ok: false, reason: 'timeout' });
+  });
+
+  it('US-011-05 ni contraseñas ni identificadores internos llegan a la consola', async () => {
+    const spies = [
+      vi.spyOn(console, 'log').mockImplementation(() => undefined),
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined),
+      vi.spyOn(console, 'error').mockImplementation(() => undefined),
+    ];
+    const { service, probeAuth, updateUser } = changeSetup();
+    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
+    updateUser.mockResolvedValue({
+      data: { user: { id: UID, email: 'ana@cuenta.invalid' } },
+      error: null,
+    });
+
+    await service.changePassword('ClaveActual123', 'ClaveNueva456');
+
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('AuthAccessService · cuenta: borrar la cuenta (spec 011)', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    TestBed.resetTestingModule();
+  });
+
+  const ACCOUNT_STORED = () =>
+    storedSession({ user: { id: UID, is_anonymous: false, email: 'ana@cuenta.invalid' } });
+  const NEW_ID = '44444444-4444-4444-4444-444444444444';
+  const reauthOk = { data: { session: { access_token: 'a', refresh_token: 'b' } }, error: null };
+
+  function deleteSetup(stored = ACCOUNT_STORED()) {
+    const base = accountSetup(stored);
+    const signOut = vi.fn(async () => {
+      base.emit('SIGNED_OUT');
+      return { error: null };
+    });
+    Object.assign(base.auth, { signOut });
+    base.signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
+    return { ...base, signOut };
+  }
+
+  it('US-011-06 re-autentica, borra con la función de servidor y deja una sesión anónima nueva', async () => {
+    const { service, probeAuth, rpc, signOut } = deleteSetup();
+    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    const result = await service.deleteOwnAccount('ClaveActual123');
+    await flush();
+
+    expect(result).toEqual({ ok: true });
+    expect(probeAuth.signInWithPassword).toHaveBeenCalledWith({
+      email: 'ana@cuenta.invalid',
+      password: PW_CURRENT,
+    });
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith('delete_my_account');
+    expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(service.status()).toBe('ready');
+    expect(service.userId()).toBe(NEW_ID);
+    expect(service.session()?.user).toEqual({ id: NEW_ID, isAnonymous: true, username: null });
+  });
+
+  it('US-011-06 contraseña incorrecta: no se llama al servidor ni cambia nada', async () => {
+    const { service, probeAuth, rpc, signOut } = deleteSetup();
+    probeAuth.signInWithPassword.mockResolvedValue({
+      data: { session: null },
+      error: Object.assign(new Error('x'), {
+        name: 'AuthApiError',
+        status: 400,
+        code: 'invalid_credentials',
+      }),
+    });
+
+    expect(await service.deleteOwnAccount('mala')).toEqual({
+      ok: false,
+      reason: 'invalid-credentials',
+    });
+    expect(rpc).not.toHaveBeenCalled();
+    expect(signOut).not.toHaveBeenCalled();
+    expect(service.userId()).toBe(UID);
+  });
+
+  it('US-011-06 si falla el borrado no se cierra nada ni se crea otra sesión', async () => {
+    const { service, probeAuth, rpc, signOut, signInAnonymously } = deleteSetup();
+    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
+
+    rpc.mockResolvedValueOnce({
+      data: null,
+      error: { code: '500', message: 'boom', details: '', hint: '' },
+    });
+    expect(await service.deleteOwnAccount('ClaveActual123')).toEqual({
+      ok: false,
+      reason: 'unknown',
+    });
+
+    rpc.mockResolvedValueOnce({
+      data: null,
+      error: { code: '42501', message: 'permission denied', details: '', hint: '' },
+    });
+    expect(await service.deleteOwnAccount('ClaveActual123')).toEqual({
+      ok: false,
+      reason: 'unauthorized',
+    });
+
+    rpc.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    expect(await service.deleteOwnAccount('ClaveActual123')).toEqual({
+      ok: false,
+      reason: 'network',
+    });
+
+    expect(signOut).not.toHaveBeenCalled();
+    expect(signInAnonymously).not.toHaveBeenCalled();
+    expect(service.userId()).toBe(UID);
+    expect(service.session()?.user.username).toBe('ana');
+  });
+
+  it('US-011-06 sin respuesta del servidor → timeout y no se borra nada a medias', async () => {
+    const { service, probeAuth, rpc, signOut } = deleteSetup();
+    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
+    rpc.mockReturnValue(new Promise(() => undefined));
+
+    const pending = service.deleteOwnAccount('ClaveActual123');
+    await vi.advanceTimersByTimeAsync(40_000);
+
+    expect(await pending).toEqual({ ok: false, reason: 'timeout' });
+    expect(signOut).not.toHaveBeenCalled();
+    expect(service.userId()).toBe(UID);
+  });
+
+  it('US-011-06 una sesión anónima no puede borrar cuenta y ni siquiera llama al servidor', async () => {
+    const { service, rpc, probeAuth } = deleteSetup(storedSession());
+
+    expect(await service.deleteOwnAccount('x')).toEqual({ ok: false, reason: 'unauthorized' });
+    expect(rpc).not.toHaveBeenCalled();
+    expect(probeAuth.signInWithPassword).not.toHaveBeenCalled();
+  });
+
+  it('US-011-06 si la cuenta ya se borró aunque el cierre local falle, el móvil queda con una sesión anónima nueva', async () => {
+    const { service, probeAuth, rpc, auth } = deleteSetup();
+    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
+    rpc.mockResolvedValue({ data: null, error: null });
+    Object.assign(auth, { signOut: vi.fn().mockRejectedValue(new TypeError('Failed to fetch')) });
+
+    const result = await service.deleteOwnAccount('ClaveActual123');
+    await flush();
+
+    expect(result).toEqual({ ok: true });
+    expect(service.userId()).toBe(NEW_ID);
+    expect(service.session()?.user.isAnonymous).toBe(true);
+  });
+
+  it('US-011-06 la contraseña y los identificadores no llegan a la consola', async () => {
+    const spies = [
+      vi.spyOn(console, 'log').mockImplementation(() => undefined),
+      vi.spyOn(console, 'warn').mockImplementation(() => undefined),
+      vi.spyOn(console, 'error').mockImplementation(() => undefined),
+    ];
+    const { service, probeAuth, rpc } = deleteSetup();
+    probeAuth.signInWithPassword.mockResolvedValue(reauthOk);
+    rpc.mockResolvedValue({ data: null, error: null });
+
+    await service.deleteOwnAccount('ClaveActual123');
+    await flush();
+
+    for (const spy of spies) expect(spy).not.toHaveBeenCalled();
   });
 });

@@ -1,6 +1,40 @@
 import { TestBed } from '@angular/core/testing';
 import { ICON_NAMES, Icon, IconName } from './icon';
 
+const ACCOUNT_ICONS = [
+  'arrow-left',
+  'arrow-right',
+  'person',
+  'at',
+  'id-card',
+  'key',
+  'eye',
+  'eye-off',
+  'check-circle',
+  'circle',
+  'alert-circle',
+  'user-plus',
+  'x',
+  'shield-user',
+  'lock-reset',
+  'phone-lock',
+  'cloud-sync',
+  'cloud-up',
+  'cloud-check',
+  'log-in',
+  'log-out',
+  'badge-check',
+  'verified-user',
+  'swap',
+  'list-plus',
+  'info',
+  'trash-sweep',
+  'bolt',
+];
+
+// Spec 012: tareas repetitivas.
+const REPEAT_ICONS = ['repeat', 'event-repeat', 'lock-clock', 'one', 'infinity', 'skip-next'];
+
 type ComponentDef = { ɵcmp: { onPush: boolean } };
 
 function render(name: string, label?: string) {
@@ -20,12 +54,15 @@ describe('Icon', () => {
     expect([...ICON_NAMES].sort()).toEqual(
       [
         'alert',
+        'bell',
+        'bell-off',
         'calendar',
         'check',
         'chevron-down',
         'chevron-right',
         'clock',
         'fingerprint',
+        'flame',
         'plus',
         'trash',
         'hourglass',
@@ -33,7 +70,12 @@ describe('Icon', () => {
         'refresh',
         'server',
         'shield',
+        'snooze',
+        'star',
+        'trophy',
         'wifi-off',
+        ...ACCOUNT_ICONS,
+        ...REPEAT_ICONS,
       ].sort()
     );
   });
@@ -69,6 +111,33 @@ describe('Icon', () => {
       const el = render(name);
       expect(el.innerHTML, name).not.toMatch(/https?:\/\//);
       expect(el.querySelector('svg')?.getAttribute('stroke'), name).toBe('currentColor');
+    }
+  });
+
+  it('US-011-01 por defecto el icono es de trazo (sin relleno)', () => {
+    expect(render('person').querySelector('svg')?.getAttribute('fill')).toBe('none');
+  });
+
+  it('US-011-01 con filled el icono se rellena con el color actual', () => {
+    const fixture = TestBed.createComponent(Icon);
+    fixture.componentRef.setInput('name', 'badge-check' as IconName);
+    fixture.componentRef.setInput('filled', true);
+    fixture.detectChanges();
+    const svg = (fixture.nativeElement as HTMLElement).querySelector('svg');
+    expect(svg?.getAttribute('fill')).toBe('currentColor');
+    expect(svg?.getAttribute('stroke')).toBe('currentColor');
+  });
+
+  it('US-011-01 con filled los detalles interiores se pueden recortar con el color del fondo', () => {
+    for (const name of [
+      'badge-check',
+      'check-circle',
+      'info',
+      'verified-user',
+      'cloud-up',
+      'cloud-sync',
+    ]) {
+      expect(render(name).querySelectorAll('svg .cut').length, name).toBeGreaterThan(0);
     }
   });
 

@@ -1,3 +1,6 @@
+@use 'mixins';
+@use 'type';
+
 :host {
   display: block;
 }
@@ -8,7 +11,8 @@
   flex-direction: column;
   gap: var(--space-4);
   min-height: 100dvh;
-  padding: var(--space-4) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom));
+  padding: var(--space-margin) var(--space-margin)
+    calc(var(--space-8) + env(safe-area-inset-bottom));
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-family);
@@ -24,9 +28,7 @@
 
 .heading {
   margin: 0;
-  font-size: var(--font-size-headline);
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  @include type.headline-lg;
 }
 
 .cancel {
@@ -37,19 +39,21 @@
   border-radius: var(--radius-full);
   background: var(--color-surface-soft);
   color: var(--color-on-primary-soft);
-  font: inherit;
-  font-weight: 700;
   cursor: pointer;
+  @include type.label-lg;
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
 }
 
 .card {
+  @include mixins.card;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  padding: var(--space-4);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
 }
 
 .label-row {
@@ -64,55 +68,36 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-weight: 700;
+  @include type.label-lg;
 }
 
 .optional {
   color: var(--color-text-muted);
-  font-size: var(--font-size-body);
-  font-weight: 500;
+  @include type.body-sm;
 }
 
 .counter {
   color: var(--color-text-muted);
-  font-size: var(--font-size-body);
-  font-weight: 600;
+  @include type.label-md;
 
   &.over {
     color: var(--color-error);
   }
 }
 
+// Campos de texto, fecha y hora: píldora continua con anillo de foco de 2 px
 .field {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 3.25rem;
-  padding: 0 var(--space-4);
-  border: 2px solid transparent;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-soft);
-  color: var(--color-text);
-  font: inherit;
-  font-size: var(--font-size-body-lg);
-
-  &:focus-visible {
-    border-color: var(--color-primary);
-    outline: none;
-  }
+  @include mixins.field;
 
   &:disabled {
     opacity: 0.5;
-  }
-
-  &[aria-invalid='true'] {
-    border-color: transparent;
   }
 }
 
 .help {
   margin: 0;
   color: var(--color-text-muted);
-  font-size: var(--font-size-body);
+  @include type.body-sm;
 }
 
 .chips {
@@ -122,33 +107,15 @@
 }
 
 .chip {
-  min-height: var(--tap-target);
-  padding: 0 var(--space-4);
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-surface-soft);
-  color: var(--color-on-primary-soft);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-
-  &[aria-pressed='true'] {
-    background: var(--color-primary);
-    color: var(--color-on-primary);
-  }
+  @include mixins.chip;
 
   &.clear {
     flex: none;
     white-space: nowrap;
+    border-color: transparent;
     background: transparent;
     color: var(--color-text-muted);
     text-decoration: underline;
-  }
-
-  &:focus-visible,
-  .cancel:focus-visible {
-    outline: 3px solid var(--color-primary);
-    outline-offset: 2px;
   }
 }
 
@@ -160,7 +127,7 @@
 
 .picker-label {
   color: var(--color-text-muted);
-  font-size: var(--font-size-body);
+  @include type.body-sm;
 }
 
 .form-error {
@@ -168,47 +135,24 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-lg);
   background: var(--color-error-soft);
-  color: var(--color-error);
-  font-weight: 600;
+  color: var(--color-on-error-soft);
+  @include type.label-lg;
 }
 
 .save,
 .confirm {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+  @include mixins.pill-button;
   width: 100%;
-  min-height: 3.5rem;
-  border: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font: inherit;
-  font-size: var(--font-size-body-lg);
-  font-weight: 700;
-  box-shadow: var(--shadow-button);
-  cursor: pointer;
-
-  &:disabled {
-    opacity: 0.5;
-    box-shadow: none;
-    cursor: default;
-  }
-
-  &:focus-visible {
-    outline: 3px solid var(--color-primary-soft);
-    outline-offset: 3px;
-  }
 }
 
 .save-hint {
   margin: calc(var(--space-2) * -1) 0 0;
   color: var(--color-text-muted);
-  font-size: var(--font-size-body);
   text-align: center;
+  @include type.body-sm;
 }
 
+.postpone,
 .delete,
 .keep {
   display: inline-flex;
@@ -216,14 +160,22 @@
   justify-content: center;
   gap: var(--space-2);
   width: 100%;
-  min-height: 3.5rem;
+  min-height: var(--control-height);
   border: 0;
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--color-error);
-  font: inherit;
-  font-weight: 700;
   cursor: pointer;
+  @include type.label-lg;
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.postpone {
+  color: var(--color-primary-text);
 }
 
 .keep {
@@ -231,36 +183,103 @@
   color: var(--color-on-primary-soft);
 }
 
+// Velo con desenfoque y diálogo de borrar como modal de nivel 3
 .backdrop {
+  @include mixins.scrim;
   position: fixed;
   inset: 0;
   z-index: 20;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
-  background: rgba(15, 14, 23, 0.55);
+  padding: var(--space-4) var(--space-margin) calc(var(--space-4) + env(safe-area-inset-bottom));
 }
 
 .dialog {
+  @include mixins.sheet;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   width: 100%;
   max-width: 28rem;
-  padding: var(--space-6) var(--space-4) var(--space-4);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
+  border-radius: var(--radius-lg);
   text-align: center;
 }
 
 .dialog-title {
   margin: 0;
-  font-size: var(--font-size-headline);
-  font-weight: 700;
+  @include type.headline-md;
 }
 
 .dialog-text {
   margin: 0;
   color: var(--color-text-muted);
+  @include type.body-md;
+}
+
+// Aviso previo del permiso de alarmas: a pantalla completa, sobre el formulario.
+.prompt-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow-y: auto;
+  background: var(--color-bg);
+}
+
+// Fila «Repetir»: abre la hoja de repetición; toda la fila es la zona táctil
+.repeat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.repeat-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft);
+  font-size: 1.25rem;
+}
+
+.repeat-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.repeat-label {
+  @include type.label-lg;
+  font-weight: 700;
+}
+
+.repeat-value {
+  overflow: hidden;
+  color: var(--color-primary-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  @include type.body-md;
 }

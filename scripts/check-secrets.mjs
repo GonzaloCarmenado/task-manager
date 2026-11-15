@@ -20,6 +20,7 @@ const EMAIL_ALLOWED_DOMAINS = [
   'example.org',
   'example.net',
   'users.noreply.github.com',
+  'cuenta.invalid', // TLD reservado (RFC 2606): identificador interno de la spec 011, no es un correo
 ];
 const EMAIL_ALLOWED_ADDRESSES = ['noreply@anthropic.com'];
 const FILE_LIKE_TLDS = /\.(png|jpe?g|gif|svg|webp|ico|css|scss|js|mjs|ts|json|map|woff2?)$/i;

@@ -1,0 +1,63 @@
+@use 'mixins';
+@use 'type';
+
+:host {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+// Aviso de alarmas desactivadas: identidad ámbar suave (invita, no alarma)
+.banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'icon message close'
+    '. action action';
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-lg);
+  background: var(--color-secondary-soft);
+  color: var(--color-on-secondary-soft);
+}
+
+.icon {
+  grid-area: icon;
+  color: var(--color-on-secondary-soft);
+  font-size: 1.5rem;
+}
+
+.message {
+  grid-area: message;
+  margin: 0;
+  @include type.body-md;
+}
+
+.activate {
+  @include mixins.pill-button;
+  grid-area: action;
+  justify-self: start;
+  min-height: var(--tap-target);
+  box-shadow: none;
+}
+
+.close {
+  grid-area: close;
+  display: grid;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-on-secondary-soft);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  outline: 3px solid var(--color-primary-text);
+  outline-offset: 2px;
+}

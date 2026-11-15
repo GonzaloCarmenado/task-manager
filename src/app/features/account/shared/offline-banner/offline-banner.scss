@@ -1,0 +1,65 @@
+@use 'type';
+
+:host {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-error-soft);
+  color: var(--color-on-error-soft);
+}
+
+.lead {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--color-error);
+}
+
+.content {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  @include type.label-lg;
+}
+
+.body {
+  margin: 0;
+  @include type.body-sm;
+}
+
+// Alto visible de 28 px con zona táctil de 44 px
+.retry {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-2);
+  padding: 4px 12px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-error);
+  color: var(--color-on-error);
+  cursor: pointer;
+  @include type.label-sm;
+  text-transform: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -8px 0;
+  }
+
+  app-icon {
+    width: 14px;
+    height: 14px;
+  }
+}

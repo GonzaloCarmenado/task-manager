@@ -58,3 +58,8 @@ supabase/.env.*
 # Revisión cruzada (informes y copias temporales del revisor)
 reports/
 .review/
+
+# Cypress
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/

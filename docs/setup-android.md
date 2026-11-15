@@ -44,6 +44,8 @@ APK debug: `src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-univ
 Lista tus AVD con `emulator -list-avds`; crea uno con Android Studio o `avdmanager`.
 `src-tauri/gen/` está en `.gitignore` (se regenera con `pnpm tauri android init`).
 
+**APK de producción**: no se compila a mano. Lo publica el flujo de GitHub al crear una etiqueta de versión (ver [`release.md`](./release.md)); para instalarlo, ver [`instalacion.md`](./instalacion.md).
+
 ## Bloqueo con huella (spec 004)
 
 El plugin `tauri-plugin-biometry` (versión exacta fijada) solo se compila y se registra en Android. Permisos mínimos: `capabilities/mobile.json` concede únicamente `biometry:default` (estado y autenticación), con plataforma `android` y ventana `main`; no se da acceso al almacenamiento del plugin. `scripts/capabilities.test.mjs` lo comprueba.
@@ -61,3 +63,33 @@ Notas: el aviso del sistema es una ventana protegida (las capturas salen en negr
 ## Tareas (spec 005)
 
 Los selectores de fecha y hora del formulario son los **nativos** del sistema (`input type="date"` y `type="time"`); en el WebView de Android abren el selector de Android, en el idioma del teléfono. Comprobado en el emulador: el teclado virtual no tapa el campo ni el botón de guardar, y las tareas persisten al cerrar y abrir la app. Con una instalación nueva, la primera carga puede tardar unos segundos (se crea la sesión anónima).
+
+## Alarmas (spec 006)
+
+- **Permiso y canal**: `tauri-plugin-notification` (versión exacta `2.8.1`) solo para pedir el permiso de notificaciones y crear el canal «Recordatorios». **No programa los avisos**: su receptor de reinicio no puede restaurarlos (guarda cada aviso con `sourceJson` nulo, también en su rama principal).
+- **Programación, restauración y notificación**: las hace el plugin local `src-tauri/plugins/app-settings` (Kotlin): `AlarmManager` (exacta si el usuario concede «alarmas y recordatorios»; si no, aproximada), almacén de avisos en el dispositivo, `AlarmReceiver` (publica la notificación, también con la app cerrada) y `BootReceiver` (reprograma tras reiniciar el móvil). La app envía el conjunto **completo** de avisos con `schedule_alarms` y el plugin lo compara.
+- El mismo plugin declara `SCHEDULE_EXACT_ALARM`, abre los ajustes de notificaciones y de alarmas exactas, y entrega el id del aviso que abrió la app (`launch_notification_id`).
+- El permiso de notificaciones se pide al guardar una tarea con hora (hasta 3 negativas).
+- **Probar en el emulador**: guardar una tarea con hora a unos minutos, cerrar la app y esperar. `adb shell dumpsys alarm` muestra la alarma (etiqueta `app.tauri.appsettings.ALARM`, `window=0` si es exacta); `adb shell cmd statusbar expand-notifications` abre el panel; `adb reboot` comprueba la restauración.
+- **Zona horaria**: los avisos se reconcilian al volver a primer plano; si cambia la zona con la app en segundo plano, suenan a la hora antigua hasta reabrirla.
+- **`am force-stop`** (y «Forzar detención» en Ajustes) cancela todas las alarmas de la app: para cerrarla en pruebas, quitarla de «recientes».
+- **Limitación conocida**: si Android mata el proceso pero la tarea sigue en «recientes», el toque en el aviso abre la lista en vez de la tarea (Android no entrega el intent en ese caso). Con la app abierta, cerrada por el usuario o tras un reinicio, sí abre la tarea.
+- Al compilar con `pnpm tauri android build`, **no** definir `MSYS_NO_PATHCONV` en la misma sesión (rompe la ruta de `pnpm` y falla con `MODULE_NOT_FOUND`).
+
+## Cuenta de usuario (spec 011)
+
+- Es JavaScript puro sobre Supabase Auth: **no hay plugin nativo ni permisos nuevos**. La cuenta vive en el WebView y la sesión en `localStorage`.
+- **Botón atrás de Android**: las hojas y diálogos (cerrar sesión, tareas de este móvil, confirmación de descarte) añaden una entrada al historial (`OverlayBack`) y el gesto las cierra. Con capas superpuestas cierra solo la de arriba. Probar: `adb shell input keyevent KEYCODE_BACK` con una capa abierta (se cierra sin salir de la pantalla) y sin ninguna (vuelve a la pantalla anterior).
+- **Teclado virtual**: en Crear cuenta, Cambiar contraseña, Iniciar sesión y Borrar cuenta el teclado no debe tapar el campo activo ni el botón principal (la cabecera es fija y el contenido hace scroll). `adb shell input text` escribe en el campo enfocado.
+- **Arranque en frío, claro y oscuro**: cambiar el tema con la app abierta no recrea la barra de estado (ver spec 010); cerrar y abrir la app tras cambiarlo (`adb shell cmd uimode night yes`).
+- Si la app se cierra a mitad de un traspaso de tareas (entrar con tareas pendientes en el móvil), al abrirla de nuevo se reanuda sin duplicar (buffer en `localStorage`).
+- **Tareas repetitivas (spec 012)**: con el APK x86_64, crear una tarea que se repite, completarla (la siguiente aparece con candado), probar «Editar / Borrar → Solo esta / Toda la serie» con el botón atrás cerrando solo la hoja de arriba, y una ocurrencia con hora a pocos minutos (`adb shell dumpsys alarm` y `dumpsys notification`). Conceder antes `POST_NOTIFICATIONS` y `SCHEDULE_EXACT_ALARM` con `adb shell pm grant` y `appops set`.
+- Comprobación manual recomendada tras cambios en la cuenta: crear cuenta → cerrar sesión → entrar con tareas locales (traer y descartar) → cambiar contraseña → borrar cuenta, con el backend real (`pnpm tauri android dev`).
+
+## Interfaz y diseño (spec 010)
+
+- **Fuente empaquetada**: Plus Jakarta Sans (SIL OFL 1.1, `@fontsource-variable/plus-jakarta-sans` con versión exacta). `angular.json` copia solo los `woff2` `latin` y `latin-ext` a `/fonts/` y `src/styles/_fonts.scss` los declara con `font-display: swap`. Va dentro del APK: no se pide a ningún servicio externo y la app la aplica sin red.
+- **Probar la fuente sin red**: con `pnpm tauri android dev` la app se sirve desde el servidor de desarrollo, así que no vale. Compilar el APK (`pnpm tauri android build --debug --apk --target x86_64`), instalarlo, desactivar la red del emulador (`adb shell svc wifi disable` y `adb shell svc data disable`) y abrir en frío.
+- **Barra de estado en oscuro**: con arranque en frío en modo oscuro los iconos ya son claros. Cambiar el tema del teléfono **con la app abierta** (p. ej. `adb shell cmd uimode night yes`) no recrea la actividad y la barra conserva el color anterior hasta reabrir la app. Es un artefacto del cambio en caliente, no un fallo de la app.
+- `src-tauri/gen/` está ignorado por git (lo genera Tauri): no se versionan cambios ahí.
+

@@ -96,6 +96,22 @@
     }
   </section>
 
+  <section class="card">
+    <button type="button" class="repeat" [disabled]="dueDate() === null" (click)="startRepeat()">
+      <span class="repeat-icon"><app-icon name="repeat" /></span>
+      <span class="repeat-text">
+        <span class="repeat-label">{{ repeatCopy.row.label }}</span>
+        <span class="repeat-value">{{ repeatText() }}</span>
+      </span>
+      <app-icon name="chevron-right" />
+    </button>
+    @if (repeatCleared()) {
+    <p class="help">{{ repeatCopy.row.clearedByDate }}</p>
+    } @else if (dueDate() === null) {
+    <p class="help">{{ repeatCopy.row.needsDate }}</p>
+    }
+  </section>
+
   @if (error(); as message) {
   <p class="form-error" role="alert">{{ message }}</p>
   }
@@ -107,6 +123,10 @@
   @if (isEmptyTitle()) {
   <p class="save-hint">{{ copy.form.saveBlocked }}</p>
   } @if (isEdit) {
+  <button type="button" class="postpone" (click)="startPostpone()">
+    <app-icon name="snooze" />
+    <span>{{ copy.form.postpone }}</span>
+  </button>
   <button type="button" class="delete" (click)="askDelete()">
     <app-icon name="trash" />
     <span>{{ copy.form.delete }}</span>
@@ -121,6 +141,34 @@
       </button>
       <button type="button" class="keep" (click)="keepTask()">{{ copy.form.deleteCancel }}</button>
     </section>
+  </div>
+  } @if (postponing(); as target) {
+  <app-postpone-sheet
+    [task]="target"
+    (choose)="postpone(target, $event)"
+    (dismiss)="postponing.set(null)"
+  />
+  } @if (choosingRepeat() && dueDate(); as day) {
+  <app-recurrence-sheet
+    [rule]="recurrence()"
+    [firstDate]="day"
+    (apply)="applyRepeat($event)"
+    (dismiss)="choosingRepeat.set(false)"
+  />
+  } @if (choice(); as mode) {
+  <app-series-choice-sheet
+    [mode]="mode"
+    (single)="mode === 'edit' ? confirmEdit('single') : confirmSeriesDelete('single')"
+    (series)="mode === 'edit' ? confirmEdit('series') : confirmSeriesDelete('series')"
+    (cancel)="cancelChoice()"
+  />
+  } @if (promptVisible()) {
+  <div class="prompt-overlay">
+    <app-alarm-permission-prompt
+      [busy]="promptBusy()"
+      (allow)="allowAlarms()"
+      (later)="skipAlarms()"
+    />
   </div>
   }
 </main>

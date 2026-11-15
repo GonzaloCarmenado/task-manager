@@ -61,6 +61,7 @@ test('detecta correos personales pero no los genéricos', () => {
     'a@example.com',
     '1234+user@users.noreply.github.com',
     'noreply@anthropic.com',
+    'ana@cuenta.invalid',
     'icono icon@2x.png',
   ]) {
     assert.equal(scan({ 'doc.md': ok + '\n' }).code, 0, ok);

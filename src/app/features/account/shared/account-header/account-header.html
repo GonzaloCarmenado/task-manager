@@ -1,0 +1,12 @@
+<header class="bar">
+  <div class="inner">
+    <div class="start">
+      <button class="back" type="button" aria-label="Volver" (click)="back.emit()">
+        <app-icon name="arrow-left" />
+      </button>
+      <h1 class="title">{{ title() }}</h1>
+    </div>
+    <span class="profile" aria-hidden="true"><app-icon name="person" [filled]="true" /></span>
+  </div>
+</header>
+<div class="spacer"></div>

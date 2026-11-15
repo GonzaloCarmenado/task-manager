@@ -26,3 +26,5 @@ tauri-plugin-log = "2"
 
 [target.'cfg(target_os = "android")'.dependencies]
 tauri-plugin-biometry = "=0.3.0-rc.3"
+tauri-plugin-notification = "=2.8.1"
+tauri-plugin-app-settings = { path = "plugins/app-settings" }

@@ -78,6 +78,58 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - Solo `BiometricAccessService` toca el plugin (carga diferida, solo Android); el estado vive en `BiometricLockService`. El plugin y su crate van con **versión exacta** y el permiso es solo `biometry:default` en `capabilities/mobile.json`.
 - La pantalla de bloqueo no muestra datos de la app. Los textos del aviso del sistema siguen el idioma del teléfono.
 
+### Alarmas de tareas (spec 006)
+
+- Solo `AlarmsAccessService` (`features/tasks/alarms/`) habla con el plugin de avisos; envía siempre el conjunto **completo** de avisos (`schedule_alarms`).
+- La programación, restauración tras reinicio y publicación de la notificación son **código nativo propio** del plugin local `src-tauri/plugins/app-settings`; `tauri-plugin-notification` (versión exacta) solo pide el permiso y crea el canal. No programar avisos con el plugin oficial: no restaura tras reiniciar. Detalles en `docs/setup-android.md`.
+
+### Progreso y gamificación (spec 008)
+
+- El progreso (XP, tope diario, racha) lo **calcula la base de datos** con disparadores sobre `tasks`; el cliente solo envía el **día local** (`completed_day`) y lee `get_progress`. `player_stats` y `xp_events` son de solo lectura desde el cliente. Detalles en `docs/supabase.md`.
+- Solo `ProgressAccessService` (`features/progress/`) habla con `get_progress`; el nivel se calcula en el cliente (`ProgressConstructorService`).
+- **Orden de despliegue**: las migraciones `tasks_postponed_count` (007) y `progress` (008) se aplican **antes** de ejecutar el cliente contra el remoto (el cliente exige `postponed_count` y envía `completed_day`).
+- Pruebas reales (manuales, contra el remoto): `pnpm verify:rls` y `pnpm verify:progress`.
+
+### Cuenta de usuario (spec 011)
+
+- **Sin correo, sin verificación y sin recuperación**: usuario + contraseña. Internamente el usuario es `<usuario>@cuenta.invalid` (dominio reservado; la persona no lo ve; el escáner de secretos lo admite). No hay forma de cambiar el nombre (descartado tras el spike) ni de recuperar el acceso (se avisa al crear y hay casilla obligatoria).
+- Solo `AuthAccessService` toca `supabase.auth`. El inicio de sesión va en **dos fases** (`checkCredentials` con cliente sonda → `completeSignIn`); cancelar nunca destruye la sesión anónima. Cerrar sesión es `scope: 'local'`; `canSignOut()` rechaza antes de empezar si no hay conexión.
+- `AccountAccessService` orquesta los flujos y las cachés. Al salir una identidad (cerrar sesión o borrar cuenta) se llama a `forget(userId)` de tareas y progreso; el progreso pendiente (celebración, subida de nivel) se limpia al cambiar de `userId`. El traspaso de tareas pendientes al entrar usa un buffer en `localStorage` con origen y destino y se reanuda al arrancar.
+- **Capas (hojas y diálogos)**: usar `OverlayBack` (pila, `close()`/`closeAll()`). Antes de **navegar** tras un flujo con capas hay que retirarlas del historial y esperar (`await closeAll()`/`close()`): el router de Angular atiende su `popstate` en un `setTimeout(0)` y pisaría la navegación. Los retrocesos propios no cierran la capa de debajo.
+- **Paquete inicial**: `app.ts` no importa de forma estática los servicios de cuenta (la reanudación del traspaso usa `import()`; lo comprueba `scripts/initial-bundle.test.mjs`). Los presupuestos de build están en `angular.json` (`scripts/budgets.test.mjs`).
+- **Fidelidad**: las pantallas siguen las medidas de `specs/011-cuenta-usuario/plan.md`; `cypress/e2e/cuenta-fidelidad.cy.ts` las comprueba a 390 px. Vistas previas en desarrollo: `/__dev/account/<pantalla>/<estado>`.
+- `pnpm verify:account` (manual, contra el remoto, con confirmación) crea y borra una cuenta de prueba.
+
+### Tareas repetitivas (spec 012)
+
+- Una **serie** (`task_series`) guarda la regla (diaria cada N días, semanal con días y cada N semanas, o un día del mes, con fecha de fin opcional) y cada **ocurrencia** es una fila de `tasks` con `series_id` y `series_date`. Hay **una sola pendiente por serie** (índice único): no se generan ocurrencias por adelantado.
+- Las fechas se calculan solo en `core/utils/recurrence.ts` (puro, fechas locales). Solo `TasksAccessService` toca las series: completar crea la siguiente (posterior a `series_date` y no anterior a hoy), `load()` repara las series sin pendiente y desmarcar deja una sola.
+- Una ocurrencia con fecha posterior a hoy **no se puede completar** (lo impide la lista y el disparador `tasks_series_guard`).
+- Cambiar la **regla** (incluido «No se repite» o quitar la fecha) es siempre de toda la serie y no pregunta; si la regla no cambia pero sí título, fecha u hora, se pregunta «Solo esta / Toda la serie» (`SeriesChoiceSheet`).
+- Hojas con botón atrás de Android: `OverlayBack`; antes de navegar tras ellas, `await closeAll()`.
+- **Orden de despliegue**: la migración `task_series` se aplica antes de ejecutar el cliente contra el remoto. Detalles en `docs/supabase.md`.
+
+### Publicación de Android (spec 013)
+
+- El APK de producción lo compila, firma y publica en las **Releases** el flujo `.github/workflows/release-android.yml` al crear una etiqueta `vX.Y.Z` (o `vX.Y.Z-sufijo`, versión previa) **sobre un commit de `main`**. Solo `arm64-v8a`; el emulador x86_64 usa el APK de depuración local. Guía de mantenimiento: `docs/release.md`; para instalar: `docs/instalacion.md`.
+- **Secretos de CI** (solo en GitHub, nunca en el repo, en un commit ni en el chat): `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (esta nunca es la `service_role`). El *keystore* lo genera el propietario en su equipo y guarda una copia fuera de GitHub; Claude no lo lee ni lo pide.
+- Subir de versión: `package.json`, `src-tauri/tauri.conf.json` y `src-tauri/Cargo.toml` a la vez; el flujo falla si no coinciden con la etiqueta. `versionCode = (MAYOR*10000 + MENOR*100 + PARCHE)*100 + etapa` (99 en la final).
+- Cambios en el flujo: mantener permisos mínimos por trabajo, acciones fijadas por SHA, secretos solo en `env:` y el borrado del *keystore* con `if: always()`; `scripts/release-workflow.test.mjs` lo comprueba. Probar con `actionlint` y, antes de una etiqueta real, con la ejecución manual desde `main`.
+
+### Pruebas e2e (spec 009)
+
+- `pnpm e2e` ejecuta Cypress contra la app con la configuración `e2e` (entorno ficticio, puerto 4300). Toda la red a Supabase se simula con estado en `cypress/support/backend.ts`: **nunca** toca el remoto.
+- Un flujo nuevo o un cambio de comportamiento visible debe añadir o actualizar su prueba e2e (comprobar lo que se ve **y** lo que llega al servidor). Si cambian las reglas de los disparadores, actualizar también el simulador.
+- No sustituyen a `verify:*` (migraciones reales) ni a la comprobación en Android.
+
+### Diseño y estilos (spec 010)
+
+- La referencia única es `specs/_design/playful-momentum/DESIGN.md`. **Los estilos nuevos usan los tokens (`src/styles/_tokens.scss`) y los mixins** (`_type.scss` para la escala tipográfica; `_mixins.scss` para `card`, `pill-button` de 52 px, `chip`, `field`, `scrim`, `sheet` y `pill`) con `@use mixins; @use type;`. Nada de tamaños, colores ni sombras sueltos, ni de `color-mix`.
+- `pnpm test:scripts` ejecuta `scripts/design-tokens.test.mjs`: compara los tokens con el propio `DESIGN.md`, comprueba el contraste AA en claro y oscuro (con una excepción documentada: botón primario oscuro, 4,47:1), la fuente local y que hojas y formularios usan los mixins. Una pantalla nueva con estilo propio debe añadir su comprobación ahí.
+- Texto e iconos de color primario: `--color-primary-text` (en oscuro es más claro); `--color-primary` es para rellenos.
+- La fuente (Plus Jakarta Sans) va empaquetada; nunca se pide a un servicio externo. «Reducir movimiento» lo resuelve una regla global en `styles.scss`.
+- Zona táctil ≥ 44 px aunque el elemento se vea más pequeño (check de 28 px, chips de 36 px).
+
 ### Revisión visual obligatoria en el navegador (CRITICO)
 
 - **OBLIGATORIO**: todo diseño (pantalla, componente, estilo, estado visual) se revisa en el navegador con la **extensión de Claude en Chrome sincronizada** (`mcp__claude-in-chrome__*`; invocar antes la skill `claude-in-chrome`).
@@ -133,7 +185,11 @@ pnpm test:ci               # Vitest sin watch
 pnpm test:scripts          # tests de los scripts de ayuda (node --test)
 pnpm lint:fix && pnpm format
 pnpm secrets:check        # escaneo de secretos (también en pre-commit)
+pnpm e2e                   # pruebas e2e con Cypress (arranca la app en :4300 con el entorno ficticio; sin red real)
+pnpm e2e:open              # Cypress en modo interactivo
 pnpm verify:rls            # prueba REAL de RLS de `tasks` con dos sesiones anónimas (manual, contra el remoto)
+pnpm verify:series         # prueba REAL de las tareas repetitivas (índice único, guarda de futuras, RLS) con dos sesiones anónimas (manual, contra el remoto)
+pnpm verify:account        # prueba REAL de la cuenta (alta, entrada, contraseña, borrado) con una cuenta aleatoria (manual, contra el remoto; pedir confirmación)
 pnpm env:init              # crea src/environments/environment.ts (ignorado) desde el ejemplo
 pnpm db:new <nombre>       # nueva migración SQL
 pnpm db:push:dry           # simula la subida de migraciones (siempre --remote)
@@ -274,6 +330,6 @@ const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${Stri
 ### Tests (Vitest)
 
 - Assertions: `toHaveLength`, `toBe`, `toEqual` — nunca `toHaveSize`.
-- Mocks de módulos a nivel de módulo; para capturar valores usar `vi.hoisted()`.
+- Mocks de módulos a nivel de módulo; para capturar valores usar `vi.hoisted()`. **Excepción**: no usar `vi.mock` sobre librerías que otros specs importan reales (p. ej. `@supabase/supabase-js`): con el empaquetado del builder de Angular el mock falla de forma intermitente según el orden de carga. Inyectar la dependencia con un `InjectionToken` (ver `SUPABASE_CLIENT_FACTORY`).
 - Un `*.spec.ts` por servicio o componente relevante.
 - Cobertura objetivo ≥ 80 % en access services.

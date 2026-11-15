@@ -1,0 +1,31 @@
+<section class="card">
+  <div class="top">
+    <div class="who">
+      <span class="tile" aria-hidden="true"><app-icon name="cloud-sync" [filled]="true" /></span>
+      <div class="texts">
+        <p class="label">{{ copy.label }}</p>
+        <h2 class="title">{{ copy.title }}</h2>
+      </div>
+    </div>
+    <button
+      class="close"
+      type="button"
+      [attr.aria-label]="copy.dismissLabel"
+      (click)="snooze.emit()"
+    >
+      <app-icon name="x" />
+    </button>
+  </div>
+
+  <p class="body">{{ copy.body }}</p>
+
+  <div class="actions">
+    <a class="create" routerLink="/cuenta/crear">
+      <app-icon name="shield" [filled]="true" />
+      {{ copy.create }}
+    </a>
+    <button class="later" type="button" [attr.aria-label]="copy.laterLabel" (click)="snooze.emit()">
+      {{ copy.later }}
+    </button>
+  </div>
+</section>

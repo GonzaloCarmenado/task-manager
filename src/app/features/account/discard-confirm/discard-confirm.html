@@ -1,0 +1,17 @@
+<div class="scrim" (click)="back.emit()">
+  <div
+    class="box"
+    role="alertdialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+    (click)="$event.stopPropagation()"
+  >
+    <span class="badge" aria-hidden="true"><app-icon name="trash-sweep" [filled]="true" /></span>
+    <h2 class="title" [id]="titleId">{{ title() }}</h2>
+    <p class="body">{{ body() }}</p>
+    <div class="actions">
+      <button class="confirm" type="button" (click)="confirm.emit()">{{ confirmLabel() }}</button>
+      <button class="back" type="button" (click)="back.emit()">{{ backLabel() }}</button>
+    </div>
+  </div>
+</div>

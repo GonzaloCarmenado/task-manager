@@ -1,9 +1,16 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
+import { AlarmPermission } from '../../../core/models/alarm';
+import { Recurrence, TaskSeries } from '../../../core/models/recurrence';
 import { Task } from '../../../core/models/task';
 import { CLOCK } from '../../../core/services/clock';
+import { Celebration, Progress } from '../../../core/models/progress';
+import { AccountAccessService } from '../../account/account.access.service';
+import { ProgressAccessService, ProgressStatus } from '../../progress/progress.access.service';
+import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import {
+  CompleteResult,
   TaskOpResult,
   TasksAccessService,
   TasksErrorReason,
@@ -24,18 +31,86 @@ function task(over: Partial<Task> = {}): Task {
     dueTime: null,
     completedAt: null,
     createdAt: `2026-11-01T10:${String(seq % 60).padStart(2, '0')}:00.000Z`,
+    postponedCount: 0,
+    seriesId: null,
+    seriesDate: null,
     ...over,
   };
 }
 
-function setup(initial: Task[] = [], status: TasksStatus = 'ready') {
+interface AlarmsMockOptions {
+  supported?: boolean;
+  permission?: AlarmPermission;
+  banner?: boolean;
+  offerExact?: boolean;
+  scheduled?: string[];
+}
+
+function alarmsMock(o: AlarmsMockOptions = {}) {
+  const scheduled = new Set(o.scheduled ?? []);
+  return {
+    supported: o.supported ?? false,
+    permission: signal<AlarmPermission>(o.permission ?? 'unsupported'),
+    bannerVisible: signal(o.banner ?? false),
+    hasScheduled: vi.fn((id: string) => scheduled.has(id)),
+    shouldOfferExact: vi.fn(() => o.offerExact ?? false),
+    skipExact: vi.fn(),
+    dismissBanner: vi.fn(),
+    openNotificationSettings: vi.fn(async () => undefined),
+    openExactAlarmSettings: vi.fn(async () => undefined),
+  };
+}
+
+const PROGRESS: Progress = {
+  totalXp: 20,
+  level: 1,
+  xpIntoLevel: 20,
+  xpForNextLevel: 50,
+  currentStreak: 1,
+  bestStreak: 1,
+  xpToday: 20,
+  lastCompletedDay: '2026-11-13',
+};
+
+function progressMock() {
+  const progress = signal<Progress | null>(PROGRESS);
+  const status = signal<ProgressStatus>('ready');
+  const celebration = signal<Celebration | null>(null);
+  const levelUp = signal<number | null>(null);
+  return {
+    progress,
+    status,
+    celebration,
+    levelUp,
+    load: vi.fn(async () => true),
+    afterToggle: vi.fn(async () => undefined),
+    dismissCelebration: vi.fn(() => celebration.set(null)),
+    consumeLevelUp: vi.fn(),
+  };
+}
+
+/** Series de las ocurrencias de prueba (la lista las pide por su id). */
+const seriesStore: Record<string, TaskSeries> = {};
+
+function setup(
+  initial: Task[] = [],
+  status: TasksStatus = 'ready',
+  alarmOptions: AlarmsMockOptions = {}
+) {
   let now = new Date(2026, 10, 13, 12, 0, 0);
+  const alarms = alarmsMock(alarmOptions);
+  const progress = progressMock();
   const tasks = signal<readonly Task[]>(initial);
   const statusSig = signal<TasksStatus>(status);
   const errorReason = signal<TasksErrorReason | null>(null);
-  const setCompleted = vi.fn(async (): Promise<TaskOpResult> => ({ ok: true }));
+  const setCompleted = vi.fn(async (): Promise<CompleteResult> => ({ ok: true }));
+  const postpone = vi.fn(async (): Promise<TaskOpResult> => ({ ok: true }));
   const load = vi.fn(async () => undefined);
-  const access = { tasks, status: statusSig, errorReason, load, setCompleted };
+  const seriesOf = vi.fn((t: Task) => (t.seriesId === null ? undefined : seriesStore[t.seriesId]));
+  const access = { tasks, status: statusSig, errorReason, load, setCompleted, postpone, seriesOf };
+  const reminderOn = signal(false);
+  const snoozeReminder = vi.fn(() => reminderOn.set(false));
+  const account = { reminderVisible: () => reminderOn(), snoozeReminder };
 
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -43,6 +118,9 @@ function setup(initial: Task[] = [], status: TasksStatus = 'ready') {
     providers: [
       provideRouter([]),
       { provide: TasksAccessService, useValue: access },
+      { provide: AlarmsAccessService, useValue: alarms },
+      { provide: ProgressAccessService, useValue: progress },
+      { provide: AccountAccessService, useValue: account },
       { provide: CLOCK, useValue: () => now },
     ],
   });
@@ -60,8 +138,13 @@ function setup(initial: Task[] = [], status: TasksStatus = 'ready') {
     status: statusSig,
     errorReason,
     setCompleted,
+    postpone,
     load,
     navigate,
+    alarms,
+    progress,
+    reminderOn,
+    snoozeReminder,
     setNow: (d: Date) => (now = d),
     text: () => el.textContent?.replace(/\s+/g, ' ').trim() ?? '',
     detect: () => fixture.detectChanges(),
@@ -319,5 +402,457 @@ describe('TasksList · navegación y accesibilidad', () => {
 
   it('US-005-02 usa ChangeDetectionStrategy.OnPush', () => {
     expect((TasksList as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
+  });
+});
+
+describe('TasksList · alarmas', () => {
+  const timed = (over: Partial<Task> = {}) =>
+    task({ title: 'Llamar al fontanero', dueDate: '2026-11-14', dueTime: '11:00', ...over });
+
+  it('US-006-02 el aviso de alarmas desactivadas solo aparece cuando el servicio lo pide', () => {
+    const hidden = setup([timed()], 'ready', { supported: true, banner: false });
+    expect(hidden.el.querySelector('app-alarms-banner')).toBeNull();
+
+    const shown = setup([timed()], 'ready', {
+      supported: true,
+      banner: true,
+      permission: 'denied',
+    });
+    expect(shown.el.querySelector('app-alarms-banner')).not.toBeNull();
+  });
+
+  it('US-006-02 Activar alarmas abre los ajustes y cerrar oculta el aviso ese día', () => {
+    const t = setup([timed()], 'ready', { supported: true, banner: true, permission: 'denied' });
+    const [activate, close] = Array.from(
+      t.el.querySelectorAll<HTMLButtonElement>('app-alarms-banner button')
+    );
+
+    activate.click();
+    close.click();
+
+    expect(t.alarms.openNotificationSettings).toHaveBeenCalledTimes(1);
+    expect(t.alarms.dismissBanner).toHaveBeenCalledTimes(1);
+  });
+
+  it('US-006-03 una tarea con alarma programada muestra «Avisará a las HH:MM»', () => {
+    const a = timed();
+    const t = setup([a], 'ready', { supported: true, permission: 'granted', scheduled: [a.id] });
+    expect(t.el.querySelector('.alarm')?.textContent?.trim()).toBe('Avisará a las 11:00');
+  });
+
+  it('US-006-03 con hora pero sin permiso muestra «Sin alarma»; sin hora no muestra nada', () => {
+    const withTime = timed();
+    const withoutTime = task({ dueDate: '2026-11-14', dueTime: null });
+    const t = setup([withTime, withoutTime], 'ready', { supported: true, permission: 'denied' });
+
+    const labels = Array.from(t.el.querySelectorAll('.alarm')).map((e) => e.textContent?.trim());
+    expect(labels).toEqual(['Sin alarma']);
+  });
+
+  it('US-006-03 en navegador (sin alarmas) no se pinta ningún indicador ni aviso', () => {
+    const t = setup([timed()], 'ready', { supported: false });
+    expect(t.el.querySelector('.alarm')).toBeNull();
+    expect(t.el.querySelector('app-alarms-banner')).toBeNull();
+    expect(t.el.querySelector('app-exact-alarm-sheet')).toBeNull();
+  });
+
+  it('US-006-03 una tarea completada o pasada no lleva indicador', () => {
+    const done = timed({ completedAt: '2026-11-13T08:00:00.000Z' });
+    const past = timed({ dueDate: '2026-11-12' });
+    const t = setup([done, past], 'ready', { supported: true, permission: 'denied' });
+    expect(t.el.querySelector('.alarm')).toBeNull();
+  });
+
+  it('US-006-02 la hoja de alarmas exactas aparece si el servicio la ofrece; Ir a ajustes y Omitir actúan', () => {
+    const t = setup([timed()], 'ready', {
+      supported: true,
+      permission: 'granted',
+      offerExact: true,
+    });
+    const sheet = t.el.querySelector('app-exact-alarm-sheet');
+    expect(sheet).not.toBeNull();
+
+    const [open, skip] = Array.from(sheet?.querySelectorAll<HTMLButtonElement>('button') ?? []);
+    open.click();
+    skip.click();
+
+    expect(t.alarms.openExactAlarmSettings).toHaveBeenCalledTimes(1);
+    expect(t.alarms.skipExact).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('TasksList · posponer', () => {
+  const pending = () => task({ id: 'a', title: 'Regar', dueDate: '2026-11-13' });
+
+  it('US-007-01 cada tarea pendiente tiene un botón Posponer con nombre accesible', () => {
+    const t = setup([pending()]);
+    const button = t.el.querySelector<HTMLButtonElement>('button.postpone');
+    expect(button).not.toBeNull();
+    expect(button?.getAttribute('type')).toBe('button');
+    expect(button?.getAttribute('aria-label')).toBe('Posponer: Regar');
+  });
+
+  it('US-007-01 las tareas completadas no tienen Posponer', () => {
+    const t = setup([task({ id: 'c', completedAt: '2026-11-12T09:00:00.000Z' })]);
+    t.el.querySelector<HTMLButtonElement>('.completed-toggle')?.click();
+    t.detect();
+    expect(t.el.querySelector('.task.done')).not.toBeNull();
+    expect(t.el.querySelector('button.postpone')).toBeNull();
+  });
+
+  it('US-007-01 el botón abre la hoja con la tarea y no abre el formulario', () => {
+    const t = setup([pending()]);
+    expect(t.el.querySelector('app-postpone-sheet')).toBeNull();
+    t.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    t.detect();
+
+    expect(t.el.querySelector('app-postpone-sheet')).not.toBeNull();
+    expect(t.text()).toContain('Posponer tarea');
+    expect(t.navigate).not.toHaveBeenCalled();
+  });
+
+  it('US-007-01 elegir una opción pospone, cierra la hoja y avisa con la nueva fecha', async () => {
+    const t = setup([pending()]);
+    t.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    t.detect();
+    t.el.querySelector<HTMLButtonElement>('app-postpone-sheet button.option')?.click();
+    await flush();
+    t.detect();
+
+    expect(t.postpone).toHaveBeenCalledWith('a', { dueDate: '2026-11-14', dueTime: null });
+    expect(t.el.querySelector('app-postpone-sheet')).toBeNull();
+    expect(t.text()).toContain('Tarea pospuesta a Mañana');
+    expect(t.el.querySelector('.notice[role="status"]')).not.toBeNull();
+  });
+
+  it('US-007-01 si falla el guardado, avisa como alerta', async () => {
+    const t = setup([pending()]);
+    t.postpone.mockResolvedValueOnce({ ok: false, reason: 'network' });
+    t.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    t.detect();
+    t.el.querySelector<HTMLButtonElement>('app-postpone-sheet button.option')?.click();
+    await flush();
+    t.detect();
+
+    expect(t.text()).toContain('No se pudo posponer la tarea. Inténtalo de nuevo.');
+    expect(t.el.querySelector('.notice[role="alert"]')).not.toBeNull();
+  });
+
+  it('US-007-01 cerrar la hoja sin elegir no cambia nada', () => {
+    const t = setup([pending()]);
+    t.el.querySelector<HTMLButtonElement>('button.postpone')?.click();
+    t.detect();
+    t.el.querySelector<HTMLButtonElement>('app-postpone-sheet button.close')?.click();
+    t.detect();
+
+    expect(t.el.querySelector('app-postpone-sheet')).toBeNull();
+    expect(t.postpone).not.toHaveBeenCalled();
+  });
+});
+
+describe('TasksList · progreso', () => {
+  it('US-008-04 muestra el resumen de progreso arriba de la lista y carga el progreso', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    const summary = t.el.querySelector('app-progress-summary');
+    expect(summary).not.toBeNull();
+    expect(t.progress.load).toHaveBeenCalled();
+    const heading = t.el.querySelector('h1');
+    expect(heading?.compareDocumentPosition(summary as Node)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('US-008-01 completar pide al progreso comparar con lo de antes', async () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.el.querySelector<HTMLButtonElement>('.check')?.click();
+    await flush();
+
+    expect(t.setCompleted).toHaveBeenCalledWith('a', true);
+    expect(t.progress.afterToggle).toHaveBeenCalledWith(true, PROGRESS);
+  });
+
+  it('US-008-01 desmarcar también avisa al progreso', async () => {
+    const t = setup([task({ id: 'c', completedAt: '2026-11-12T09:00:00.000Z' })]);
+    t.el.querySelector<HTMLButtonElement>('.completed-toggle')?.click();
+    t.detect();
+    t.el.querySelector<HTMLButtonElement>('.task.done .check')?.click();
+    await flush();
+
+    expect(t.progress.afterToggle).toHaveBeenCalledWith(false, PROGRESS);
+  });
+
+  it('US-008-01 si falla el guardado, el progreso no se toca', async () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.setCompleted.mockResolvedValueOnce({ ok: false, reason: 'network' });
+    t.el.querySelector<HTMLButtonElement>('.check')?.click();
+    await flush();
+
+    expect(t.progress.afterToggle).not.toHaveBeenCalled();
+    expect(t.text()).toContain(t.copy.list.failNotice);
+  });
+
+  it('US-008-01 muestra la celebración mientras la haya y la quita al terminar', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.progress.celebration.set({ xpDelta: 10, capped: false, streakDays: null, leveledUpTo: null });
+    t.detect();
+    expect(t.el.querySelector('app-celebration')).not.toBeNull();
+    expect(t.text()).toContain('+10 XP');
+
+    t.el.querySelector('app-celebration')?.dispatchEvent(new Event('finished'));
+    t.progress.dismissCelebration();
+    t.detect();
+    expect(t.el.querySelector('app-celebration')).toBeNull();
+  });
+
+  it('US-008-02 al subir de nivel lleva a la pantalla de subida', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.progress.levelUp.set(2);
+    t.detect();
+    expect(t.navigate).toHaveBeenCalledWith(['/nivel', 2]);
+  });
+});
+
+describe('TasksList · sistema de diseño (spec 010)', () => {
+  const timed = (over: Partial<Task> = {}) =>
+    task({ title: 'Llamar al fontanero', dueDate: '2026-11-14', dueTime: '11:00', ...over });
+
+  it('US-010-02 hora, atraso y aviso son píldoras con su rol de color', () => {
+    const overdue = timed({ title: 'Vieja', dueDate: '2026-11-10' });
+    const t = setup([overdue], 'ready', {
+      supported: true,
+      permission: 'granted',
+      scheduled: [overdue.id],
+    });
+    const meta = t.el.querySelector('.meta') as HTMLElement;
+    expect(meta.querySelector('.tag.pill')?.textContent?.trim()).toBe(t.copy.list.overdueTag);
+    expect(meta.querySelector('.when.pill')).not.toBeNull();
+    expect(meta.querySelector('.alarm.pill')).not.toBeNull();
+  });
+
+  it('US-010-02 el aviso apagado y el encendido se distinguen por clase', () => {
+    const a = timed();
+    const on = setup([a], 'ready', { supported: true, permission: 'granted', scheduled: [a.id] });
+    expect(on.el.querySelector('.alarm.pill')?.classList.contains('off')).toBe(false);
+    const off = setup([timed()], 'ready', { supported: true, permission: 'denied' });
+    expect(off.el.querySelector('.alarm.pill')?.classList.contains('off')).toBe(true);
+  });
+
+  it('US-010-02 el check es un botón con nombre accesible y marca visible dentro de un círculo', () => {
+    const t = setup([task({ title: 'Regar', dueDate: '2026-11-14' })]);
+    const check = t.el.querySelector<HTMLButtonElement>('button.check');
+    expect(check?.getAttribute('aria-label')).toContain('Regar');
+    expect(check?.querySelector('app-icon')).not.toBeNull();
+    expect(check?.querySelector('.ring')).not.toBeNull();
+  });
+
+  it('US-010-02 vacío muestra una ilustración decorativa sin cambiar textos ni acciones', () => {
+    const t = setup([]);
+    const art = t.el.querySelector('.state app-illustration');
+    expect(art?.getAttribute('kind')).toBe('hill');
+    expect(art?.getAttribute('aria-hidden')).toBe('true');
+    expect(t.text()).toContain(t.copy.list.emptyTitle);
+    expect(t.text()).toContain(t.copy.list.createFirst);
+  });
+
+  it('US-010-02 error muestra la ilustración de nube y conserva Reintentar', () => {
+    const t = setup([], 'loading');
+    t.errorReason.set('network');
+    t.status.set('error');
+    t.detect();
+    expect(t.el.querySelector('.state app-illustration')?.getAttribute('kind')).toBe('cloud');
+    expect(t.text()).toContain(t.copy.list.errorTitle);
+    expect(t.text()).toContain(t.copy.list.retry);
+  });
+
+  it('US-010-02 cargando mantiene el indicador y no usa ilustración', () => {
+    const t = setup([], 'loading');
+    expect(t.el.querySelector('.spinner')).not.toBeNull();
+    expect(t.el.querySelector('app-illustration')).toBeNull();
+  });
+
+  it('US-010-02 el botón flotante «Nueva tarea» es un botón principal anclado y el aviso no lo tapa', () => {
+    const t = setup([task({ dueDate: '2026-11-14' })]);
+    expect(t.el.querySelector('button.fab')).not.toBeNull();
+    expect(t.el.querySelector('.screen')).not.toBeNull();
+  });
+});
+
+describe('TasksList · botón de perfil', () => {
+  it('US-011-03 la cabecera tiene el título «Tareas» y a su derecha el botón de perfil', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    const header = t.el.querySelector('header.header') as HTMLElement;
+    const heading = header.querySelector('h1') as HTMLElement;
+    const profile = header.querySelector('app-profile-button') as HTMLElement;
+    expect(heading.textContent?.trim()).toBe('Tareas');
+    expect(profile).not.toBeNull();
+    expect(heading.compareDocumentPosition(profile)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('US-011-03 el botón de perfil está también con la lista vacía', () => {
+    const t = setup([]);
+    expect(t.el.querySelector('header.header app-profile-button')).not.toBeNull();
+  });
+});
+
+describe('TasksList · recordatorio de cuenta', () => {
+  it('US-011-08 sin recordatorio activo no se pinta la tarjeta', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    expect(t.el.querySelector('app-account-reminder')).toBeNull();
+  });
+
+  it('US-011-08 con el recordatorio activo aparece bajo el resumen de nivel y antes de las tareas', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.reminderOn.set(true);
+    t.detect();
+
+    const summary = t.el.querySelector('app-progress-summary') as Node;
+    const reminder = t.el.querySelector('app-account-reminder') as Node;
+    const firstGroup = t.el.querySelector('.group') as Node;
+    expect(reminder).not.toBeNull();
+    expect(summary.compareDocumentPosition(reminder)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(reminder.compareDocumentPosition(firstGroup)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('US-011-08 también aparece con la lista vacía (no depende de tener tareas pendientes)', () => {
+    const t = setup([]);
+    t.reminderOn.set(true);
+    t.detect();
+    expect(t.el.querySelector('app-account-reminder')).not.toBeNull();
+  });
+
+  it('US-011-08 el aspa o «En 14 días» aplazan el recordatorio y la tarjeta desaparece', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.reminderOn.set(true);
+    t.detect();
+
+    (t.el.querySelector('app-account-reminder button.close') as HTMLButtonElement).click();
+    t.detect();
+
+    expect(t.snoozeReminder).toHaveBeenCalledTimes(1);
+    expect(t.el.querySelector('app-account-reminder')).toBeNull();
+  });
+});
+
+describe('TasksList · repetitivas (spec 012)', () => {
+  const rule = (over: Partial<Recurrence> = {}): Recurrence => ({
+    kind: 'daily',
+    interval: 1,
+    weekdays: [],
+    monthDay: null,
+    startDate: '2026-11-09',
+    until: null,
+    ...over,
+  });
+  const occurrence = (over: Partial<Task> = {}): Task =>
+    task({ seriesId: 's1', seriesDate: '2026-11-13', dueDate: '2026-11-13', ...over });
+
+  beforeEach(() => {
+    seriesStore['s1'] = { id: 's1', title: 'Pastilla', dueTime: null, recurrence: rule() };
+    seriesStore['s2'] = {
+      id: 's2',
+      title: 'Gimnasio',
+      dueTime: null,
+      recurrence: rule({ kind: 'weekly', weekdays: [1, 4] }),
+    };
+  });
+
+  const chips = (el: HTMLElement): string[] =>
+    Array.from(el.querySelectorAll('.repeat')).map(
+      (c) => c.textContent?.replace(/\s+/g, ' ').trim() ?? ''
+    );
+  const check = (el: HTMLElement, index = 0): HTMLButtonElement =>
+    el.querySelectorAll<HTMLButtonElement>('.check')[index];
+
+  it('US-012-04 las tareas repetitivas muestran un icono y el texto de su regla', () => {
+    const { el } = setup([
+      occurrence({ title: 'Pastilla' }),
+      occurrence({ title: 'Gimnasio', seriesId: 's2' }),
+    ]);
+
+    expect(chips(el)).toEqual(['Todos los días', 'Lun, jue']);
+    expect(el.querySelector('.repeat app-icon')).not.toBeNull();
+  });
+
+  it('US-012-04 una tarea suelta no lleva indicador de repetición', () => {
+    const { el } = setup([task({ title: 'Suelta', dueDate: '2026-11-13' })]);
+    expect(chips(el)).toEqual([]);
+  });
+
+  it('US-012-02 una ocurrencia de hoy se puede completar', () => {
+    const { el } = setup([occurrence()]);
+    expect(check(el).disabled).toBe(false);
+  });
+
+  it('US-012-02 una ocurrencia atrasada se puede completar y conserva su indicador', () => {
+    const { el, text } = setup([occurrence({ dueDate: '2026-11-10', seriesDate: '2026-11-10' })]);
+    expect(check(el).disabled).toBe(false);
+    expect(text()).toContain('Atrasada');
+    expect(chips(el)).toEqual(['Todos los días']);
+  });
+
+  it('US-012-02 una ocurrencia futura tiene el check desactivado y dice cuándo estará disponible', async () => {
+    const { el, text, setCompleted } = setup([
+      occurrence({ dueDate: '2026-11-19', seriesDate: '2026-11-19' }),
+    ]);
+
+    expect(check(el).disabled).toBe(true);
+    expect(text()).toContain('Disponible el jueves');
+    check(el).click();
+    await flush();
+    expect(setCompleted).not.toHaveBeenCalled();
+  });
+
+  it('US-012-02 la de mañana dice «Disponible mañana»', () => {
+    const { text } = setup([occurrence({ dueDate: '2026-11-14', seriesDate: '2026-11-14' })]);
+    expect(text()).toContain('Disponible mañana');
+  });
+
+  it('US-012-02 una tarea suelta futura se puede completar como siempre', () => {
+    const { el } = setup([task({ dueDate: '2026-11-20' })]);
+    expect(check(el).disabled).toBe(false);
+  });
+
+  it('US-012-02 al completar una ocurrencia avisa de cuál es la próxima', async () => {
+    const { el, text, setCompleted, detect } = setup([occurrence()]);
+    setCompleted.mockResolvedValue({ ok: true, next: '2026-11-16' });
+
+    check(el).click();
+    await flush();
+    detect();
+
+    expect(text()).toContain('Hecho. Próxima: lunes 16 de noviembre');
+  });
+
+  it('US-012-06 al completar la última repetición lo dice', async () => {
+    const { el, text, setCompleted, detect } = setup([occurrence()]);
+    setCompleted.mockResolvedValue({ ok: true, next: null });
+
+    check(el).click();
+    await flush();
+    detect();
+
+    expect(text()).toContain('Hecho. Era la última repetición');
+  });
+
+  it('US-012-02 completar una tarea suelta mantiene el aviso de siempre', async () => {
+    const { el, text, copy, detect } = setup([task({ dueDate: '2026-11-13' })]);
+
+    check(el).click();
+    await flush();
+    detect();
+
+    expect(text()).toContain(copy.list.doneNotice);
+  });
+
+  it('US-012-02 si falla completar una ocurrencia, avisa del error y no anuncia ninguna próxima', async () => {
+    const { el, text, copy, setCompleted, detect } = setup([occurrence()]);
+    setCompleted.mockResolvedValue({ ok: false, reason: 'network' });
+
+    check(el).click();
+    await flush();
+    detect();
+
+    expect(text()).toContain(copy.list.failNotice);
+    expect(text()).not.toContain('Próxima');
   });
 });

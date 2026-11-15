@@ -6,6 +6,8 @@ import { AuthErrorReason, AuthStatus } from './core/models/auth-status';
 import { LockPhase } from './core/models/biometric';
 import { AuthAccessService } from './core/services/auth.access.service';
 import { BiometricLockService } from './core/services/biometric-lock.service';
+import { AccountAccessService } from './features/account/account.access.service';
+import { AccountToastService } from './features/account/shared/account-toast/account-toast.service';
 import { App } from './app';
 
 type ComponentDef = { ɵcmp: { onPush: boolean } };
@@ -16,6 +18,7 @@ function setup(initial: AuthStatus, options: { path?: string } = {}) {
   const autoRetryPending = signal(false);
   const retry = vi.fn();
   const auth = { status, errorReason, autoRetryPending, retry, initialize: vi.fn() };
+  const resumeTransfer = vi.fn(async () => undefined);
 
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -23,13 +26,14 @@ function setup(initial: AuthStatus, options: { path?: string } = {}) {
     providers: [
       provideRouter([]),
       { provide: AuthAccessService, useValue: auth },
+      { provide: AccountAccessService, useValue: { resumePendingTransfer: resumeTransfer } },
       { provide: Location, useValue: { path: () => options.path ?? '/' } },
     ],
   });
   const fixture = TestBed.createComponent(App);
   fixture.detectChanges();
   const el = fixture.nativeElement as HTMLElement;
-  return { fixture, el, status, errorReason, autoRetryPending, retry };
+  return { fixture, el, status, errorReason, autoRetryPending, retry, resumeTransfer };
 }
 
 describe('App', () => {
@@ -40,6 +44,44 @@ describe('App', () => {
 
   it('US-003-01 usa ChangeDetectionStrategy.OnPush', () => {
     expect((App as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
+  });
+
+  it('US-011-01 monta el aviso de la cuenta una sola vez, y publica avisos sobre cualquier pantalla', () => {
+    const { el, fixture } = setup('ready');
+    expect(el.querySelectorAll('app-account-toast')).toHaveLength(1);
+    TestBed.inject(AccountToastService).show('Sesión cerrada');
+    fixture.detectChanges();
+    expect(el.querySelector('app-account-toast [role="status"]')?.textContent).toContain(
+      'Sesión cerrada'
+    );
+  });
+
+  it('US-011-02 reanuda un traspaso de tareas a medias al tener identidad lista, y no antes', async () => {
+    const loading = setup('loading');
+    await new Promise((r) => setTimeout(r, 30));
+    expect(loading.resumeTransfer).not.toHaveBeenCalled();
+    loading.status.set('ready');
+    loading.fixture.detectChanges();
+    await vi.waitFor(() => expect(loading.resumeTransfer).toHaveBeenCalledTimes(1));
+
+    const ready = setup('ready');
+    await vi.waitFor(() => expect(ready.resumeTransfer).toHaveBeenCalledTimes(1));
+  });
+
+  it('US-011-02 si la app se destruye antes de cargar la lógica de cuenta no hay rechazos sin gestionar', async () => {
+    const rejected: unknown[] = [];
+    const onRejection = (event: PromiseRejectionEvent) => {
+      rejected.push(event.reason);
+      event.preventDefault();
+    };
+    window.addEventListener('unhandledrejection', onRejection);
+    const { fixture, resumeTransfer } = setup('ready');
+    fixture.destroy();
+    await new Promise((r) => setTimeout(r, 80));
+    window.removeEventListener('unhandledrejection', onRejection);
+
+    expect(rejected).toEqual([]);
+    expect(resumeTransfer).not.toHaveBeenCalled();
   });
 
   it('US-003-01 con ready pinta el router-outlet y no la pantalla de estado', () => {
@@ -147,6 +189,7 @@ function setupLock(authStatus: AuthStatus = 'ready') {
     providers: [
       provideRouter([]),
       { provide: AuthAccessService, useValue: auth },
+      { provide: AccountAccessService, useValue: { resumePendingTransfer: async () => undefined } },
       { provide: BiometricLockService, useValue: lock },
       { provide: Location, useValue: { path: () => '/' } },
     ],

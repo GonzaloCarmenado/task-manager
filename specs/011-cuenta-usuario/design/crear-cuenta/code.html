@@ -1,0 +1,838 @@
+<!doctype html>
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+      name="viewport"
+    />
+    <meta content="mobile_stack" name="shell-type" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @layer base {
+        html,
+        body {
+          width: 100vw;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          overscroll-behavior: none;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .pt-safe {
+          padding-top: env(safe-area-inset-top, 0px);
+        }
+        main > :first-child {
+          margin-top: 0 !important;
+        }
+        main > :last-child {
+          margin-bottom: 0 !important;
+        }
+      }
+      ::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              background: '#fcf8ff',
+              'error-container': '#ffdad6',
+              'secondary-container': '#fea619',
+              'primary-container': '#6063ee',
+              'inverse-surface': '#2d2a5b',
+              outline: '#767586',
+              'surface-bright': '#fcf8ff',
+              'surface-container-high': '#e9e5ff',
+              'on-primary-fixed': '#07006c',
+              'on-error': '#ffffff',
+              'on-surface-variant': '#464554',
+              error: '#ba1a1a',
+              'on-tertiary-container': '#000703',
+              'secondary-fixed': '#ffddb8',
+              'primary-fixed-dim': '#c0c1ff',
+              'on-tertiary': '#ffffff',
+              'on-surface': '#181445',
+              primary: '#4648d4',
+              'surface-container-low': '#f6f2ff',
+              'outline-variant': '#c7c4d7',
+              'on-primary-container': '#fffbff',
+              secondary: '#855300',
+              'on-secondary-container': '#684000',
+              'surface-container-lowest': '#ffffff',
+              'on-secondary-fixed-variant': '#653e00',
+              'tertiary-fixed': '#6ffbbe',
+              'surface-variant': '#e3dfff',
+              'on-background': '#181445',
+              'on-secondary': '#ffffff',
+              'primary-fixed': '#e1e0ff',
+              'tertiary-container': '#00885d',
+              'surface-container': '#efebff',
+              'surface-tint': '#494bd6',
+              tertiary: '#006c49',
+              'on-primary-fixed-variant': '#2f2ebe',
+              'on-primary': '#ffffff',
+              'secondary-fixed-dim': '#ffb95f',
+              'on-tertiary-fixed': '#002113',
+              surface: '#fcf8ff',
+              'on-error-container': '#93000a',
+              'surface-container-highest': '#e3dfff',
+              'surface-dim': '#dad6ff',
+              'tertiary-fixed-dim': '#4edea3',
+              'on-secondary-fixed': '#2a1700',
+              'inverse-on-surface': '#f3eeff',
+              'inverse-primary': '#c0c1ff',
+              'on-tertiary-fixed-variant': '#005236',
+            },
+            borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' },
+            spacing: {
+              'space-sm': '0.5rem',
+              margin: '1.25rem',
+              'space-xl': '2.25rem',
+              'space-lg': '1.5rem',
+              'space-md': '1rem',
+              'space-xs': '0.25rem',
+              gutter: '1rem',
+            },
+            fontFamily: {
+              'body-lg': ['Plus Jakarta Sans'],
+              'body-md': ['Plus Jakarta Sans'],
+              'headline-lg': ['Plus Jakarta Sans'],
+              'label-lg': ['Plus Jakarta Sans'],
+              'headline-md': ['Plus Jakarta Sans'],
+              'headline-sm': ['Plus Jakarta Sans'],
+              'label-md': ['Plus Jakarta Sans'],
+              'label-sm': ['Plus Jakarta Sans'],
+              'body-sm': ['Plus Jakarta Sans'],
+              'display-lg': ['Plus Jakarta Sans'],
+            },
+            fontSize: {
+              'body-lg': ['16px', { lineHeight: '24px', fontWeight: '500' }],
+              'body-md': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+              'headline-lg': [
+                '28px',
+                { lineHeight: '36px', letterSpacing: '-0.02em', fontWeight: '700' },
+              ],
+              'label-lg': [
+                '14px',
+                { lineHeight: '20px', letterSpacing: '0.01em', fontWeight: '700' },
+              ],
+              'headline-md': [
+                '22px',
+                { lineHeight: '28px', letterSpacing: '-0.01em', fontWeight: '700' },
+              ],
+              'headline-sm': ['18px', { lineHeight: '24px', fontWeight: '600' }],
+              'label-md': [
+                '12px',
+                { lineHeight: '16px', letterSpacing: '0.02em', fontWeight: '600' },
+              ],
+              'label-sm': [
+                '10px',
+                { lineHeight: '14px', letterSpacing: '0.04em', fontWeight: '700' },
+              ],
+              'body-sm': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+              'display-lg': [
+                '36px',
+                { lineHeight: '44px', letterSpacing: '-0.03em', fontWeight: '800' },
+              ],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body class="bg-background font-body-md text-body-md text-on-surface flex flex-col min-h-screen">
+    <header
+      class="fixed top-0 w-full z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"
+    >
+      <div class="h-16 px-margin flex items-center justify-between">
+        <div class="flex items-center gap-space-sm">
+          <a
+            aria-label="Volver"
+            class="w-11 h-11 -ml-2 rounded-full flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors active:scale-95"
+            href="#"
+            onclick="history.back()"
+            ><span class="material-symbols-outlined text-[24px]">arrow_back</span></a
+          >
+          <h1 class="text-headline-sm font-headline-sm text-on-surface tracking-tight">
+            Cuenta Auth
+          </h1>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+        </div>
+      </div>
+    </header>
+    <main class="flex flex-col relative w-full pt-16 pb-safe px-margin bg-background flex-1">
+      <div class="flex flex-col w-full pb-10">
+        <!-- BARRA DE SIMULACIÓN INTERACTIVA (Prototipado) -->
+        <section
+          class="w-full bg-surface-container-high rounded-DEFAULT p-space-sm mb-space-md shadow-sm"
+        >
+          <div class="flex items-center justify-between mb-space-xs px-1">
+            <div class="flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-primary text-[16px]">smart_toy</span>
+              <span
+                class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold"
+                >Simulador de Estados</span
+              >
+            </div>
+            <span class="font-label-sm text-label-sm text-outline font-medium">Spec 011</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button
+              class="px-2 py-1.5 rounded-full font-label-sm text-label-sm bg-primary text-on-primary font-bold shadow-sm transition-all active:scale-95 text-center truncate"
+              id="btn-state-normal"
+              onclick="setScreenState('normal')"
+              type="button"
+            >
+              Normal
+            </button>
+            <button
+              class="px-2 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-lowest text-on-surface font-semibold shadow-sm transition-all active:scale-95 text-center truncate"
+              id="btn-state-errors"
+              onclick="setScreenState('errors')"
+              type="button"
+            >
+              Errores
+            </button>
+            <button
+              class="px-2 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-lowest text-on-surface font-semibold shadow-sm transition-all active:scale-95 text-center truncate"
+              id="btn-state-loading"
+              onclick="setScreenState('loading')"
+              type="button"
+            >
+              Cargando
+            </button>
+            <button
+              class="px-2 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-lowest text-on-surface font-semibold shadow-sm transition-all active:scale-95 text-center truncate"
+              id="btn-state-offline"
+              onclick="setScreenState('offline')"
+              type="button"
+            >
+              Sin conexión
+            </button>
+          </div>
+        </section>
+        <!-- BANNER DINÁMICO DE CONEXIÓN (Modo Offline) -->
+        <div
+          class="hidden w-full mb-space-md bg-error-container text-on-error-container p-space-md rounded-DEFAULT shadow-sm flex items-start gap-space-sm"
+          id="offline-banner"
+        >
+          <span class="material-symbols-outlined text-error text-[22px] shrink-0 mt-0.5"
+            >wifi_off</span
+          >
+          <div class="flex-1 min-w-0">
+            <p class="font-label-lg text-label-lg font-bold text-on-error-container">
+              Sin conexión a Internet
+            </p>
+            <p class="font-body-sm text-body-sm text-on-error-container mt-0.5">
+              No se pudo contactar con el servidor. Tus tareas locales permanecen a salvo.
+            </p>
+            <button
+              class="mt-space-sm inline-flex items-center gap-1.5 px-3 py-1 bg-error text-on-error rounded-full font-label-sm text-label-sm font-bold active:scale-95 shadow-sm transition-transform"
+              onclick="simulateRetry()"
+              type="button"
+            >
+              <span class="material-symbols-outlined text-[14px]">refresh</span>
+              Reintentar ahora
+            </button>
+          </div>
+        </div>
+        <!-- CABECERA ILUSTRATIVA / GAMIFICADA -->
+        <div
+          class="w-full bg-surface-container-lowest rounded-2xl p-space-md shadow-[0_4px_20px_-2px_rgba(70,72,212,0.08)] mb-space-md flex items-center gap-space-md"
+        >
+          <div
+            class="relative w-14 h-14 rounded-full bg-primary-fixed flex items-center justify-center shrink-0 shadow-inner"
+          >
+            <span
+              class="material-symbols-outlined text-primary text-[28px]"
+              style="font-variation-settings: 'FILL' 1"
+              >shield_person</span
+            >
+            <div
+              class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-secondary-container flex items-center justify-center shadow-md"
+            >
+              <span
+                class="material-symbols-outlined text-on-secondary-container text-[14px] font-bold"
+                >lock_reset</span
+              >
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <span
+              class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider mb-1"
+            >
+              <span class="material-symbols-outlined text-[12px]">bolt</span> Privacidad Máxima
+            </span>
+            <p class="font-body-md text-body-md text-on-surface font-semibold leading-snug">
+              Sin correos ni verificaciones.
+            </p>
+            <p class="font-body-sm text-body-sm text-on-surface-variant leading-tight">
+              Solo tu nombre de usuario y tu contraseña.
+            </p>
+          </div>
+        </div>
+        <!-- FORMULARIO PRINCIPAL -->
+        <form
+          class="w-full flex flex-col gap-space-md"
+          id="create-account-form"
+          novalidate=""
+          onsubmit="handleFormSubmit(event)"
+        >
+          <!-- 1. CAMPO: NOMBRE DE USUARIO -->
+          <div
+            class="flex flex-col w-full bg-surface-container-lowest p-space-md rounded-2xl shadow-[0_4px_20px_-2px_rgba(70,72,212,0.06)]"
+          >
+            <div class="flex items-center justify-between mb-1.5">
+              <label
+                class="font-label-lg text-label-lg text-on-surface font-bold flex items-center gap-1.5"
+                for="username"
+              >
+                <span class="material-symbols-outlined text-primary text-[18px]"
+                  >alternate_email</span
+                >
+                Nombre de usuario
+              </label>
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant font-medium"
+                id="username-counter"
+                >0/24</span
+              >
+            </div>
+            <div class="relative flex items-center w-full">
+              <input
+                autocapitalize="none"
+                autocomplete="username"
+                autocorrect="off"
+                class="w-full h-12 bg-surface-container-low text-on-surface font-body-lg text-body-lg rounded-full px-4 pr-11 transition-all placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:shadow-[0_0_0_2px_#4648d4]"
+                id="username"
+                name="username"
+                oninput="validateForm()"
+                placeholder="ej. carlos_ritmo"
+                spellcheck="false"
+                type="text"
+              />
+              <div
+                class="absolute right-3.5 flex items-center justify-center pointer-events-none text-outline"
+                id="username-status-icon"
+              >
+                <span class="material-symbols-outlined text-[20px]">badge</span>
+              </div>
+            </div>
+            <!-- Reglas visibles y validación dinámica -->
+            <div class="mt-2.5 flex flex-col gap-1">
+              <div class="flex items-center gap-1.5" id="rule-user-chars">
+                <span
+                  class="material-symbols-outlined text-[16px] text-outline"
+                  id="icon-user-chars"
+                  >check_circle</span
+                >
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >De 3 a 24 caracteres</span
+                >
+              </div>
+              <div class="flex items-center gap-1.5" id="rule-user-format">
+                <span
+                  class="material-symbols-outlined text-[16px] text-outline"
+                  id="icon-user-format"
+                  >check_circle</span
+                >
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >Minúsculas, números, punto, guion y guion bajo</span
+                >
+              </div>
+            </div>
+            <p
+              class="hidden mt-2 font-label-md text-label-md text-error flex items-center gap-1"
+              id="username-error-msg"
+            >
+              <span class="material-symbols-outlined text-[16px]">error</span>
+              <span>El formato de usuario no es válido.</span>
+            </p>
+          </div>
+          <!-- 2. CAMPO: CONTRASEÑA -->
+          <div
+            class="flex flex-col w-full bg-surface-container-lowest p-space-md rounded-2xl shadow-[0_4px_20px_-2px_rgba(70,72,212,0.06)]"
+          >
+            <div class="flex items-center justify-between mb-1.5">
+              <label
+                class="font-label-lg text-label-lg text-on-surface font-bold flex items-center gap-1.5"
+                for="password"
+              >
+                <span class="material-symbols-outlined text-primary text-[18px]">key</span>
+                Contraseña
+              </label>
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant font-medium"
+                id="password-len-tag"
+                >Mín. 8</span
+              >
+            </div>
+            <div class="relative flex items-center w-full">
+              <input
+                autocomplete="new-password"
+                class="w-full h-12 bg-surface-container-low text-on-surface font-body-lg text-body-lg rounded-full px-4 pr-12 transition-all placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:shadow-[0_0_0_2px_#4648d4]"
+                id="password"
+                name="password"
+                oninput="validateForm()"
+                placeholder="••••••••••••"
+                type="password"
+              />
+              <button
+                aria-label="Mostrar u ocultar contraseña"
+                class="absolute right-2 w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95"
+                onclick="togglePasswordVisibility('password', 'eye-icon-pass')"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[20px]" id="eye-icon-pass"
+                  >visibility</span
+                >
+              </button>
+            </div>
+            <!-- Reglas visibles contraseña -->
+            <div class="mt-2.5 flex flex-col gap-1">
+              <div class="flex items-center gap-1.5" id="rule-pass-length">
+                <span
+                  class="material-symbols-outlined text-[16px] text-outline"
+                  id="icon-pass-length"
+                  >check_circle</span
+                >
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >De 8 a 64 caracteres</span
+                >
+              </div>
+              <div class="flex items-center gap-1.5" id="rule-pass-diff">
+                <span class="material-symbols-outlined text-[16px] text-outline" id="icon-pass-diff"
+                  >check_circle</span
+                >
+                <span class="font-body-sm text-body-sm text-on-surface-variant"
+                  >Distinta del nombre de usuario</span
+                >
+              </div>
+            </div>
+            <p
+              class="hidden mt-2 font-label-md text-label-md text-error flex items-center gap-1"
+              id="password-error-msg"
+            >
+              <span class="material-symbols-outlined text-[16px]">error</span>
+              <span>La contraseña debe cumplir con los requisitos.</span>
+            </p>
+          </div>
+          <!-- 3. CAMPO: REPETIR CONTRASEÑA -->
+          <div
+            class="flex flex-col w-full bg-surface-container-lowest p-space-md rounded-2xl shadow-[0_4px_20px_-2px_rgba(70,72,212,0.06)]"
+          >
+            <div class="flex items-center justify-between mb-1.5">
+              <label
+                class="font-label-lg text-label-lg text-on-surface font-bold flex items-center gap-1.5"
+                for="password_confirm"
+              >
+                <span class="material-symbols-outlined text-primary text-[18px]"
+                  >verified_user</span
+                >
+                Repetir contraseña
+              </label>
+              <span class="font-label-sm text-label-sm text-outline font-semibold" id="match-status"
+                >Sin verificar</span
+              >
+            </div>
+            <div class="relative flex items-center w-full">
+              <input
+                autocomplete="new-password"
+                class="w-full h-12 bg-surface-container-low text-on-surface font-body-lg text-body-lg rounded-full px-4 pr-12 transition-all placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:shadow-[0_0_0_2px_#4648d4]"
+                id="password_confirm"
+                name="password_confirm"
+                oninput="validateForm()"
+                placeholder="••••••••••••"
+                type="password"
+              />
+              <button
+                aria-label="Mostrar u ocultar repetición de contraseña"
+                class="absolute right-2 w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors active:scale-95"
+                onclick="togglePasswordVisibility('password_confirm', 'eye-icon-confirm')"
+                type="button"
+              >
+                <span class="material-symbols-outlined text-[20px]" id="eye-icon-confirm"
+                  >visibility</span
+                >
+              </button>
+            </div>
+            <div class="mt-2.5 flex items-center gap-1.5" id="rule-pass-match">
+              <span class="material-symbols-outlined text-[16px] text-outline" id="icon-pass-match"
+                >check_circle</span
+              >
+              <span class="font-body-sm text-body-sm text-on-surface-variant"
+                >Coincidencia exacta con la anterior</span
+              >
+            </div>
+            <p
+              class="hidden mt-2 font-label-md text-label-md text-error flex items-center gap-1"
+              id="match-error-msg"
+            >
+              <span class="material-symbols-outlined text-[16px]">error</span>
+              <span>Las contraseñas no coinciden.</span>
+            </p>
+          </div>
+          <!-- AVISO CRÍTICO OBLIGATORIO -->
+          <div
+            class="w-full bg-secondary-fixed/30 rounded-2xl p-space-md shadow-sm transition-colors"
+          >
+            <div class="flex items-center gap-space-sm mb-space-sm">
+              <div
+                class="w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0"
+              >
+                <span class="material-symbols-outlined text-[18px]">warning</span>
+              </div>
+              <h2 class="font-headline-sm text-headline-sm text-secondary font-bold">
+                ⚠ Aviso importante sobre tu cuenta
+              </h2>
+            </div>
+            <label
+              class="flex items-start gap-space-sm cursor-pointer select-none"
+              for="acknowledgment"
+            >
+              <div class="relative flex items-center justify-center mt-0.5 shrink-0">
+                <input
+                  class="peer appearance-none w-6 h-6 rounded-full bg-surface-container-lowest checked:bg-tertiary transition-all cursor-pointer shadow-sm focus:outline-none"
+                  id="acknowledgment"
+                  name="acknowledgment"
+                  onchange="validateForm()"
+                  type="checkbox"
+                />
+                <span
+                  class="material-symbols-outlined text-on-tertiary text-[16px] absolute pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity font-bold"
+                >
+                  check
+                </span>
+              </div>
+              <span class="font-body-md text-body-md text-on-surface font-medium leading-relaxed">
+                Si olvidas tu contraseña no podremos recuperar tu cuenta.
+                <span class="font-bold text-error">Entiendo que no hay forma de recuperarla.</span>
+              </span>
+            </label>
+          </div>
+          <!-- ZONA ERGONÓMICA DE ACCIÓN (PARTE INFERIOR) -->
+          <div class="mt-space-sm flex flex-col gap-space-sm w-full">
+            <!-- BOTÓN PRINCIPAL -->
+            <button
+              class="w-full h-[52px] rounded-full font-label-lg text-label-lg bg-surface-container-highest text-outline flex items-center justify-center gap-2 cursor-not-allowed transition-all duration-200 active:scale-[0.98] shadow-none"
+              disabled=""
+              id="btn-submit"
+              type="submit"
+            >
+              <span class="material-symbols-outlined text-[20px]" id="btn-submit-icon"
+                >person_add</span
+              >
+              <span id="btn-submit-text">Crear cuenta</span>
+              <div
+                class="hidden animate-spin w-5 h-5 rounded-full border-2 border-on-primary border-t-transparent"
+                id="btn-spinner"
+              ></div>
+            </button>
+            <!-- BOTÓN SECUNDARIO -->
+            <a
+              class="w-full h-11 rounded-full font-label-lg text-label-lg text-on-surface-variant flex items-center justify-center gap-1.5 hover:bg-surface-container-high transition-colors active:scale-98"
+              href="#"
+              onclick="handleCancelAndReturn(event)"
+            >
+              <span class="material-symbols-outlined text-[18px]">close</span>
+              <span>Cancelar y volver</span>
+            </a>
+            <p class="text-center font-body-sm text-body-sm text-outline mt-0.5">
+              Mantienes tus tareas locales intactas en este dispositivo.
+            </p>
+          </div>
+        </form>
+        <!-- CONFIRMACIÓN DE ÉXITO (Simulación) -->
+        <div
+          class="fixed bottom-6 left-5 right-5 z-50 transform translate-y-32 transition-transform duration-300 pointer-events-none"
+          id="success-toast"
+        >
+          <div
+            class="bg-tertiary text-on-tertiary p-space-md rounded-2xl shadow-xl flex items-center gap-space-sm"
+          >
+            <span class="material-symbols-outlined text-[24px]">verified</span>
+            <div class="flex-1 min-w-0">
+              <p class="font-label-lg text-label-lg font-bold">¡Cuenta creada con éxito!</p>
+              <p class="font-body-sm text-body-sm opacity-90">
+                Tus hábitos y XP locales se han sincronizado.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        // Validaciones del formulario
+        function getElements() {
+          return {
+            username: document.getElementById('username'),
+            userCounter: document.getElementById('username-counter'),
+            userIcon: document.getElementById('username-status-icon'),
+            userError: document.getElementById('username-error-msg'),
+            ruleUserChars: document.getElementById('rule-user-chars'),
+            iconUserChars: document.getElementById('icon-user-chars'),
+            ruleUserFormat: document.getElementById('rule-user-format'),
+            iconUserFormat: document.getElementById('icon-user-format'),
+
+            password: document.getElementById('password'),
+            rulePassLength: document.getElementById('rule-pass-length'),
+            iconPassLength: document.getElementById('icon-pass-length'),
+            rulePassDiff: document.getElementById('rule-pass-diff'),
+            iconPassDiff: document.getElementById('icon-pass-diff'),
+            passError: document.getElementById('password-error-msg'),
+
+            passwordConfirm: document.getElementById('password_confirm'),
+            rulePassMatch: document.getElementById('rule-pass-match'),
+            iconPassMatch: document.getElementById('icon-pass-match'),
+            matchStatus: document.getElementById('match-status'),
+            matchError: document.getElementById('match-error-msg'),
+
+            acknowledgment: document.getElementById('acknowledgment'),
+            submitBtn: document.getElementById('btn-submit'),
+            submitText: document.getElementById('btn-submit-text'),
+            submitIcon: document.getElementById('btn-submit-icon'),
+            spinner: document.getElementById('btn-spinner'),
+            offlineBanner: document.getElementById('offline-banner'),
+            successToast: document.getElementById('success-toast'),
+          };
+        }
+
+        function setRuleState(iconEl, isValid) {
+          if (isValid) {
+            iconEl.textContent = 'check_circle';
+            iconEl.className = 'material-symbols-outlined text-[16px] text-tertiary';
+          } else {
+            iconEl.textContent = 'radio_button_unchecked';
+            iconEl.className = 'material-symbols-outlined text-[16px] text-outline';
+          }
+        }
+
+        function togglePasswordVisibility(fieldId, iconId) {
+          const input = document.getElementById(fieldId);
+          const icon = document.getElementById(iconId);
+          if (!input || !icon) return;
+
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = 'visibility_off';
+          } else {
+            input.type = 'password';
+            icon.textContent = 'visibility';
+          }
+        }
+
+        function validateForm() {
+          const el = getElements();
+          const userVal = el.username.value;
+          const passVal = el.password.value;
+          const confirmVal = el.passwordConfirm.value;
+          const ackVal = el.acknowledgment.checked;
+
+          // Actualizar contador
+          el.userCounter.textContent = `${userVal.length}/24`;
+
+          // Regla Username 1: 3 a 24 caracteres
+          const validUserLen = userVal.length >= 3 && userVal.length <= 24;
+          setRuleState(el.iconUserChars, validUserLen);
+
+          // Regla Username 2: minúsculas, números, punto, guion y guion bajo
+          const regexUserFormat = /^[a-z0-9._-]+$/;
+          const validUserFormat = regexUserFormat.test(userVal);
+          setRuleState(el.iconUserFormat, userVal.length > 0 && validUserFormat);
+
+          const isUserValid = validUserLen && validUserFormat;
+
+          // Regla Pass 1: 8 a 64 chars
+          const validPassLen = passVal.length >= 8 && passVal.length <= 64;
+          setRuleState(el.iconPassLength, validPassLen);
+
+          // Regla Pass 2: distinta del nombre de usuario
+          const validPassDiff =
+            passVal.length > 0 &&
+            userVal.length > 0 &&
+            passVal.toLowerCase() !== userVal.toLowerCase();
+          setRuleState(el.iconPassDiff, validPassDiff);
+
+          const isPassValid = validPassLen && (userVal.length === 0 || validPassDiff);
+
+          // Regla Confirmación
+          const validMatch = passVal.length > 0 && confirmVal.length > 0 && passVal === confirmVal;
+          setRuleState(el.iconPassMatch, validMatch);
+
+          if (confirmVal.length > 0) {
+            if (validMatch) {
+              el.matchStatus.textContent = 'Coinciden';
+              el.matchStatus.className = 'font-label-sm text-label-sm text-tertiary font-bold';
+              el.matchError.classList.add('hidden');
+            } else {
+              el.matchStatus.textContent = 'No coinciden';
+              el.matchStatus.className = 'font-label-sm text-label-sm text-error font-bold';
+            }
+          } else {
+            el.matchStatus.textContent = 'Sin verificar';
+            el.matchStatus.className = 'font-label-sm text-label-sm text-outline font-semibold';
+            el.matchError.classList.add('hidden');
+          }
+
+          // Estado del botón Submit
+          const allValid = isUserValid && isPassValid && validMatch && ackVal;
+
+          if (allValid) {
+            el.submitBtn.disabled = false;
+            el.submitBtn.className =
+              'w-full h-[52px] rounded-full font-label-lg text-label-lg bg-primary text-on-primary flex items-center justify-center gap-2 cursor-pointer shadow-[0_8px_24px_-4px_rgba(70,72,212,0.35)] transition-all duration-200 active:scale-[0.97] hover:brightness-105';
+          } else {
+            el.submitBtn.disabled = true;
+            el.submitBtn.className =
+              'w-full h-[52px] rounded-full font-label-lg text-label-lg bg-surface-container-highest text-outline flex items-center justify-center gap-2 cursor-not-allowed transition-all duration-200 active:scale-[0.98] shadow-none';
+          }
+
+          return allValid;
+        }
+
+        function handleFormSubmit(e) {
+          e.preventDefault();
+          if (!validateForm()) return;
+
+          setScreenState('loading');
+          setTimeout(() => {
+            setScreenState('normal');
+            showSuccessToast();
+          }, 1800);
+        }
+
+        function showSuccessToast() {
+          const toast = document.getElementById('success-toast');
+          if (!toast) return;
+          toast.classList.remove('translate-y-32');
+          toast.classList.add('translate-y-0');
+          setTimeout(() => {
+            toast.classList.remove('translate-y-0');
+            toast.classList.add('translate-y-32');
+          }, 3200);
+        }
+
+        function handleCancelAndReturn(e) {
+          e.preventDefault();
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            alert('Regresando a tu lista local sin realizar cambios en tu cuenta.');
+          }
+        }
+
+        function simulateRetry() {
+          const el = getElements();
+          el.offlineBanner.classList.add('hidden');
+          setScreenState('normal');
+        }
+
+        // Controlador de estados del simulador
+        function setScreenState(state) {
+          const el = getElements();
+
+          // Actualizar botones de simulación
+          ['normal', 'errors', 'loading', 'offline'].forEach((s) => {
+            const btn = document.getElementById(`btn-state-${s}`);
+            if (!btn) return;
+            if (s === state) {
+              btn.className =
+                'px-2 py-1.5 rounded-full font-label-sm text-label-sm bg-primary text-on-primary font-bold shadow-sm transition-all active:scale-95 text-center truncate';
+            } else {
+              btn.className =
+                'px-2 py-1.5 rounded-full font-label-sm text-label-sm bg-surface-container-lowest text-on-surface font-semibold shadow-sm transition-all active:scale-95 text-center truncate';
+            }
+          });
+
+          // Reset general
+          el.offlineBanner.classList.add('hidden');
+          el.userError.classList.add('hidden');
+          el.passError.classList.add('hidden');
+          el.matchError.classList.add('hidden');
+          el.spinner.classList.add('hidden');
+          el.submitIcon.classList.remove('hidden');
+          el.submitText.textContent = 'Crear cuenta';
+
+          if (state === 'normal') {
+            el.username.value = 'carlos_ritmo';
+            el.password.value = 'MiRitmoSeguro2025';
+            el.passwordConfirm.value = 'MiRitmoSeguro2025';
+            el.acknowledgment.checked = true;
+            validateForm();
+          } else if (state === 'errors') {
+            el.username.value = 'Carlos con Espacios!';
+            el.password.value = 'carlos';
+            el.passwordConfirm.value = 'otra_cosa';
+            el.acknowledgment.checked = false;
+
+            validateForm();
+
+            el.userError.classList.remove('hidden');
+            el.passError.classList.remove('hidden');
+            el.matchError.classList.remove('hidden');
+
+            el.iconUserChars.className = 'material-symbols-outlined text-[16px] text-error';
+            el.iconUserFormat.className = 'material-symbols-outlined text-[16px] text-error';
+            el.iconPassLength.className = 'material-symbols-outlined text-[16px] text-error';
+            el.iconPassDiff.className = 'material-symbols-outlined text-[16px] text-error';
+            el.iconPassMatch.className = 'material-symbols-outlined text-[16px] text-error';
+          } else if (state === 'loading') {
+            el.username.value = 'ana_aventura';
+            el.password.value = 'ClaveFirme123!';
+            el.passwordConfirm.value = 'ClaveFirme123!';
+            el.acknowledgment.checked = true;
+
+            el.submitBtn.disabled = true;
+            el.submitBtn.className =
+              'w-full h-[52px] rounded-full font-label-lg text-label-lg bg-primary-container text-on-primary-container flex items-center justify-center gap-2 cursor-wait shadow-sm';
+            el.submitIcon.classList.add('hidden');
+            el.spinner.classList.remove('hidden');
+            el.submitText.textContent = 'Creando tu cuenta...';
+          } else if (state === 'offline') {
+            el.offlineBanner.classList.remove('hidden');
+            el.username.value = 'marcos_viajero';
+            el.password.value = 'ViajeroValiente99';
+            el.passwordConfirm.value = 'ViajeroValiente99';
+            el.acknowledgment.checked = true;
+            validateForm();
+          }
+        }
+
+        // Inicializar estado por defecto
+        document.addEventListener('DOMContentLoaded', () => {
+          setScreenState('normal');
+        });
+        // Ejecución inmediata si el script se carga posterior al DOMReady
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+          setScreenState('normal');
+        }
+      </script>
+    </main>
+  </body>
+</html>

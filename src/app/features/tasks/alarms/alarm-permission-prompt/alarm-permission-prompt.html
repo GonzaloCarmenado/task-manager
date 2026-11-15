@@ -1,0 +1,14 @@
+<section class="screen" role="dialog" aria-modal="true" aria-labelledby="alarm-prompt-title">
+  <div class="badge"><app-icon name="bell" /></div>
+  <h1 id="alarm-prompt-title" class="title">{{ copy.prompt.title }}</h1>
+  <p class="description">{{ copy.prompt.description }}</p>
+
+  <div class="actions">
+    <button type="button" class="primary" [disabled]="busy()" (click)="allow.emit()">
+      {{ copy.prompt.allow }}
+    </button>
+    <button type="button" class="link" [disabled]="busy()" (click)="later.emit()">
+      {{ copy.prompt.later }}
+    </button>
+  </div>
+</section>

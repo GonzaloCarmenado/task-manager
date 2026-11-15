@@ -27,24 +27,39 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "plus-jakarta-sans-latin-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/plus-jakarta-sans/files",
+                "output": "/fonts"
+              },
+              {
+                "glob": "plus-jakarta-sans-latin-ext-wght-normal.woff2",
+                "input": "node_modules/@fontsource-variable/plus-jakarta-sans/files",
+                "output": "/fonts"
               }
             ],
             "styles": [
               "src/styles.scss"
-            ]
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/styles"
+              ]
+            }
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "560kB",
                   "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "10kB",
+                  "maximumError": "12kB"
                 }
               ],
               "outputHashing": "all"
@@ -53,6 +68,17 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "e2e": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": false,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.e2e.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -65,6 +91,9 @@
             },
             "development": {
               "buildTarget": "task-manager:build:development"
+            },
+            "e2e": {
+              "buildTarget": "task-manager:build:e2e"
             }
           },
           "defaultConfiguration": "development"

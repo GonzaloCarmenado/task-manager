@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { TITLE_MAX, Task } from '../../core/models/task';
 import { CLOCK } from '../../core/services/clock';
-import { addDays, parseLocalDay, toLocalDay } from '../../core/utils/local-date';
+import { addDays, daysBetween, parseLocalDay, toLocalDay } from '../../core/utils/local-date';
 
 export type GroupKind = 'overdue' | 'today' | 'tomorrow' | 'date' | 'none';
 
@@ -18,6 +18,9 @@ const dayFormat = new Intl.DateTimeFormat('es-ES', {
   day: 'numeric',
   month: 'long',
 });
+
+const weekdayFormat = new Intl.DateTimeFormat('es-ES', { weekday: 'long' });
+const shortDateFormat = new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'long' });
 
 const byCreation = (a: Task, b: Task): number => a.createdAt.localeCompare(b.createdAt);
 
@@ -50,6 +53,7 @@ export class TasksConstructorService {
     noCompleted: 'Todavía no has completado ninguna tarea en los últimos 30 días.',
     overdueTag: 'Atrasada',
     markDone: 'Marcar como hecha',
+    postpone: 'Posponer',
     markUndone: 'Marcar como pendiente',
     doneNotice: 'Tarea completada',
     undoneNotice: 'Tarea pendiente otra vez',
@@ -78,6 +82,7 @@ export class TasksConstructorService {
     save: 'Guardar tarea',
     saving: 'Guardando…',
     cancel: 'Cancelar',
+    postpone: 'Posponer',
     delete: 'Borrar tarea',
     deleteTitle: '¿Borrar esta tarea?',
     deleteWarning: 'Esta acción no se puede deshacer.',
@@ -94,6 +99,35 @@ export class TasksConstructorService {
 
   tomorrowDay(): string {
     return addDays(this.todayDay(), 1);
+  }
+
+  /** Una ocurrencia con fecha posterior a hoy se ve, pero no se puede completar hasta su día. */
+  isFuture(task: Task): boolean {
+    return (
+      task.seriesId !== null &&
+      task.completedAt === null &&
+      task.dueDate !== null &&
+      task.dueDate > this.todayDay()
+    );
+  }
+
+  /** «Disponible mañana», «Disponible el jueves» (esta semana) o «Disponible el 30 de noviembre». */
+  availableLabel(task: Task): string {
+    const day = task.dueDate;
+    if (day === null) return '';
+    if (day === this.tomorrowDay()) return 'Disponible mañana';
+    const date = parseLocalDay(day);
+    return daysBetween(this.todayDay(), day) <= 6
+      ? `Disponible el ${weekdayFormat.format(date)}`
+      : `Disponible el ${shortDateFormat.format(date)}`;
+  }
+
+  /** Aviso al completar: con serie nombra la próxima ocurrencia (o dice que era la última). */
+  completedNotice(next: string | null | undefined): string {
+    if (next === undefined) return this.list.doneNotice;
+    if (next === null) return 'Hecho. Era la última repetición';
+    const text = dayFormat.format(parseLocalDay(next)).replace(',', '');
+    return `Hecho. Próxima: ${text}`;
   }
 
   isOverdue(task: Task): boolean {

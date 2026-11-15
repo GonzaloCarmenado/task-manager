@@ -1,0 +1,71 @@
+<div
+  class="field"
+  [attr.data-variant]="variant()"
+  [class.invalid]="error()"
+  [class.has-toggle]="isPassword()"
+  [class.has-trailing]="trailingIcon()"
+>
+  <div class="row">
+    <label class="label" [for]="inputId">
+      @if (variant() === 'card') {
+      <app-icon class="label-icon" [name]="icon()" />
+      } {{ label() }}
+    </label>
+    @if (variant() === 'card' && hint()) {
+    <span
+      class="hint"
+      [class.idle]="hintTone() === 'idle'"
+      [class.ok]="hintTone() === 'ok'"
+      [class.error]="hintTone() === 'error'"
+    >
+      {{ hint() }}
+    </span>
+    } @if (variant() === 'block' && side()) {
+    <span class="side">{{ side() }}</span>
+    }
+  </div>
+
+  <div class="control">
+    @if (variant() === 'block') {
+    <app-icon class="leading" [name]="icon()" />
+    }
+    <input
+      class="input"
+      [id]="inputId"
+      [type]="inputType()"
+      [value]="value()"
+      [attr.placeholder]="placeholder() || null"
+      [attr.autocomplete]="autocomplete()"
+      [attr.autocapitalize]="autocapitalize()"
+      autocorrect="off"
+      [attr.spellcheck]="spellcheck() ? 'true' : 'false'"
+      [attr.maxlength]="maxlength()"
+      [attr.aria-invalid]="error() ? 'true' : null"
+      [attr.aria-describedby]="error() ? errorId : null"
+      (input)="onInput($event)"
+      (blur)="blurred.emit()"
+    />
+    @if (isPassword()) {
+    <button
+      class="toggle"
+      type="button"
+      [attr.aria-label]="toggleLabel()"
+      [attr.aria-pressed]="revealed()"
+      (click)="toggle()"
+    >
+      <app-icon [name]="revealed() ? 'eye-off' : 'eye'" />
+    </button>
+    } @else if (trailingIcon(); as trailing) {
+    <app-icon class="trailing" [name]="trailing" />
+    }
+  </div>
+
+  <app-rule-list [rules]="rules()" />
+
+  @if (error(); as message) {
+  <p class="error" [id]="errorId">
+    <app-icon name="alert-circle" />
+    {{ message }}
+  </p>
+  }
+</div>

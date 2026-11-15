@@ -1,0 +1,16 @@
+@if (rules().length > 0) {
+<ul class="rules">
+  @for (rule of rules(); track rule.key) {
+  <li class="rule" [attr.data-state]="rule.state">
+    <app-icon [name]="rule.state === 'ok' ? 'check-circle' : 'circle'" />
+    <span class="text">
+      @if (rule.state === 'ok') {
+      <span class="sr">Cumple:</span>
+      } @else if (rule.state === 'error') {
+      <span class="sr">No cumple:</span>
+      } {{ rule.text }}
+    </span>
+  </li>
+  }
+</ul>
+}

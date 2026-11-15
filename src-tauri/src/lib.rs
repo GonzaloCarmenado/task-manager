@@ -6,6 +6,12 @@ pub fn run() {
   #[cfg(target_os = "android")]
   let builder = builder.plugin(tauri_plugin_biometry::init());
 
+  // Alarmas (spec 006): notificaciones locales y ajustes del sistema, solo en Android.
+  #[cfg(target_os = "android")]
+  let builder = builder.plugin(tauri_plugin_notification::init());
+  #[cfg(target_os = "android")]
+  let builder = builder.plugin(tauri_plugin_app_settings::init());
+
   builder
     .setup(|app| {
       if cfg!(debug_assertions) {

@@ -1,0 +1,60 @@
+<app-account-header [title]="copy.title" (back)="goBack()" />
+
+<form class="page" novalidate (submit)="onSubmit($event)">
+  <section class="danger-box">
+    <div class="danger-head">
+      <app-icon class="danger-icon" name="alert" />
+      <div>
+        <h2 class="danger-title">{{ danger.dangerTitle }}</h2>
+        <p class="danger-body">{{ danger.dangerBody }}</p>
+      </div>
+    </div>
+  </section>
+
+  <app-account-field
+    [label]="copy.passwordLabel"
+    icon="lock"
+    type="password"
+    autocomplete="current-password"
+    [placeholder]="shared.passwordPlaceholder"
+    [toggleLabel]="shared.toggleLabel"
+    [error]="passwordError()"
+    [value]="password()"
+    (valueChange)="onPassword($event)"
+  />
+
+  <section class="confirm">
+    <label class="check">
+      <input class="accept" type="checkbox" [checked]="accepted()" (change)="onAccept($event)" />
+      <span class="box" aria-hidden="true"><app-icon name="check" /></span>
+      <span class="confirm-text"><strong>{{ copy.confirmText }}</strong></span>
+    </label>
+  </section>
+
+  @if (formError(); as message) {
+  <p class="form-error" role="alert">
+    <app-icon name="alert-circle" />
+    {{ message }}
+  </p>
+  }
+
+  <div class="actions">
+    <button
+      class="submit"
+      type="submit"
+      [class.loading]="loading()"
+      [disabled]="!canSubmit()"
+      [attr.aria-busy]="loading()"
+    >
+      @if (loading()) {
+      <span class="spinner" aria-hidden="true"></span>
+      {{ copy.submitting }} } @else {
+      <app-icon name="trash" />
+      {{ copy.submit }} }
+    </button>
+    <button class="cancel" type="button" (click)="goBack()">
+      <app-icon name="x" />
+      {{ copy.cancel }}
+    </button>
+  </div>
+</form>

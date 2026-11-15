@@ -106,6 +106,7 @@ Migración `*_tasks.sql`. Una fila por tarea de un usuario:
 | `due_time` | `time` | opcional y **solo con `due_date`** |
 | `completed_at` | `timestamptz` | `null` = pendiente |
 | `created_at` | `timestamptz` | por defecto `now()` |
+| `postponed_count` | `integer` | spec 007: veces pospuesta (por defecto 0, nunca negativa). Rollback: `alter table public.tasks drop column postponed_count;` |
 
 **RLS**: una política por operación (`select`, `insert`, `update`, `delete`), todas `to authenticated` y con `user_id = (select auth.uid())`. Las sesiones anónimas usan el rol `authenticated`. Se revoca todo a `anon`. La app solo accede desde `TasksAccessService`.
 
@@ -113,6 +114,47 @@ Rollback: una nueva migración con `drop table public.tasks;`.
 
 Verificación real (manual): `pnpm verify:rls` crea dos sesiones anónimas y comprueba que una no ve, edita, borra ni crea tareas de la otra, que sin sesión no se accede a nada y que se rechazan los títulos inválidos y la hora sin fecha; borra lo que crea y nunca imprime claves ni ids.
 
+### Progreso (spec 008)
+
+El progreso lo calcula la **base de datos**: el cliente solo envía el **día local** al completar una tarea (`completed_day`) y lee el resultado con `get_progress(hoy)`.
+
+- Columnas nuevas en `tasks`: `completed_day` (día local en que se completó; es `null` si y solo si `completed_at` lo es), `xp_awarded` (0 a 10) y `xp_day`. Las escribe el disparador, no el cliente.
+- `player_stats` (XP total y mejor racha, una fila por usuario) y `xp_events` (libro de movimientos de XP por día): **solo lectura** desde el cliente, con RLS por `user_id`; las escribe el disparador (`security definer`, `search_path` fijado).
+- **Reglas**: una tarea completada da 10 XP, con tope de **100 XP por día local** (suma del libro de ese día). Desmarcarla quita el XP que dio, en el día en que se concedió. Volver a completarla lo da otra vez, respetando el tope. Borrar una tarea completada **no** quita XP.
+- **Racha**: se deriva de los días con alguna tarea completada (`streak_ending`); la mejor racha solo sube.
+- Solo `get_progress(date)` es ejecutable desde el cliente; las demás funciones no.
+- Las tareas completadas antes de esta migración conservan su día (en UTC) y no dan XP.
+- Rollback: ver el final de la migración `<marca>_progress.sql`. La migración `<marca>_progress_best_streak.sql` corrige la mejor racha (cuenta la racha completa que contiene el día completado).
+
+## Cuenta de usuario (spec 011)
+
+- Registro e inicio de sesión con **nombre de usuario + contraseña**, sin correo, sin verificación y sin recuperación. Internamente el nombre se guarda como `<usuario>@cuenta.invalid` (TLD reservado: nunca resuelve ni recibe correo); la persona no lo ve.
+- Vincular la sesión anónima (`updateUser`) conserva el mismo `user_id`: tareas y progreso siguen siendo suyos.
+- **Configuración remota (panel de Supabase, la hace el propietario; no se versiona)**: Authentication → Providers → Email: desactivar «Confirm email» y fijar longitud mínima de contraseña en 8. Sin esto, vincular deja la cuenta pendiente de verificar.
+- Migración `<marca>_account.sql`: `delete_my_account()` (security definer, solo `authenticated` y no anónimo; borra `auth.users` y las tablas de datos caen en cascada). Rollback al final del fichero.
+- Verificación real (manual): `pnpm verify:account` crea una cuenta de prueba aleatoria, la vincula, cambia la contraseña, la borra y comprueba que una sesión anónima no puede borrar. Solo imprime booleanos; no deja usuarios de prueba.
+- **No se puede cambiar el nombre de usuario** (US-011-07 descartada tras el spike): el servicio rechaza (`email_address_invalid`) cambiar el identificador a una dirección `.invalid`. Quien quiera otro nombre crea una cuenta nueva.
+- **Cerrar sesión** usa `signOut({ scope: 'local' })`: la librería quita la sesión local antes de la petición, así que solo se rechaza antes de empezar si el móvil declara estar sin conexión. Un fallo al revocar el token en el servidor no impide cerrar.
+- **Iniciar sesión** va en dos fases con un cliente «sonda» (sin persistencia, almacenamiento en memoria): comprueba credenciales sin tocar la sesión anónima; solo `completeSignIn` cambia de identidad.
+- Las contraseñas y los identificadores internos no se escriben nunca en consola ni en el repo.
+
+## Tareas repetitivas (spec 012)
+
+Migración `<marca>_task_series.sql`. Una **serie** guarda la regla de repetición y cada **ocurrencia** es una fila normal de `tasks`: por eso la lista, las alarmas, el XP, el posponer y la RLS no cambian.
+
+| Tabla / columna | Notas |
+|---|---|
+| `task_series` | `user_id`, `title`, `due_time`, `kind` (`daily`/`weekly`/`monthly`), `interval_n` (1 a 30), `weekdays` (1 = lunes … 7 = domingo), `month_day` (1 a 31), `start_date`, `until_date`. RLS por `user_id` en las cuatro operaciones; sin acceso anónimo |
+| `tasks.series_id` | Enlaza la ocurrencia con su serie. `on delete set null`: al borrar la serie, las completadas quedan como tareas sueltas |
+| `tasks.series_date` | Día previsto **original** de la ocurrencia (no cambia al posponer). La siguiente se calcula desde él |
+
+- **Una sola ocurrencia pendiente por serie**: índice único parcial `tasks_series_one_pending`. Un reintento o un segundo móvil no duplican nada (el cliente ignora el `23505`).
+- **Disparador `tasks_series_guard`** (antes de actualizar): rechaza completar una ocurrencia con fecha posterior al día local enviado (`P0001`, «future occurrence»: sin XP por adelantar días) y, al desmarcar, borra la pendiente generada después. No es `security definer`: respeta la RLS.
+- **El cálculo de fechas vive solo en el cliente** (`core/utils/recurrence.ts`). Al completar, el cliente crea la siguiente; si se cierra entre los dos pasos, `TasksAccessService.load()` repara las series sin pendiente.
+- **Orden de despliegue**: aplicar la migración `task_series` **antes** de ejecutar el cliente contra el remoto (el cliente lee `task_series` y `series_id`).
+- La CLI 3.x pide `--yes` para aplicar en modo agente (`supabase db push --remote --yes`); solo tras la aprobación explícita del propietario y un `db:push:dry` revisado.
+- Rollback: ver el final de la migración.
+
 ## Estado
 
-Migraciones: `tasks` (spec 005). El resto del modelo (XP, rachas…) llegará con las siguientes specs. La identidad anónima ya existe (spec 003).
+Migraciones: `tasks` (spec 005), `tasks_postponed_count` (007), `progress` y `progress_best_streak` (008), `account` (011) y `task_series` (012), todas aplicadas al remoto y verificadas con `verify:rls` y `verify:progress`. La identidad anónima ya existe (spec 003).

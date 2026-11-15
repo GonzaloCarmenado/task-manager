@@ -1,0 +1,107 @@
+<app-account-header [title]="copy.title" (back)="goBack()" />
+
+<form class="page" novalidate (submit)="onSubmit($event)">
+  @if (offline()) {
+  <app-offline-banner (retry)="submit()" />
+  }
+
+  <section class="intro">
+    <span class="intro-icon" aria-hidden="true">
+      <app-icon name="shield-user" [filled]="true" />
+      <span class="intro-badge"><app-icon name="lock-reset" /></span>
+    </span>
+    <div>
+      <p class="intro-title">{{ copy.introTitle }}</p>
+      <p class="intro-body">{{ copy.introBody }}</p>
+    </div>
+  </section>
+
+  <app-account-field
+    [label]="copy.usernameLabel"
+    icon="at"
+    trailingIcon="id-card"
+    autocomplete="username"
+    [placeholder]="copy.usernamePlaceholder"
+    [hint]="username().length + '/' + maxName"
+    [rules]="usernameRules()"
+    [error]="usernameError()"
+    [value]="username()"
+    (valueChange)="onUsername($event)"
+    (blurred)="onBlur('user')"
+  />
+
+  <app-account-field
+    [label]="copy.passwordLabel"
+    icon="key"
+    type="password"
+    autocomplete="new-password"
+    [placeholder]="copy.passwordPlaceholder"
+    [hint]="copy.passwordHint"
+    [toggleLabel]="copy.toggleLabel"
+    [rules]="passwordRules()"
+    [error]="passwordError()"
+    [value]="password()"
+    (valueChange)="onPassword($event)"
+    (blurred)="onBlur('password')"
+  />
+
+  <app-account-field
+    [label]="copy.repeatLabel"
+    icon="verified-user"
+    type="password"
+    autocomplete="new-password"
+    [placeholder]="copy.passwordPlaceholder"
+    [hint]="match().label"
+    [hintTone]="match().state"
+    [toggleLabel]="copy.toggleLabel"
+    [rules]="repeatRules()"
+    [error]="repeatError()"
+    [value]="repeat()"
+    (valueChange)="onRepeat($event)"
+    (blurred)="onBlur('repeat')"
+  />
+
+  <section class="notice">
+    <div class="notice-head">
+      <span class="notice-icon" aria-hidden="true"><app-icon name="alert" /></span>
+      <h2 class="notice-title">{{ copy.noticeTitle }}</h2>
+    </div>
+    <label class="check">
+      <input class="accept" type="checkbox" [checked]="accepted()" (change)="onAccept($event)" />
+      <span class="box" aria-hidden="true"><app-icon name="check" /></span>
+      <span class="notice-text">
+        {{ copy.noticeText }}
+        <strong>{{ copy.noticeStrong }}</strong>
+      </span>
+    </label>
+  </section>
+
+  @if (formError(); as message) {
+  <p class="form-error" role="alert">
+    <app-icon name="alert-circle" />
+    {{ message }}
+  </p>
+  }
+
+  <div class="actions">
+    <button
+      class="submit"
+      type="submit"
+      [class.loading]="loading()"
+      [disabled]="!canSubmit()"
+      [attr.aria-busy]="loading()"
+    >
+      @if (loading()) {
+      <span class="spinner" aria-hidden="true"></span>
+      {{ copy.submitting }} } @else {
+      <app-icon name="user-plus" />
+      {{ copy.submit }} }
+    </button>
+    <button class="cancel" type="button" (click)="goBack()">
+      <app-icon name="x" />
+      {{ copy.cancel }}
+    </button>
+  </div>
+
+  <p class="footer">{{ copy.footer }}</p>
+</form>

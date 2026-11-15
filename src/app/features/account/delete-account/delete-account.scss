@@ -1,0 +1,209 @@
+@use 'type';
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+}
+
+.page {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-margin) var(--space-margin) calc(40px + env(safe-area-inset-bottom));
+}
+
+// Caja de peligro: la misma de la pantalla Cuenta
+.danger-box {
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--tint-error);
+}
+
+.danger-head {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.danger-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  color: var(--color-error);
+}
+
+.danger-title {
+  margin: 0;
+  @include type.headline-sm;
+  line-height: 1.25;
+}
+
+.danger-body {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  @include type.body-sm;
+  line-height: 1.5;
+}
+
+// Bloque de confirmación: como el aviso de Crear cuenta, con fondo de peligro
+.confirm {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--tint-error);
+}
+
+.check {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.accept {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.box {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: transparent;
+  transition: background 150ms;
+
+  app-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.accept:checked + .box {
+  background: var(--color-error);
+  color: var(--color-on-error);
+}
+
+.accept:focus-visible + .box {
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.confirm-text {
+  @include type.body-md;
+  font-weight: 500;
+  line-height: 1.625;
+
+  strong {
+    color: var(--color-error);
+    font-weight: 700;
+  }
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--color-error);
+  @include type.label-md;
+
+  app-icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-height);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-error);
+  color: var(--color-on-error);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  @include type.label-lg;
+  transition: transform 150ms;
+
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  &:disabled {
+    background: var(--color-surface-highest);
+    color: var(--color-outline-strong);
+    box-shadow: none;
+    cursor: default;
+  }
+
+  &.loading:disabled {
+    background: var(--color-error);
+    color: var(--color-on-error);
+    box-shadow: var(--shadow-soft);
+    opacity: 0.85;
+  }
+
+  app-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  animation: spin 800ms linear infinite;
+}
+
+.cancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  @include type.label-lg;
+
+  app-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

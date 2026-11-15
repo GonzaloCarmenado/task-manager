@@ -1,8 +1,8 @@
 {
   "$schema": "../gen/schemas/mobile-schema.json",
   "identifier": "mobile",
-  "description": "permisos solo de Android: comprobar la biometría y autenticarse (sin acceso al almacenamiento del plugin)",
+  "description": "permisos solo de Android: biometría (estado y autenticación), notificaciones locales y ajustes del sistema para las alarmas",
   "platforms": ["android"],
   "windows": ["main"],
-  "permissions": ["biometry:default"]
+  "permissions": ["biometry:default", "notification:default", "app-settings:default"]
 }
