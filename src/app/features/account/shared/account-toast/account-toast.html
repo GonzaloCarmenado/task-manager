@@ -1,0 +1,14 @@
+@if (service.toast(); as toast) {
+<div class="toast" role="status" aria-live="polite" [attr.data-kind]="toast.kind">
+  @if (toast.kind === 'success') {
+  <app-icon class="icon" name="badge-check" />
+  <div class="content">
+    <p class="title">{{ toast.title }}</p>
+    <p class="body">{{ toast.text }}</p>
+  </div>
+  } @else {
+  <app-icon class="icon" name="check-circle" [filled]="true" />
+  <p class="text">{{ toast.text }}</p>
+  }
+</div>
+}

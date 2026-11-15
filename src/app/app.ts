@@ -6,12 +6,20 @@ import { BiometricLockService } from './core/services/biometric-lock.service';
 import { BiometricLockScreen } from './shared/components/biometric-lock-screen/biometric-lock-screen';
 import { BiometricNotice } from './shared/components/biometric-notice/biometric-notice';
 import { BiometricOffer } from './shared/components/biometric-offer/biometric-offer';
+import { AccountToast } from './features/account/shared/account-toast/account-toast';
 import { SessionStatus } from './shared/components/session-status/session-status';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, SessionStatus, BiometricLockScreen, BiometricNotice, BiometricOffer],
+  imports: [
+    RouterOutlet,
+    SessionStatus,
+    BiometricLockScreen,
+    BiometricNotice,
+    BiometricOffer,
+    AccountToast,
+  ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

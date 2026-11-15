@@ -52,6 +52,11 @@ export function buildRoutes(devMode: boolean): Routes {
               import('./features/dev/progress-preview').then((m) => m.ProgressPreview),
           },
           {
+            path: '__dev/account/:screen/:state',
+            loadComponent: () =>
+              import('./features/dev/account-preview').then((m) => m.AccountPreview),
+          },
+          {
             path: '__dev/biometric/:state',
             loadComponent: () =>
               import('./features/dev/biometric-preview').then((m) => m.BiometricPreview),

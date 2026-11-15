@@ -48,22 +48,22 @@
 - [x] T-011-31 (Red): `icon.spec.ts`: iconos de cuenta (`shield-user`, `lock-reset`, `phone-lock`, `shield`, `cloud-sync`, `cloud-up`, `cloud-check`, `log-in`, `log-out`, `badge-check`, `verified-user`, `swap`, `list-plus`, `info`, `trash-sweep`, `bolt`, `chevron-right` existente)
 - [x] T-011-32 (Green): `icon.ts`: los iconos del T-011-31
 - [x] T-011-33: revisión visual de los iconos nuevos en una vista previa (rejilla, claro y oscuro) comparados con los glifos de las capturas; ajustar trazo y proporciones
-- [ ] T-011-34 (Red): `account.constructor.service.spec.ts`: `usernameRules`, `passwordRules` (incluida «distinta de la actual»), `matchState`, `errorText` por contexto y todos los textos fijos de las pantallas del plan
-- [ ] T-011-35 (Green): `features/account/account.constructor.service.ts`
-- [ ] T-011-36 (Red): `shared/account-header.spec.ts`: título, botón atrás con nombre accesible y zona 44, círculo decorativo `aria-hidden`
-- [ ] T-011-37 (Green): `AccountHeader` (fija, desenfoque, 64, zona segura, medidas del plan)
-- [ ] T-011-38 (Red): `shared/account-field.spec.ts`: etiqueta con icono, indicación, contador, entrada con `autocomplete`/`autocapitalize`/`spellcheck` configurables, mostrar/ocultar contraseña con `aria-label`, reglas y error, foco con anillo, dos variantes (píldora de 48 en tarjeta, bloque de 56 con icono)
-- [ ] T-011-39 (Green): `AccountField` (`model()` de valor; variantes `card` y `block`)
-- [ ] T-011-40 (Red): `shared/rule-list.spec.ts` y `shared/offline-banner.spec.ts`: estados `idle/ok/error` con icono y color de rol; banner con título, texto y «Reintentar ahora» que emite
-- [ ] T-011-41 (Green): `RuleList` y `OfflineBanner`
-- [ ] T-011-42 (Red): `shared/account-toast.spec.ts`: el servicio publica un aviso con icono y texto, desaparece a los 2,8 s (con `CLOCK`/temporizador simulado), `role="status"`; variante de éxito de Crear cuenta
-- [ ] T-011-43 (Green): `AccountToastService` y `AccountToast` (montado en `app.html`)
-- [ ] T-011-44 (Red): `shared/overlay-back.spec.ts`: añade una entrada al historial y cierra con `popstate`; al destruirse sin haber retrocedido, retrocede (mismo patrón que `PostponeSheet`)
-- [ ] T-011-45 (Green): `OverlayBack` (servicio o función de ayuda en contexto de inyección)
-- [ ] T-011-46: vistas previas `__dev/account/<pantalla>/<estado>` (`features/dev/account-preview.ts` + spec, ruta solo en desarrollo) con datos de ejemplo y sin backend
-- [ ] T-011-47 (Refactor): limpiar los componentes compartidos con los tests en verde
-- [ ] T-011-48: **medidas** de cabecera, tarjeta de campo y entrada (alto 64/44/32, 48, radio, relleno, sombra) en el navegador frente a la tabla del plan; **comparación** con los recortes de `crear-cuenta/screen.png`; claro y oscuro; consola limpia
-- [ ] T-011-49: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` en verde
+- [x] T-011-34 (Red): `account.constructor.service.spec.ts`: `usernameRules`, `passwordRules` (incluida «distinta de la actual»), `matchState`, `errorText` por contexto y todos los textos fijos de las pantallas del plan
+- [x] T-011-35 (Green): `features/account/account.constructor.service.ts`
+- [x] T-011-36 (Red): `shared/account-header.spec.ts`: título, botón atrás con nombre accesible y zona 44, círculo decorativo `aria-hidden`
+- [x] T-011-37 (Green): `AccountHeader` (fija, desenfoque, 64, zona segura, medidas del plan)
+- [x] T-011-38 (Red): `shared/account-field.spec.ts`: etiqueta con icono, indicación, contador, entrada con `autocomplete`/`autocapitalize`/`spellcheck` configurables, mostrar/ocultar contraseña con `aria-label`, reglas y error, foco con anillo, dos variantes (píldora de 48 en tarjeta, bloque de 56 con icono)
+- [x] T-011-39 (Green): `AccountField` (`model()` de valor; variantes `card` y `block`)
+- [x] T-011-40 (Red): `shared/rule-list.spec.ts` y `shared/offline-banner.spec.ts`: estados `idle/ok/error` con icono y color de rol; banner con título, texto y «Reintentar ahora» que emite
+- [x] T-011-41 (Green): `RuleList` y `OfflineBanner`
+- [x] T-011-42 (Red): `shared/account-toast.spec.ts`: el servicio publica un aviso con icono y texto, desaparece a los 2,8 s (con `CLOCK`/temporizador simulado), `role="status"`; variante de éxito de Crear cuenta
+- [x] T-011-43 (Green): `AccountToastService` y `AccountToast` (montado en `app.html`)
+- [x] T-011-44 (Red): `shared/overlay-back.spec.ts`: añade una entrada al historial y cierra con `popstate`; al destruirse sin haber retrocedido, retrocede (mismo patrón que `PostponeSheet`)
+- [x] T-011-45 (Green): `OverlayBack` (servicio o función de ayuda en contexto de inyección)
+- [x] T-011-46: vistas previas `__dev/account/<pantalla>/<estado>` (`features/dev/account-preview.ts` + spec, ruta solo en desarrollo) con datos de ejemplo y sin backend
+- [x] T-011-47 (Refactor): limpiar los componentes compartidos con los tests en verde
+- [x] T-011-48: **medidas** de cabecera, tarjeta de campo y entrada (alto 64/44/32, 48, radio, relleno, sombra) en el navegador frente a la tabla del plan; **comparación** con los recortes de `crear-cuenta/screen.png`; claro y oscuro; consola limpia
+- [x] T-011-49: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` en verde
 
 ---
 

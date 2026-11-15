@@ -6,6 +6,7 @@ import { AuthErrorReason, AuthStatus } from './core/models/auth-status';
 import { LockPhase } from './core/models/biometric';
 import { AuthAccessService } from './core/services/auth.access.service';
 import { BiometricLockService } from './core/services/biometric-lock.service';
+import { AccountToastService } from './features/account/shared/account-toast/account-toast.service';
 import { App } from './app';
 
 type ComponentDef = { ɵcmp: { onPush: boolean } };
@@ -40,6 +41,16 @@ describe('App', () => {
 
   it('US-003-01 usa ChangeDetectionStrategy.OnPush', () => {
     expect((App as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
+  });
+
+  it('US-011-01 monta el aviso de la cuenta una sola vez, y publica avisos sobre cualquier pantalla', () => {
+    const { el, fixture } = setup('ready');
+    expect(el.querySelectorAll('app-account-toast')).toHaveLength(1);
+    TestBed.inject(AccountToastService).show('Sesión cerrada');
+    fixture.detectChanges();
+    expect(el.querySelector('app-account-toast [role="status"]')?.textContent).toContain(
+      'Sesión cerrada'
+    );
   });
 
   it('US-003-01 con ready pinta el router-outlet y no la pantalla de estado', () => {

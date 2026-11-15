@@ -1,0 +1,213 @@
+@use 'type';
+
+:host {
+  display: block;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.control {
+  position: relative;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  border: 0;
+  color: var(--color-text);
+  outline: none;
+  @include type.body-lg;
+  font-weight: 400;
+
+  &::placeholder {
+    color: var(--color-outline-strong);
+    opacity: 1;
+  }
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  color: var(--color-error);
+  @include type.label-md;
+
+  app-icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+
+  app-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ---- Tarjeta de campo (Crear cuenta y derivadas) ----------------------------------------------
+.field[data-variant='card'] {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-field);
+
+  .row {
+    margin-bottom: 6px;
+  }
+
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-text);
+    @include type.label-lg;
+  }
+
+  .label-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--color-primary-text);
+  }
+
+  .hint {
+    color: var(--color-text-muted);
+    @include type.label-sm;
+    font-weight: 500;
+    text-transform: none;
+
+    &.idle {
+      color: var(--color-outline-strong);
+      font-weight: 600;
+    }
+
+    &.ok {
+      color: var(--color-tertiary);
+      font-weight: 700;
+    }
+
+    &.error {
+      color: var(--color-error);
+      font-weight: 700;
+    }
+  }
+
+  .input {
+    height: 48px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-low);
+
+    &:focus {
+      background: var(--color-surface);
+      box-shadow: 0 0 0 2px var(--color-primary);
+    }
+  }
+
+  &.has-trailing .input {
+    padding-right: 44px;
+  }
+
+  &.has-toggle .input {
+    padding-right: 48px;
+  }
+
+  .trailing {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 20px;
+    height: 20px;
+    color: var(--color-outline-strong);
+    pointer-events: none;
+  }
+
+  // Alto visible 36 px dentro de la entrada de 48; la zona táctil llega a 44 px
+  .toggle {
+    position: absolute;
+    top: 6px;
+    right: var(--space-2);
+    width: 36px;
+    height: 36px;
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+    }
+  }
+}
+
+// ---- Bloque con icono interior (Iniciar sesión) --------------------------------------------------
+.field[data-variant='block'] {
+  .row {
+    padding: 0 var(--space-1);
+    margin-bottom: 6px;
+  }
+
+  .label {
+    color: var(--color-text-muted);
+    @include type.label-md;
+  }
+
+  .side {
+    color: var(--color-outline-strong);
+    @include type.body-sm;
+  }
+
+  .input {
+    height: 56px;
+    padding: 0 var(--space-4) 0 48px;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-input);
+
+    &:focus {
+      box-shadow:
+        var(--shadow-input),
+        0 0 0 2px var(--color-primary);
+    }
+  }
+
+  &.has-toggle .input {
+    padding-right: 56px;
+  }
+
+  .leading {
+    position: absolute;
+    top: 17px;
+    left: var(--space-4);
+    width: 22px;
+    height: 22px;
+    color: var(--color-primary-text);
+    pointer-events: none;
+  }
+
+  .toggle {
+    position: absolute;
+    top: 6px;
+    right: var(--space-2);
+    width: var(--tap-target);
+    height: var(--tap-target);
+
+    app-icon {
+      width: 22px;
+      height: 22px;
+    }
+  }
+}

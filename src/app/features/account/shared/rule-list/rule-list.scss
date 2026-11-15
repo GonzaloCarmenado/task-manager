@@ -1,0 +1,46 @@
+@use 'type';
+
+:host {
+  display: block;
+}
+
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-muted);
+  @include type.body-sm;
+
+  app-icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--color-outline-strong);
+  }
+
+  &[data-state='ok'] app-icon {
+    color: var(--color-tertiary);
+  }
+
+  &[data-state='error'] app-icon {
+    color: var(--color-error);
+  }
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

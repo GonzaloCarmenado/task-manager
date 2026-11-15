@@ -8,6 +8,7 @@ import { BiometricPreview } from './features/dev/biometric-preview';
 import { AlarmsPreview } from './features/dev/alarms-preview';
 import { PostponePreview } from './features/dev/postpone-preview';
 import { ProgressPreview } from './features/dev/progress-preview';
+import { AccountPreview } from './features/dev/account-preview';
 import { LevelUp } from './features/progress/level-up/level-up';
 import { ProgressScreen } from './features/progress/progress-screen/progress-screen';
 
@@ -110,5 +111,14 @@ describe('app.routes', () => {
 
   it('US-003-06 la ruta de desarrollo no sustituye a la ruta principal', () => {
     expect(buildRoutes(true).find((r) => r.path === '')).toBeDefined();
+  });
+});
+
+describe('rutas de la vista previa de cuenta', () => {
+  it('US-011-01 en desarrollo existe la vista previa de cuenta, lazy, y no en producción', async () => {
+    const path = '__dev/account/:screen/:state';
+    const route = buildRoutes(true).find((r) => r.path === path);
+    expect(await route?.loadComponent?.()).toBe(AccountPreview);
+    expect(buildRoutes(false).some((r) => r.path === path)).toBe(false);
   });
 });
