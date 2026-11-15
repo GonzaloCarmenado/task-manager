@@ -29,6 +29,7 @@ import {
 } from '../postpone/postpone.constructor.service';
 import { PostponeSheet } from '../postpone/postpone-sheet/postpone-sheet';
 import { TasksAccessService } from '../tasks.access.service';
+import { RecurrenceConstructorService } from '../recurrence/recurrence.constructor.service';
 import { TasksConstructorService } from '../tasks.constructor.service';
 import { TasksNoticeService } from '../tasks-notice.service';
 
@@ -53,6 +54,7 @@ import { TasksNoticeService } from '../tasks-notice.service';
 export class TasksList {
   protected readonly access = inject(TasksAccessService);
   protected readonly copy = inject(TasksConstructorService);
+  private readonly repeatCopy = inject(RecurrenceConstructorService);
   protected readonly alarms = inject(AlarmsAccessService);
   private readonly alarmsCopy = inject(AlarmsConstructorService);
   private readonly postponeRules = inject(PostponeConstructorService);
@@ -113,12 +115,17 @@ export class TasksList {
   }
 
   protected async toggle(task: Task): Promise<void> {
+    // Una ocurrencia futura no se completa hasta su día (el botón ya está desactivado; esto es la red de seguridad).
+    if (this.copy.isFuture(task)) return;
     const done = task.completedAt === null;
     const before = this.progress.progress();
     const result = await this.access.setCompleted(task.id, done);
     if (result.ok) {
       void this.progress.afterToggle(done, before);
-      this.notices.show(done ? this.copy.list.doneNotice : this.copy.list.undoneNotice, false);
+      this.notices.show(
+        done ? this.copy.completedNotice(result.next) : this.copy.list.undoneNotice,
+        false
+      );
     } else {
       this.notices.show(this.copy.list.failNotice, true);
     }
@@ -160,6 +167,16 @@ export class TasksList {
   protected openExactAlarmSettings(): void {
     void this.alarms.openExactAlarmSettings();
     this.alarms.skipExact();
+  }
+
+  /** Texto corto de la repetición de una ocurrencia («Todos los días», «Lun, jue»); `null` si es suelta. */
+  protected repeatLabel(task: Task): string | null {
+    const series = this.access.seriesOf(task);
+    return series === undefined ? null : this.repeatCopy.describe(series.recurrence);
+  }
+
+  protected isFuture(task: Task): boolean {
+    return this.copy.isFuture(task);
   }
 
   protected isOverdue(task: Task): boolean {

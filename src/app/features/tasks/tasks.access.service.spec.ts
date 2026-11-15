@@ -1478,3 +1478,24 @@ describe('TasksAccessService · series · borrar', () => {
     expect(from).toHaveBeenCalledWith('tasks');
   });
 });
+
+describe('TasksAccessService · series · posponer', () => {
+  it('US-012-03 posponer una ocurrencia mueve solo esa fila: no cambia la regla ni su día previsto original', async () => {
+    const { service, next, called, from } = await loadedSeries([
+      occurrence({ due_date: '2026-11-13', series_date: '2026-11-13' }),
+    ]);
+    from.mockClear();
+    next(() => ok(null));
+
+    const result = await service.postpone('o1', { dueDate: '2026-11-15', dueTime: '08:00' });
+
+    expect(result).toEqual({ ok: true });
+    expect(from).toHaveBeenCalledTimes(1);
+    expect(from).toHaveBeenCalledWith('tasks');
+    expect(called('update')[0]).toEqual([
+      { due_date: '2026-11-15', due_time: '08:00', postponed_count: 1 },
+    ]);
+    expect(service.get('o1')).toMatchObject({ seriesId: 's1', seriesDate: '2026-11-13' });
+    expect(service.seriesOf(service.get('o1')!)?.recurrence.kind).toBe('daily');
+  });
+});

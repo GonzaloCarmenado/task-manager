@@ -100,6 +100,15 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - **Fidelidad**: las pantallas siguen las medidas de `specs/011-cuenta-usuario/plan.md`; `cypress/e2e/cuenta-fidelidad.cy.ts` las comprueba a 390 px. Vistas previas en desarrollo: `/__dev/account/<pantalla>/<estado>`.
 - `pnpm verify:account` (manual, contra el remoto, con confirmación) crea y borra una cuenta de prueba.
 
+### Tareas repetitivas (spec 012)
+
+- Una **serie** (`task_series`) guarda la regla (diaria cada N días, semanal con días y cada N semanas, o un día del mes, con fecha de fin opcional) y cada **ocurrencia** es una fila de `tasks` con `series_id` y `series_date`. Hay **una sola pendiente por serie** (índice único): no se generan ocurrencias por adelantado.
+- Las fechas se calculan solo en `core/utils/recurrence.ts` (puro, fechas locales). Solo `TasksAccessService` toca las series: completar crea la siguiente (posterior a `series_date` y no anterior a hoy), `load()` repara las series sin pendiente y desmarcar deja una sola.
+- Una ocurrencia con fecha posterior a hoy **no se puede completar** (lo impide la lista y el disparador `tasks_series_guard`).
+- Cambiar la **regla** (incluido «No se repite» o quitar la fecha) es siempre de toda la serie y no pregunta; si la regla no cambia pero sí título, fecha u hora, se pregunta «Solo esta / Toda la serie» (`SeriesChoiceSheet`).
+- Hojas con botón atrás de Android: `OverlayBack`; antes de navegar tras ellas, `await closeAll()`.
+- **Orden de despliegue**: la migración `task_series` se aplica antes de ejecutar el cliente contra el remoto. Detalles en `docs/supabase.md`.
+
 ### Pruebas e2e (spec 009)
 
 - `pnpm e2e` ejecuta Cypress contra la app con la configuración `e2e` (entorno ficticio, puerto 4300). Toda la red a Supabase se simula con estado en `cypress/support/backend.ts`: **nunca** toca el remoto.
@@ -172,6 +181,7 @@ pnpm secrets:check        # escaneo de secretos (también en pre-commit)
 pnpm e2e                   # pruebas e2e con Cypress (arranca la app en :4300 con el entorno ficticio; sin red real)
 pnpm e2e:open              # Cypress en modo interactivo
 pnpm verify:rls            # prueba REAL de RLS de `tasks` con dos sesiones anónimas (manual, contra el remoto)
+pnpm verify:series         # prueba REAL de las tareas repetitivas (índice único, guarda de futuras, RLS) con dos sesiones anónimas (manual, contra el remoto)
 pnpm verify:account        # prueba REAL de la cuenta (alta, entrada, contraseña, borrado) con una cuenta aleatoria (manual, contra el remoto; pedir confirmación)
 pnpm env:init              # crea src/environments/environment.ts (ignorado) desde el ejemplo
 pnpm db:new <nombre>       # nueva migración SQL

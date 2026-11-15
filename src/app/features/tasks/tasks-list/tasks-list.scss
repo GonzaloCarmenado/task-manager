@@ -321,3 +321,25 @@
     color: var(--color-on-error);
   }
 }
+
+// Repetición (spec 012): indicador con icono y texto, sin depender del color
+.repeat.pill {
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft);
+}
+.available.pill {
+  background: var(--color-secondary-soft);
+  color: var(--color-on-secondary-soft);
+}
+.check:disabled {
+  cursor: default;
+
+  .ring {
+    border-style: dashed;
+    color: var(--color-text-muted);
+  }
+
+  &:active .ring {
+    transform: none;
+  }
+}

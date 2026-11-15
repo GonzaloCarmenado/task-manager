@@ -1,14 +1,23 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Recurrence } from '../../core/models/recurrence';
-import { toLocalDay } from '../../core/utils/local-date';
+import { addDays, toLocalDay } from '../../core/utils/local-date';
 import { RecurrenceSheet } from '../tasks/recurrence/recurrence-sheet/recurrence-sheet';
 
-const STATES = ['none', 'daily', 'weekly', 'sin-dias'] as const;
+const STATES = [
+  'none',
+  'daily',
+  'weekly',
+  'sin-dias',
+  'cada-n',
+  'semanas',
+  'mes',
+  'fin-error',
+] as const;
 
 /**
  * SOLO DESARROLLO: muestra la hoja «Configurar repetición» para revisarla en el navegador
- * (`/__dev/recurrence/none | daily | weekly | sin-dias`). La ruta solo existe con `isDevMode()`.
+ * (`/__dev/recurrence/none | daily | weekly | sin-dias | cada-n | semanas | mes | fin-error`). La ruta solo existe con `isDevMode()`.
  */
 @Component({
   selector: 'app-recurrence-preview',
@@ -37,6 +46,14 @@ export class RecurrencePreview {
         return { ...base, kind: 'weekly', weekdays: [1, 4] };
       case 'sin-dias':
         return { ...base, kind: 'weekly', weekdays: [] };
+      case 'cada-n':
+        return { ...base, kind: 'daily', interval: 3, weekdays: [] };
+      case 'semanas':
+        return { ...base, kind: 'weekly', interval: 2, weekdays: [5] };
+      case 'mes':
+        return { ...base, kind: 'monthly', monthDay: 31, weekdays: [] };
+      case 'fin-error':
+        return { ...base, kind: 'daily', weekdays: [], until: addDays(this.firstDate, -3) };
       default:
         return null;
     }

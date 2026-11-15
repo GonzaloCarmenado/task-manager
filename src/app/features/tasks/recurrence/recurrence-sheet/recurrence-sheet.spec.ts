@@ -51,10 +51,17 @@ function setup(rule: Recurrence | null = null) {
 const text = (el: HTMLElement): string => (el.textContent ?? '').replace(/\s+/g, ' ');
 
 describe('RecurrenceSheet · frecuencia', () => {
-  it('US-012-01 ofrece «No se repite», «Todos los días» y «Días de la semana»', () => {
+  it('US-012-01 ofrece las seis frecuencias', () => {
     const { el } = setup();
     const labels = [...el.querySelectorAll('[role="radio"]')].map((r) => r.textContent?.trim());
-    expect(labels).toEqual(['No se repite', 'Todos los días', 'Días de la semana']);
+    expect(labels).toEqual([
+      'No se repite',
+      'Todos los días',
+      'Días de la semana',
+      'Cada N días',
+      'Cada N semanas',
+      'Un día del mes',
+    ]);
   });
 
   it('US-012-01 marca la opción actual: sin regla, «No se repite»', () => {
@@ -221,5 +228,188 @@ describe('RecurrenceSheet · acciones', () => {
     expect(dialog?.getAttribute('aria-modal')).toBe('true');
     expect(text(el)).toContain('Configurar repetición');
     expect((RecurrenceSheet as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
+  });
+});
+
+describe('RecurrenceSheet · intervalos y día del mes (US-012-05)', () => {
+  const value = (el: HTMLElement): string =>
+    el.querySelector('.stepper .value')?.textContent?.trim() ?? '';
+
+  it('US-012-05 «Cada N días» muestra un selector con 2 por defecto y su resumen', () => {
+    const { el, clickText } = setup();
+    clickText('[role="radio"]', 'Cada N días');
+
+    expect(value(el)).toBe('2');
+    expect(text(el)).toContain('Se repetirá cada 2 días');
+    expect(el.querySelectorAll('.day')).toHaveLength(0);
+  });
+
+  it('US-012-05 los botones + y − cambian el intervalo dentro de 1 a 30', () => {
+    const { el, clickText, click } = setup();
+    clickText('[role="radio"]', 'Cada N días');
+    click('.stepper .plus');
+    expect(value(el)).toBe('3');
+
+    for (let i = 0; i < 5; i += 1) click('.stepper .minus');
+    expect(value(el)).toBe('1');
+
+    for (let i = 0; i < 40; i += 1) click('.stepper .plus');
+    expect(value(el)).toBe('30');
+  });
+
+  it('US-012-05 los botones + y − miden al menos 44 px de zona táctil (clase compartida con los días)', () => {
+    const { el, clickText } = setup();
+    clickText('[role="radio"]', 'Cada N días');
+    expect(el.querySelector('.stepper .plus')?.getAttribute('aria-label')).toBe('Más');
+    expect(el.querySelector('.stepper .minus')?.getAttribute('aria-label')).toBe('Menos');
+  });
+
+  it('US-012-05 «Cada N semanas» muestra el selector y también los siete días', () => {
+    const { el, clickText } = setup();
+    clickText('[role="radio"]', 'Cada N semanas');
+
+    expect(value(el)).toBe('2');
+    expect(el.querySelectorAll('.day')).toHaveLength(7);
+    expect(text(el)).toContain('Se repetirá cada 2 semanas, los lunes');
+  });
+
+  it('US-012-05 «Cada N semanas» sin ningún día desactiva «Listo»', () => {
+    const { el, clickText, click } = setup();
+    clickText('[role="radio"]', 'Cada N semanas');
+    click('.day', 0);
+    expect(el.querySelector<HTMLButtonElement>('.done')?.disabled).toBe(true);
+    expect(text(el)).toContain('Elige al menos un día');
+  });
+
+  it('US-012-05 «Un día del mes» abre con el día de la fecha y deja elegir de 1 a 31', () => {
+    const { el, clickText, click } = setup();
+    clickText('[role="radio"]', 'Un día del mes');
+
+    expect(value(el)).toBe('16');
+    expect(text(el)).toContain('Se repetirá el día 16 de cada mes');
+
+    for (let i = 0; i < 40; i += 1) click('.stepper .plus');
+    expect(value(el)).toBe('31');
+    for (let i = 0; i < 40; i += 1) click('.stepper .minus');
+    expect(value(el)).toBe('1');
+  });
+
+  it('US-012-05 desde el día 29 avisa de que en los meses cortos será el último día', () => {
+    const { el, clickText, click } = setup();
+    clickText('[role="radio"]', 'Un día del mes');
+    expect(text(el)).not.toContain('será el último día del mes');
+
+    for (let i = 0; i < 13; i += 1) click('.stepper .plus'); // 16 → 29
+    expect(text(el)).toContain('En los meses que no tengan ese día, será el último día del mes.');
+  });
+
+  it('US-012-05 «Listo» emite la regla con el intervalo o el día elegidos', () => {
+    const a = setup();
+    a.clickText('[role="radio"]', 'Cada N días');
+    a.click('.stepper .plus');
+    a.click('.done');
+    expect(a.applied[0]).toMatchObject({ kind: 'daily', interval: 3, startDate: FIRST });
+
+    const b = setup();
+    b.clickText('[role="radio"]', 'Un día del mes');
+    b.click('.done');
+    expect(b.applied[0]).toMatchObject({ kind: 'monthly', monthDay: 16, interval: 1 });
+  });
+
+  it('US-012-05 abrir con una regla cada 2 semanas muestra su intervalo y sus días', () => {
+    const { el } = setup({
+      kind: 'weekly',
+      interval: 2,
+      weekdays: [5],
+      monthDay: null,
+      startDate: FIRST,
+      until: null,
+    });
+    expect(el.querySelector('[role="radio"][aria-checked="true"]')?.textContent).toContain(
+      'Cada N semanas'
+    );
+    expect(value(el)).toBe('2');
+    expect(
+      [...el.querySelectorAll('.day[aria-pressed="true"]')].map((b) => b.getAttribute('aria-label'))
+    ).toEqual(['viernes']);
+  });
+});
+
+describe('RecurrenceSheet · finalización (US-012-06)', () => {
+  const endDate = (el: HTMLElement): HTMLInputElement | null =>
+    el.querySelector<HTMLInputElement>('input.end-date');
+  const setEnd = (fixture: { detectChanges(): void }, el: HTMLElement, value: string): void => {
+    const input = endDate(el) as HTMLInputElement;
+    input.value = value;
+    input.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+  };
+
+  it('US-012-06 «No se repite» no muestra la finalización', () => {
+    const { el } = setup();
+    expect(el.querySelector('.ending')).toBeNull();
+  });
+
+  it('US-012-06 por defecto es «Nunca» y no hay selector de fecha', () => {
+    const { el, clickText } = setup();
+    clickText('[role="radio"]', 'Todos los días');
+
+    expect(el.querySelector('.end[aria-pressed="true"]')?.textContent).toContain('Nunca');
+    expect(endDate(el)).toBeNull();
+  });
+
+  it('US-012-06 «El día…» muestra el selector con la primera ocurrencia como mínimo y valor', () => {
+    const { el, clickText } = setup();
+    clickText('[role="radio"]', 'Todos los días');
+    clickText('.end', 'El día');
+
+    expect(endDate(el)?.min).toBe(FIRST);
+    expect(endDate(el)?.value).toBe(FIRST);
+    expect(el.querySelector('.end[aria-pressed="true"]')?.textContent).toContain('El día');
+  });
+
+  it('US-012-06 una fecha de fin anterior a la primera ocurrencia es un error y desactiva «Listo»', () => {
+    const { fixture, el, clickText } = setup();
+    clickText('[role="radio"]', 'Todos los días');
+    clickText('.end', 'El día');
+    setEnd(fixture, el, '2026-11-15');
+
+    expect(text(el)).toContain('La fecha de fin no puede ser anterior a la primera ocurrencia');
+    expect(el.querySelector<HTMLButtonElement>('.done')?.disabled).toBe(true);
+  });
+
+  it('US-012-06 «Listo» con una fecha de fin válida la incluye en la regla y el resumen', () => {
+    const { fixture, el, applied, clickText, click } = setup();
+    clickText('[role="radio"]', 'Todos los días');
+    clickText('.end', 'El día');
+    setEnd(fixture, el, '2026-12-30');
+
+    expect(text(el)).toContain('hasta el 30 de diciembre');
+    click('.done');
+    expect(applied[0]).toMatchObject({ kind: 'daily', until: '2026-12-30' });
+  });
+
+  it('US-012-06 volver a «Nunca» quita la fecha de fin', () => {
+    const { el, applied, clickText, click } = setup();
+    clickText('[role="radio"]', 'Todos los días');
+    clickText('.end', 'El día');
+    clickText('.end', 'Nunca');
+    click('.done');
+
+    expect(endDate(el)).toBeNull();
+    expect(applied[0]).toMatchObject({ until: null });
+  });
+
+  it('US-012-06 con una regla que ya tiene fecha de fin, abre en «El día…» con su fecha', () => {
+    const { el } = setup({
+      kind: 'daily',
+      interval: 1,
+      weekdays: [],
+      monthDay: null,
+      startDate: FIRST,
+      until: '2026-12-30',
+    });
+    expect(el.querySelector('.end[aria-pressed="true"]')?.textContent).toContain('El día');
+    expect(endDate(el)?.value).toBe('2026-12-30');
   });
 });

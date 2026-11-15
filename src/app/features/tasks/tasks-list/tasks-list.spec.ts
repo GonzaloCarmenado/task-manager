@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { AlarmPermission } from '../../../core/models/alarm';
+import { Recurrence, TaskSeries } from '../../../core/models/recurrence';
 import { Task } from '../../../core/models/task';
 import { CLOCK } from '../../../core/services/clock';
 import { Celebration, Progress } from '../../../core/models/progress';
@@ -9,6 +10,7 @@ import { AccountAccessService } from '../../account/account.access.service';
 import { ProgressAccessService, ProgressStatus } from '../../progress/progress.access.service';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import {
+  CompleteResult,
   TaskOpResult,
   TasksAccessService,
   TasksErrorReason,
@@ -87,6 +89,9 @@ function progressMock() {
   };
 }
 
+/** Series de las ocurrencias de prueba (la lista las pide por su id). */
+const seriesStore: Record<string, TaskSeries> = {};
+
 function setup(
   initial: Task[] = [],
   status: TasksStatus = 'ready',
@@ -98,10 +103,11 @@ function setup(
   const tasks = signal<readonly Task[]>(initial);
   const statusSig = signal<TasksStatus>(status);
   const errorReason = signal<TasksErrorReason | null>(null);
-  const setCompleted = vi.fn(async (): Promise<TaskOpResult> => ({ ok: true }));
+  const setCompleted = vi.fn(async (): Promise<CompleteResult> => ({ ok: true }));
   const postpone = vi.fn(async (): Promise<TaskOpResult> => ({ ok: true }));
   const load = vi.fn(async () => undefined);
-  const access = { tasks, status: statusSig, errorReason, load, setCompleted, postpone };
+  const seriesOf = vi.fn((t: Task) => (t.seriesId === null ? undefined : seriesStore[t.seriesId]));
+  const access = { tasks, status: statusSig, errorReason, load, setCompleted, postpone, seriesOf };
   const reminderOn = signal(false);
   const snoozeReminder = vi.fn(() => reminderOn.set(false));
   const account = { reminderVisible: () => reminderOn(), snoozeReminder };
@@ -724,5 +730,129 @@ describe('TasksList · recordatorio de cuenta', () => {
 
     expect(t.snoozeReminder).toHaveBeenCalledTimes(1);
     expect(t.el.querySelector('app-account-reminder')).toBeNull();
+  });
+});
+
+describe('TasksList · repetitivas (spec 012)', () => {
+  const rule = (over: Partial<Recurrence> = {}): Recurrence => ({
+    kind: 'daily',
+    interval: 1,
+    weekdays: [],
+    monthDay: null,
+    startDate: '2026-11-09',
+    until: null,
+    ...over,
+  });
+  const occurrence = (over: Partial<Task> = {}): Task =>
+    task({ seriesId: 's1', seriesDate: '2026-11-13', dueDate: '2026-11-13', ...over });
+
+  beforeEach(() => {
+    seriesStore['s1'] = { id: 's1', title: 'Pastilla', dueTime: null, recurrence: rule() };
+    seriesStore['s2'] = {
+      id: 's2',
+      title: 'Gimnasio',
+      dueTime: null,
+      recurrence: rule({ kind: 'weekly', weekdays: [1, 4] }),
+    };
+  });
+
+  const chips = (el: HTMLElement): string[] =>
+    Array.from(el.querySelectorAll('.repeat')).map(
+      (c) => c.textContent?.replace(/\s+/g, ' ').trim() ?? ''
+    );
+  const check = (el: HTMLElement, index = 0): HTMLButtonElement =>
+    el.querySelectorAll<HTMLButtonElement>('.check')[index];
+
+  it('US-012-04 las tareas repetitivas muestran un icono y el texto de su regla', () => {
+    const { el } = setup([
+      occurrence({ title: 'Pastilla' }),
+      occurrence({ title: 'Gimnasio', seriesId: 's2' }),
+    ]);
+
+    expect(chips(el)).toEqual(['Todos los días', 'Lun, jue']);
+    expect(el.querySelector('.repeat app-icon')).not.toBeNull();
+  });
+
+  it('US-012-04 una tarea suelta no lleva indicador de repetición', () => {
+    const { el } = setup([task({ title: 'Suelta', dueDate: '2026-11-13' })]);
+    expect(chips(el)).toEqual([]);
+  });
+
+  it('US-012-02 una ocurrencia de hoy se puede completar', () => {
+    const { el } = setup([occurrence()]);
+    expect(check(el).disabled).toBe(false);
+  });
+
+  it('US-012-02 una ocurrencia atrasada se puede completar y conserva su indicador', () => {
+    const { el, text } = setup([occurrence({ dueDate: '2026-11-10', seriesDate: '2026-11-10' })]);
+    expect(check(el).disabled).toBe(false);
+    expect(text()).toContain('Atrasada');
+    expect(chips(el)).toEqual(['Todos los días']);
+  });
+
+  it('US-012-02 una ocurrencia futura tiene el check desactivado y dice cuándo estará disponible', async () => {
+    const { el, text, setCompleted } = setup([
+      occurrence({ dueDate: '2026-11-19', seriesDate: '2026-11-19' }),
+    ]);
+
+    expect(check(el).disabled).toBe(true);
+    expect(text()).toContain('Disponible el jueves');
+    check(el).click();
+    await flush();
+    expect(setCompleted).not.toHaveBeenCalled();
+  });
+
+  it('US-012-02 la de mañana dice «Disponible mañana»', () => {
+    const { text } = setup([occurrence({ dueDate: '2026-11-14', seriesDate: '2026-11-14' })]);
+    expect(text()).toContain('Disponible mañana');
+  });
+
+  it('US-012-02 una tarea suelta futura se puede completar como siempre', () => {
+    const { el } = setup([task({ dueDate: '2026-11-20' })]);
+    expect(check(el).disabled).toBe(false);
+  });
+
+  it('US-012-02 al completar una ocurrencia avisa de cuál es la próxima', async () => {
+    const { el, text, setCompleted, detect } = setup([occurrence()]);
+    setCompleted.mockResolvedValue({ ok: true, next: '2026-11-16' });
+
+    check(el).click();
+    await flush();
+    detect();
+
+    expect(text()).toContain('Hecho. Próxima: lunes 16 de noviembre');
+  });
+
+  it('US-012-06 al completar la última repetición lo dice', async () => {
+    const { el, text, setCompleted, detect } = setup([occurrence()]);
+    setCompleted.mockResolvedValue({ ok: true, next: null });
+
+    check(el).click();
+    await flush();
+    detect();
+
+    expect(text()).toContain('Hecho. Era la última repetición');
+  });
+
+  it('US-012-02 completar una tarea suelta mantiene el aviso de siempre', async () => {
+    const { el, text, copy, detect } = setup([task({ dueDate: '2026-11-13' })]);
+
+    check(el).click();
+    await flush();
+    detect();
+
+    expect(text()).toContain(copy.list.doneNotice);
+  });
+
+  it('US-012-02 si falla completar una ocurrencia, avisa del error y no anuncia ninguna próxima', async () => {
+    const { el, text, copy, setCompleted, detect } = setup([occurrence()]);
+    setCompleted.mockResolvedValue({ ok: false, reason: 'network' });
+
+    check(el).click();
+    await flush();
+    detect();
+
+    expect(text()).toContain(copy.list.failNotice);
+    expect(text()).not.toContain('Próxima');
   });
 });

@@ -1,0 +1,179 @@
+@use 'mixins';
+@use 'type';
+
+:host {
+  display: block;
+}
+
+.backdrop {
+  @include mixins.scrim;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  @include mixins.sheet;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 28rem;
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-margin) calc(var(--space-6) + env(safe-area-inset-bottom));
+  font-family: var(--font-family);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft);
+  font-size: 1.375rem;
+
+  &.danger {
+    background: var(--color-error-soft);
+    color: var(--color-on-error-soft);
+  }
+}
+
+.kicker {
+  margin: 0;
+  color: var(--color-primary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  @include type.label-sm;
+  font-weight: 700;
+
+  &.danger {
+    color: var(--color-error);
+  }
+}
+
+.title {
+  margin: 0;
+  @include type.headline-md;
+}
+
+.text {
+  margin: 0;
+  color: var(--color-text-muted);
+  @include type.body-md;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+// Opciones como tarjetas píldora con su explicación
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 3.5rem;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-low);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 150ms ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+
+  &.danger {
+    background: var(--color-error-soft);
+    color: var(--color-on-error-soft);
+  }
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft);
+  font-size: 1.125rem;
+}
+
+.danger .icon {
+  background: var(--color-error);
+  color: var(--color-on-error);
+}
+
+.option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.label {
+  @include type.body-lg;
+  font-weight: 700;
+}
+
+.detail {
+  @include type.body-sm;
+  color: var(--color-text-muted);
+}
+
+.danger .detail {
+  color: inherit;
+}
+
+.kept {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-tertiary-soft);
+  color: var(--color-on-tertiary-soft);
+  @include type.body-sm;
+}
+
+.cancel {
+  width: 100%;
+  min-height: var(--control-height);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-high);
+  color: var(--color-text);
+  cursor: pointer;
+  @include type.label-lg;
+
+  &:focus-visible {
+    outline: 3px solid var(--color-primary-text);
+    outline-offset: 2px;
+  }
+}

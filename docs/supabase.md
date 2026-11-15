@@ -138,6 +138,23 @@ El progreso lo calcula la **base de datos**: el cliente solo envía el **día lo
 - **Iniciar sesión** va en dos fases con un cliente «sonda» (sin persistencia, almacenamiento en memoria): comprueba credenciales sin tocar la sesión anónima; solo `completeSignIn` cambia de identidad.
 - Las contraseñas y los identificadores internos no se escriben nunca en consola ni en el repo.
 
+## Tareas repetitivas (spec 012)
+
+Migración `<marca>_task_series.sql`. Una **serie** guarda la regla de repetición y cada **ocurrencia** es una fila normal de `tasks`: por eso la lista, las alarmas, el XP, el posponer y la RLS no cambian.
+
+| Tabla / columna | Notas |
+|---|---|
+| `task_series` | `user_id`, `title`, `due_time`, `kind` (`daily`/`weekly`/`monthly`), `interval_n` (1 a 30), `weekdays` (1 = lunes … 7 = domingo), `month_day` (1 a 31), `start_date`, `until_date`. RLS por `user_id` en las cuatro operaciones; sin acceso anónimo |
+| `tasks.series_id` | Enlaza la ocurrencia con su serie. `on delete set null`: al borrar la serie, las completadas quedan como tareas sueltas |
+| `tasks.series_date` | Día previsto **original** de la ocurrencia (no cambia al posponer). La siguiente se calcula desde él |
+
+- **Una sola ocurrencia pendiente por serie**: índice único parcial `tasks_series_one_pending`. Un reintento o un segundo móvil no duplican nada (el cliente ignora el `23505`).
+- **Disparador `tasks_series_guard`** (antes de actualizar): rechaza completar una ocurrencia con fecha posterior al día local enviado (`P0001`, «future occurrence»: sin XP por adelantar días) y, al desmarcar, borra la pendiente generada después. No es `security definer`: respeta la RLS.
+- **El cálculo de fechas vive solo en el cliente** (`core/utils/recurrence.ts`). Al completar, el cliente crea la siguiente; si se cierra entre los dos pasos, `TasksAccessService.load()` repara las series sin pendiente.
+- **Orden de despliegue**: aplicar la migración `task_series` **antes** de ejecutar el cliente contra el remoto (el cliente lee `task_series` y `series_id`).
+- La CLI 3.x pide `--yes` para aplicar en modo agente (`supabase db push --remote --yes`); solo tras la aprobación explícita del propietario y un `db:push:dry` revisado.
+- Rollback: ver el final de la migración.
+
 ## Estado
 
-Migraciones: `tasks` (spec 005), `tasks_postponed_count` (007), `progress` y `progress_best_streak` (008), todas aplicadas al remoto y verificadas con `verify:rls` y `verify:progress`. La identidad anónima ya existe (spec 003).
+Migraciones: `tasks` (spec 005), `tasks_postponed_count` (007), `progress` y `progress_best_streak` (008), `account` (011) y `task_series` (012), todas aplicadas al remoto y verificadas con `verify:rls` y `verify:progress`. La identidad anónima ya existe (spec 003).

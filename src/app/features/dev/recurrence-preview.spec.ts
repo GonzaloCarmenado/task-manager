@@ -52,3 +52,24 @@ describe('RecurrencePreview (solo desarrollo)', () => {
     expect((RecurrencePreview as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });
 });
+
+describe('RecurrencePreview · opciones de la spec 012 P2', () => {
+  it('US-012-05 «cada-n» abre en «Cada N días» con su intervalo', () => {
+    const el = render('cada-n');
+    expect(checked(el)).toBe('Cada N días');
+    expect(el.querySelector('.stepper .value')?.textContent?.trim()).toBe('3');
+  });
+
+  it('US-012-05 «semanas» abre en «Cada N semanas» y «mes» en «Un día del mes» con el aviso del día 31', () => {
+    expect(checked(render('semanas'))).toBe('Cada N semanas');
+    const mes = render('mes');
+    expect(checked(mes)).toBe('Un día del mes');
+    expect(mes.textContent).toContain('será el último día del mes');
+  });
+
+  it('US-012-06 «fin-error» muestra el error de la fecha de fin', () => {
+    const el = render('fin-error');
+    expect(el.textContent).toContain('La fecha de fin no puede ser anterior');
+    expect(el.querySelector<HTMLButtonElement>('.done')?.disabled).toBe(true);
+  });
+});

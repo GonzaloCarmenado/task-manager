@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 155 |
+| Turnos del usuario | 156 |
 | Preguntas `F` (funcionalidad) | 46 |
-| Preguntas `W` (flujo) | 72 |
-| **Total preguntas** | **118** |
+| Preguntas `W` (flujo) | 75 |
+| **Total preguntas** | **121** |
 
 ## Log
 
@@ -162,3 +162,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 153 | 2026-11-15 | "esta perfecto" | 0 | Plan 012 aprobado. Siguiente paso: `/task`. |
 | 154 | 2026-11-15 | "vamos" (`/task` 012) | 0 | Generado `specs/012-tareas-repetitivas/tasks.md`: 69 tareas en 9 bloques (BBDD, reglas puras, acceso a datos y simulador, US-01, US-02, US-03, US-04, US-05/06 y cierre), Red antes que Green, `db push` marcado como requiere confirmación. Espera aprobación. |
 | 155 | 2026-11-15 | "vamos" (aprobar tareas y `/implement` 012) | 2 W | Implementados los Bloques 1 a 4 (migración sin aplicar al remoto, reglas de fechas, simulador y acceso a datos, traspaso, hoja de repetición y fila «Repetir» con revisión visual de la hoja en claro y oscuro). 1099 tests unitarios, 132 de scripts y 98 e2e en verde. Preguntas: aplicar la migración con `db push` y hacer el commit de los bloques 1–4. |
+| 156 | 2026-11-15 | "si aplica y si al commit" / "listo, ese es el proyecto" | 3 W | Commit `b8b0fb7` (bloques 1–4). La CLI de Supabase estaba en otra cuenta: parada, `logout`, y tras `login` del usuario se verificó la organización por id, `db:push:dry` y `db push --yes` (migración `task_series` aplicada). Implementados los Bloques 5 a 9 (lista, hojas «Solo esta / Toda la serie», intervalos, día del mes y fin, e2e, fidelidad, docs, `review.md`). 1181 tests unitarios, 138 de scripts y 135 e2e en verde. Preguntas: commit de los bloques 5–9, `verify:series` contra el remoto y comprobación en Android. |

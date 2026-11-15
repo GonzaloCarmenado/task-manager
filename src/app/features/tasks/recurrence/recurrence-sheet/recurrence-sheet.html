@@ -35,11 +35,41 @@
         }
       </div>
 
-      @if (draft().option === 'weekdays') {
+      @if (needsInterval()) {
+      <div class="config">
+        <div class="config-head">
+          <span class="config-label">{{ copy.sheet.every }}</span>
+        </div>
+        <div class="stepper">
+          <button
+            type="button"
+            class="step minus"
+            [attr.aria-label]="copy.sheet.less"
+            [disabled]="draft().interval <= copy.intervalMin"
+            (click)="stepInterval(-1)"
+          >
+            −
+          </button>
+          <span class="reading"
+            ><span class="value">{{ draft().interval }}</span
+            ><span class="unit">{{ intervalUnit() }}</span></span
+          >
+          <button
+            type="button"
+            class="step plus"
+            [attr.aria-label]="copy.sheet.more"
+            [disabled]="draft().interval >= copy.intervalMax"
+            (click)="stepInterval(1)"
+          >
+            +
+          </button>
+        </div>
+      </div>
+      } @if (needsDays()) {
       <div class="config">
         <div class="config-head">
           <span class="config-label" id="recurrence-days">{{ copy.sheet.weekdaysLabel }}</span>
-          @if (problem(); as message) {
+          @if (daysProblem(); as message) {
           <span class="problem" role="alert">{{ message }}</span>
           }
         </div>
@@ -56,6 +86,75 @@
           </button>
           }
         </div>
+      </div>
+      } @if (isMonthly()) {
+      <div class="config">
+        <div class="config-head">
+          <span class="config-label">{{ copy.sheet.monthDayLabel }}</span>
+        </div>
+        <div class="stepper">
+          <button
+            type="button"
+            class="step minus"
+            [attr.aria-label]="copy.sheet.less"
+            [disabled]="draft().monthDay <= 1"
+            (click)="stepMonthDay(-1)"
+          >
+            −
+          </button>
+          <span class="reading"><span class="value">{{ draft().monthDay }}</span></span>
+          <button
+            type="button"
+            class="step plus"
+            [attr.aria-label]="copy.sheet.more"
+            [disabled]="draft().monthDay >= 31"
+            (click)="stepMonthDay(1)"
+          >
+            +
+          </button>
+        </div>
+        @if (monthHint(); as hint) {
+        <p class="hint">{{ hint }}</p>
+        }
+      </div>
+      } @if (draft().option !== 'none') {
+      <div class="ending">
+        <p class="group-label">{{ copy.sheet.ending }}</p>
+        <div class="end-options">
+          <button
+            type="button"
+            class="end"
+            [attr.aria-pressed]="draft().until === null"
+            (click)="setEnd(false)"
+          >
+            <span class="end-title">{{ copy.sheet.never }}</span>
+            <span class="end-detail">{{ copy.sheet.neverDetail }}</span>
+          </button>
+          <button
+            type="button"
+            class="end"
+            [attr.aria-pressed]="draft().until !== null"
+            (click)="setEnd(true)"
+          >
+            <span class="end-title">{{ copy.sheet.onDate }}</span>
+            <span class="end-detail">{{ copy.sheet.onDateDetail }}</span>
+          </button>
+        </div>
+        @if (draft().until !== null) {
+        <label class="end-field">
+          <span class="end-field-label">{{ copy.sheet.endDate }}</span>
+          <input
+            type="date"
+            class="end-date"
+            [min]="firstDate()"
+            [value]="draft().until"
+            [attr.aria-invalid]="untilProblem() !== null"
+            (change)="onEndDate($event)"
+          />
+        </label>
+        } @if (untilProblem(); as message) {
+        <p class="problem" role="alert">{{ message }}</p>
+        }
       </div>
       } @if (summary(); as info) {
       <div class="summary" aria-live="polite">

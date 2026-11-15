@@ -1,0 +1,51 @@
+<div class="backdrop" (click)="cancel.emit()">
+  <section
+    class="sheet"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="series-choice-title"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="head">
+      <div class="badge" [class.danger]="mode() === 'delete'">
+        <app-icon [name]="mode() === 'delete' ? 'trash-sweep' : 'event-repeat'" />
+      </div>
+      <div>
+        <p class="kicker" [class.danger]="mode() === 'delete'">{{ copy.choice.kicker }}</p>
+        <h2 id="series-choice-title" class="title">{{ copy.choice.title }}</h2>
+      </div>
+    </header>
+
+    <p class="text">{{ texts().text }}</p>
+
+    <div class="options">
+      <button type="button" class="option single" (click)="single.emit()">
+        <span class="icon"><app-icon name="one" /></span>
+        <span class="option-text">
+          <span class="label">{{ copy.choice.single }}</span>
+          <span class="detail">{{ texts().singleDetail }}</span>
+        </span>
+      </button>
+      <button
+        type="button"
+        class="option all"
+        [class.danger]="mode() === 'delete'"
+        (click)="series.emit()"
+      >
+        <span class="icon"
+          ><app-icon [name]="mode() === 'delete' ? 'trash-sweep' : 'infinity'"
+        /></span>
+        <span class="option-text">
+          <span class="label">{{ copy.choice.series }}</span>
+          <span class="detail">{{ texts().seriesDetail }}</span>
+        </span>
+      </button>
+    </div>
+
+    @if (mode() === 'delete') {
+    <p class="kept"><app-icon name="verified-user" />{{ copy.choice.delete.kept }}</p>
+    }
+
+    <button type="button" class="cancel" (click)="cancel.emit()">{{ texts().cancel }}</button>
+  </section>
+</div>

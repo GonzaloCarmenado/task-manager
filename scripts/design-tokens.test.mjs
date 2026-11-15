@@ -501,3 +501,54 @@ test('US-011-01 contraste de los pares nuevos: texto 4,5:1 e iconos 3:1, en clar
   }
   assert.deepEqual(fails, []);
 });
+
+// ---- Tareas repetitivas (spec 012) -------------------------------------------------------------------
+const repeatSheets = [
+  'src/app/features/tasks/recurrence/recurrence-sheet/recurrence-sheet.scss',
+  'src/app/features/tasks/recurrence/series-choice-sheet/series-choice-sheet.scss',
+];
+
+test('US-012-01 las hojas de repetición usan el velo con desenfoque y el mixin sheet', () => {
+  for (const f of repeatSheets) {
+    const css = scss(f);
+    assert.match(blockAt(css, '.backdrop'), /@include mixins\.scrim/, `${f}: .backdrop sin scrim`);
+    assert.match(blockAt(css, '.sheet'), /@include mixins\.sheet/, `${f}: .sheet sin mixin sheet`);
+  }
+});
+
+test('US-012-01 las hojas de repetición no llevan colores, sombras ni tamaños de letra sueltos', () => {
+  for (const f of [...repeatSheets, 'src/app/features/tasks/task-form/task-form.scss']) {
+    const css = scss(f);
+    assert.doesNotMatch(css, /#[0-9a-fA-F]{3,8}\b/, `${f}: color suelto`);
+    assert.doesNotMatch(css, /rgba?\(/, `${f}: color suelto`);
+    assert.doesNotMatch(css, /color-mix\(/, `${f}: usa color-mix`);
+    assert.doesNotMatch(css, /var\(--font-size-/, `${f}: usa tamaños antiguos en vez de la escala`);
+  }
+});
+
+test('US-012-01 la hoja de repetición usa los mixins de chip, campo y botón principal', () => {
+  const css = scss(repeatSheets[0]);
+  assert.match(blockAt(css, '\n.pill {'), /@include mixins\.chip/);
+  assert.match(blockAt(css, '\n.done {'), /@include mixins\.pill-button/);
+  assert.match(blockAt(css, '\n.end-date {'), /@include mixins\.field/);
+});
+
+test('US-012-01 los días y los selectores − / + de la hoja miden la zona táctil de 44 px', () => {
+  const css = scss(repeatSheets[0]);
+  for (const selector of ['\n.day {', '\n.step {', '\n.close {']) {
+    const body = blockAt(css, selector);
+    assert.match(body, /width:\s*var\(--tap-target\)/, `${selector.trim()} sin ancho de zona táctil`);
+    assert.match(body, /height:\s*var\(--tap-target\)/, `${selector.trim()} sin alto de zona táctil`);
+  }
+});
+
+test('US-012-03 la acción destructiva de borrar la serie usa los tokens de error', () => {
+  const css = scss(repeatSheets[1]);
+  assert.match(blockAt(css, '&.danger'), /var\(--color-error/);
+});
+
+test('US-012-04 los indicadores de repetición de la lista usan colores de rol, no un color suelto', () => {
+  const css = scss('src/app/features/tasks/tasks-list/tasks-list.scss');
+  assert.match(blockAt(css, '.repeat.pill'), /background:\s*var\(--color-primary-soft\)/);
+  assert.match(blockAt(css, '.available.pill'), /background:\s*var\(--color-secondary-soft\)/);
+});

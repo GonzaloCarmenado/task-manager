@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { AlarmPermission } from '../../../core/models/alarm';
+import { TaskSeries } from '../../../core/models/recurrence';
 import { Task, TaskInput } from '../../../core/models/task';
 import { CLOCK } from '../../../core/services/clock';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
@@ -27,7 +28,13 @@ const EXISTING: Task = {
 const flush = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
 
 function setup(
-  options: { id?: string; existing?: Task | null; lateLoad?: boolean; askPermission?: boolean } = {}
+  options: {
+    id?: string;
+    existing?: Task | null;
+    lateLoad?: boolean;
+    askPermission?: boolean;
+    series?: TaskSeries;
+  } = {}
 ) {
   const alarms = {
     shouldAskPermission: vi.fn(() => options.askPermission ?? false),
@@ -79,7 +86,7 @@ function setup(
       void id;
       return ok();
     }),
-    seriesOf: vi.fn((): undefined => undefined),
+    seriesOf: vi.fn((): TaskSeries | undefined => options.series),
   };
 
   TestBed.resetTestingModule();
@@ -814,5 +821,223 @@ describe('TaskForm · repetición (spec 012)', () => {
       })
     );
     expect(f.access.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('TaskForm · editar y borrar una ocurrencia (spec 012)', () => {
+  const RULE = {
+    kind: 'daily' as const,
+    interval: 1,
+    weekdays: [] as number[],
+    monthDay: null,
+    startDate: '2026-11-13',
+    until: null,
+  };
+  const SERIES: TaskSeries = { id: 's1', title: 'Comprar pan', dueTime: '09:30', recurrence: RULE };
+  const OCCURRENCE: Task = { ...EXISTING, seriesId: 's1', seriesDate: '2026-11-13' };
+
+  const open = () => setup({ id: 'abc', existing: OCCURRENCE, series: SERIES });
+  type F = ReturnType<typeof setup>;
+  const choice = (f: F) => f.el.querySelector('app-series-choice-sheet');
+  const choose = (f: F, selector: string) => {
+    f.el.querySelector<HTMLElement>(`app-series-choice-sheet ${selector}`)?.click();
+    f.detect();
+  };
+  const rowButton = (f: F) => f.el.querySelector<HTMLButtonElement>('button.repeat');
+  const pickNone = (f: F) => {
+    rowButton(f)?.click();
+    f.detect();
+    Array.from(f.el.querySelectorAll<HTMLElement>('app-recurrence-sheet [role="radio"]'))
+      .find((r) => r.textContent?.includes('No se repite'))
+      ?.click();
+    f.detect();
+    f.el.querySelector<HTMLElement>('app-recurrence-sheet .done')?.click();
+    f.detect();
+  };
+
+  it('US-012-04 al editar una ocurrencia, la fila «Repetir» muestra la regla actual', () => {
+    const f = open();
+    expect(rowButton(f)?.textContent).toContain('Todos los días');
+  });
+
+  it('US-012-03 si cambia el título y la regla sigue igual, pregunta «solo esta» o «toda la serie»', async () => {
+    const f = open();
+    f.type('Comprar pan integral');
+
+    await f.save();
+
+    expect(choice(f)).not.toBeNull();
+    expect(f.access.updateOccurrence).not.toHaveBeenCalled();
+    expect(f.access.updateSeries).not.toHaveBeenCalled();
+  });
+
+  it('US-012-03 «Solo esta» cambia únicamente esa ocurrencia y vuelve a la lista', async () => {
+    const f = open();
+    f.type('Comprar pan integral');
+    await f.save();
+
+    choose(f, '.single');
+    await flush();
+
+    expect(f.access.updateOccurrence).toHaveBeenCalledWith(
+      'abc',
+      expect.objectContaining({ title: 'Comprar pan integral', dueDate: '2026-11-13' })
+    );
+    expect(f.access.updateSeries).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(f.navigate).toHaveBeenCalledWith(['/']));
+  });
+
+  it('US-012-03 «Toda la serie» cambia la serie con su regla', async () => {
+    const f = open();
+    f.type('Comprar pan integral');
+    await f.save();
+
+    choose(f, '.all');
+    await flush();
+
+    expect(f.access.updateSeries).toHaveBeenCalledWith(
+      'abc',
+      expect.objectContaining({
+        title: 'Comprar pan integral',
+        recurrence: expect.objectContaining({ kind: 'daily', startDate: '2026-11-13' }),
+      })
+    );
+    expect(f.access.updateOccurrence).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(f.navigate).toHaveBeenCalledWith(['/']));
+  });
+
+  it('US-012-03 «Cancelar» en la hoja vuelve al formulario sin guardar nada', async () => {
+    const f = open();
+    f.type('Comprar pan integral');
+    await f.save();
+
+    choose(f, '.cancel');
+
+    expect(choice(f)).toBeNull();
+    expect(f.access.updateOccurrence).not.toHaveBeenCalled();
+    expect(f.access.updateSeries).not.toHaveBeenCalled();
+    expect(f.navigate).not.toHaveBeenCalled();
+  });
+
+  it('US-012-03 cambiar la regla (aquí, a «No se repite») afecta a toda la serie sin preguntar', async () => {
+    const f = open();
+    pickNone(f);
+
+    await f.save();
+
+    expect(choice(f)).toBeNull();
+    expect(f.access.updateSeries).toHaveBeenCalledWith(
+      'abc',
+      expect.objectContaining({ recurrence: null })
+    );
+  });
+
+  it('US-012-03 quitar la fecha de una ocurrencia también es de toda la serie', async () => {
+    const f = open();
+    f.button(f.copy.form.clearDate)?.click();
+    f.detect();
+
+    await f.save();
+
+    expect(choice(f)).toBeNull();
+    expect(f.access.updateSeries).toHaveBeenCalledWith(
+      'abc',
+      expect.objectContaining({ dueDate: null, recurrence: null })
+    );
+  });
+
+  it('US-012-03 si no se cambia nada, no pregunta ni guarda: vuelve a la lista', async () => {
+    const f = open();
+
+    await f.save();
+
+    expect(choice(f)).toBeNull();
+    expect(f.access.updateOccurrence).not.toHaveBeenCalled();
+    expect(f.access.updateSeries).not.toHaveBeenCalled();
+    expect(f.navigate).toHaveBeenCalledWith(['/']);
+  });
+
+  it('US-012-03 si falla guardar la ocurrencia, avisa y se queda en el formulario', async () => {
+    const f = open();
+    f.access.updateOccurrence.mockResolvedValue({ ok: false, reason: 'network' });
+    f.type('Comprar pan integral');
+    await f.save();
+
+    choose(f, '.single');
+    await flush();
+    f.detect();
+
+    expect(f.text()).toContain(f.copy.form.saveError);
+    expect(f.navigate).not.toHaveBeenCalled();
+  });
+
+  it('US-012-03 borrar una ocurrencia abre la hoja de borrado en lugar de la confirmación simple', () => {
+    const f = open();
+    f.button(f.copy.form.delete)?.click();
+    f.detect();
+
+    expect(choice(f)).not.toBeNull();
+    expect(f.text()).toContain('Las ocurrencias ya completadas se conservan');
+    expect(f.text()).not.toContain(f.copy.form.deleteTitle);
+  });
+
+  it('US-012-03 «Solo esta» al borrar elimina la ocurrencia y vuelve a la lista', async () => {
+    const f = open();
+    f.button(f.copy.form.delete)?.click();
+    f.detect();
+
+    choose(f, '.single');
+    await flush();
+
+    expect(f.access.removeOccurrence).toHaveBeenCalledWith('abc');
+    expect(f.access.removeSeries).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(f.navigate).toHaveBeenCalledWith(['/']));
+  });
+
+  it('US-012-03 «Toda la serie» al borrar elimina la serie y vuelve a la lista', async () => {
+    const f = open();
+    f.button(f.copy.form.delete)?.click();
+    f.detect();
+
+    choose(f, '.all');
+    await flush();
+
+    expect(f.access.removeSeries).toHaveBeenCalledWith('abc');
+    await vi.waitFor(() => expect(f.navigate).toHaveBeenCalledWith(['/']));
+  });
+
+  it('US-012-03 «Volver atrás» al borrar no borra nada', () => {
+    const f = open();
+    f.button(f.copy.form.delete)?.click();
+    f.detect();
+
+    choose(f, '.cancel');
+
+    expect(choice(f)).toBeNull();
+    expect(f.access.removeOccurrence).not.toHaveBeenCalled();
+    expect(f.access.removeSeries).not.toHaveBeenCalled();
+  });
+
+  it('US-012-03 si falla el borrado, avisa del error y se queda', async () => {
+    const f = open();
+    f.access.removeOccurrence.mockResolvedValue({ ok: false, reason: 'network' });
+    f.button(f.copy.form.delete)?.click();
+    f.detect();
+
+    choose(f, '.single');
+    await flush();
+    f.detect();
+
+    expect(f.text()).toContain(f.copy.form.deleteError);
+    expect(f.navigate).not.toHaveBeenCalled();
+  });
+
+  it('US-012-03 una tarea suelta se borra con la confirmación de siempre, sin la hoja de serie', () => {
+    const f = setup({ id: 'abc' });
+    f.button(f.copy.form.delete)?.click();
+    f.detect();
+
+    expect(choice(f)).toBeNull();
+    expect(f.text()).toContain(f.copy.form.deleteTitle);
   });
 });

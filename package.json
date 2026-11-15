@@ -34,6 +34,7 @@
     "verify:rls": "node scripts/verify-rls.mjs",
     "verify:progress": "node scripts/verify-progress.mjs",
     "verify:account": "node scripts/verify-account.mjs",
+    "verify:series": "node scripts/verify-series.mjs",
     "verify:supabase": "node scripts/verify-supabase-assumptions.mjs"
   },
   "private": true,

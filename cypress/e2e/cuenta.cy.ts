@@ -406,6 +406,44 @@ describe('Cuenta (extremo a extremo)', () => {
       });
     });
 
+    it('«traer» conserva la repetición de una pendiente que es una serie (spec 012)', () => {
+      cy.boot({
+        path: '/cuenta/entrar',
+        seed: (b) => {
+          seedAccount(b, { pending: [], completed: [] });
+          const series = b.seedSeries({
+            title: 'Gimnasio',
+            kind: 'weekly',
+            weekdays: [1, 4],
+            start_date: '2026-11-09',
+          });
+          b.seed({
+            title: 'Gimnasio',
+            due_date: '2026-11-16',
+            series_id: series.id,
+            series_date: '2026-11-12',
+          });
+        },
+      }).then((backend) => {
+        const accountId = backend.accountByName('ana')?.id as string;
+        login();
+        sheetButton('Traer tareas y continuar').click();
+
+        cy.location('pathname').should('eq', '/');
+        cy.contains('.group .repeat', 'Lun, jue').should('be.visible');
+        cy.wrap(null).should(() => {
+          const [series] = backend.seriesOf(accountId);
+          expect(series.kind).to.eq('weekly');
+          expect(series.weekdays).to.deep.eq([1, 4]);
+          expect(series.start_date).to.eq('2026-11-09');
+          const [pending] = backend.pendingOf(series.id);
+          expect(pending.user_id).to.eq(accountId);
+          expect(pending.due_date).to.eq('2026-11-16');
+          expect(pending.series_date).to.eq('2026-11-12');
+        });
+      });
+    });
+
     it('«usar solo mi cuenta» pide confirmar, descarta las del móvil y entra', () => {
       cy.boot({
         path: '/cuenta/entrar',

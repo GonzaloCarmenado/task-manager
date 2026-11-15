@@ -47,20 +47,27 @@
         <button
           type="button"
           class="check"
+          [disabled]="isFuture(task)"
           [attr.aria-label]="copy.list.markDone + ': ' + task.title"
           (click)="toggle(task)"
         >
-          <span class="ring"><app-icon name="check" /></span>
+          <span class="ring"><app-icon [name]="isFuture(task) ? 'lock' : 'check'" /></span>
         </button>
         <button type="button" class="open" (click)="open(task)">
           <span class="title">{{ task.title }}</span>
-          @if (task.dueTime || isOverdue(task)) {
+          @if (task.dueTime || isOverdue(task) || task.seriesId) {
           <span class="meta">
             @if (isOverdue(task)) {
             <span class="tag pill">{{ copy.list.overdueTag }}</span>
             <span class="when pill">{{ dayLabel(task.dueDate) }}</span>
             } @if (task.dueTime) {
             <span class="when pill"><app-icon name="clock" />{{ task.dueTime }}</span>
+            } @if (repeatLabel(task); as label) {
+            <span class="repeat pill"><app-icon name="event-repeat" />{{ label }}</span>
+            } @if (isFuture(task)) {
+            <span class="available pill"
+              ><app-icon name="lock-clock" />{{ copy.availableLabel(task) }}</span
+            >
             } @if (alarmState(task); as state) {
             <span class="alarm pill" [class.off]="state === 'off'">
               <app-icon [name]="state === 'off' ? 'bell-off' : 'bell'" />{{ alarmLabel(task) }}
