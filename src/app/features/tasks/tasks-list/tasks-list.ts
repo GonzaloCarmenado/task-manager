@@ -14,6 +14,8 @@ import { AlarmsConstructorService } from '../../../core/services/alarms.construc
 import { CLOCK } from '../../../core/services/clock';
 import { Icon } from '../../../shared/components/icon/icon';
 import { Illustration } from '../../../shared/components/illustration/illustration';
+import { AccountAccessService } from '../../account/account.access.service';
+import { AccountReminder } from '../../account/account-reminder/account-reminder';
 import { ProfileButton } from '../../account/profile-button/profile-button';
 import { Celebration } from '../../progress/celebration/celebration';
 import { ProgressAccessService } from '../../progress/progress.access.service';
@@ -43,6 +45,7 @@ import { TasksNoticeService } from '../tasks-notice.service';
     ProgressSummary,
     Celebration,
     ProfileButton,
+    AccountReminder,
   ],
   templateUrl: './tasks-list.html',
   styleUrl: './tasks-list.scss',
@@ -54,6 +57,7 @@ export class TasksList {
   private readonly alarmsCopy = inject(AlarmsConstructorService);
   private readonly postponeRules = inject(PostponeConstructorService);
   protected readonly progress = inject(ProgressAccessService);
+  protected readonly account = inject(AccountAccessService);
   private readonly clock = inject(CLOCK);
   private readonly notices = inject(TasksNoticeService);
   protected readonly notice = this.notices.notice;

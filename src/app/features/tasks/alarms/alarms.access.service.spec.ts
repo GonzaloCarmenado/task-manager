@@ -616,3 +616,28 @@ describe('AlarmsAccessService · consola', () => {
     });
   });
 });
+
+describe('AlarmsAccessService · cambio de identidad (spec 011)', () => {
+  it('US-011-04 al cerrar sesión se cancelan las alarmas y al entrar se programan solo las de la cuenta', async () => {
+    const t = setup({
+      granted: true,
+      tasks: [task({ title: 'De la cuenta', dueTime: '16:30' })],
+    });
+    await t.init();
+    expect(t.last()).toHaveLength(1);
+
+    // Cierre de sesión: la identidad anónima nueva no tiene tareas
+    t.tasks.set([]);
+    TestBed.tick();
+    await settle();
+    expect(t.last()).toEqual([]);
+
+    // Entrada en otra cuenta: solo sus avisos, ninguno de la anterior
+    t.tasks.set([task({ title: 'De la otra cuenta', dueTime: '17:00' })]);
+    TestBed.tick();
+    await settle();
+    const set = t.last() ?? [];
+    expect(set).toHaveLength(1);
+    expect(set[0].title).toBe('De la otra cuenta');
+  });
+});

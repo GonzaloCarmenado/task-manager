@@ -1,4 +1,4 @@
-import { TODAY, USER_ID } from '../support/backend';
+import { NOW, TODAY, USER_ID } from '../support/backend';
 
 const PASSWORD = ['Clave', 'Segura', '123'].join('');
 
@@ -510,6 +510,130 @@ describe('Cuenta (extremo a extremo)', () => {
       login();
       cy.location('pathname').should('eq', '/');
       cy.contains('.title', 'De la cuenta').should('be.visible');
+    });
+  });
+
+  describe('recordatorio de cuenta', () => {
+    const done = (title: string) => `button.check[aria-label="Marcar como hecha: ${title}"]`;
+    const reminder = () => cy.get('app-account-reminder');
+    const typeAccount = () => {
+      cy.get('app-account-field').eq(0).find('input.input').type('carlos_ritmo');
+      cy.get('app-account-field').eq(1).find('input.input').type(PASSWORD);
+      cy.get('app-account-field').eq(2).find('input.input').type(PASSWORD);
+      cy.get('input.accept').check({ force: true });
+      cy.get('button.submit').click();
+    };
+
+    it('aparece al completar la primera tarea, con su texto y su acceso a Crear cuenta', () => {
+      cy.boot({ seed: (b) => void b.seed({ title: 'Primera tarea', due_date: TODAY }) });
+      cy.contains('.title', 'Primera tarea').should('be.visible');
+      cy.get('app-account-reminder').should('not.exist'); // antes de completar nada no se ofrece
+
+      cy.get(done('Primera tarea')).click();
+      reminder().should('be.visible');
+      reminder().contains('Asegura tu progreso').should('be.visible');
+      reminder().contains('Crea tu respaldo personal').should('be.visible');
+      reminder()
+        .contains(
+          'Tus datos solo están en este móvil. Crea una cuenta para no perderlos al cambiar de teléfono.'
+        )
+        .should('be.visible');
+      reminder().contains('a', 'Crear cuenta').should('have.attr', 'href', '/cuenta/crear');
+    });
+
+    it('queda situada bajo el resumen de nivel y la lista sigue sin solapes', () => {
+      cy.boot({ seed: (b) => void b.seedCompleted('Hecha antes', TODAY) });
+      reminder().should('be.visible');
+      cy.get('app-progress-summary').then(($summary) => {
+        cy.get('app-account-reminder').then(($reminder) => {
+          const summary = $summary[0].getBoundingClientRect();
+          const card = $reminder[0].getBoundingClientRect();
+          expect(card.top).to.be.at.least(summary.bottom);
+        });
+      });
+    });
+
+    it('el aspa la oculta y sigue oculta tras recargar', () => {
+      cy.boot({ seed: (b) => void b.seedCompleted('Hecha antes', TODAY) });
+      reminder().find('button.close').click();
+      cy.get('app-account-reminder').should('not.exist');
+      cy.reload();
+      cy.contains('h1', 'Tareas').should('be.visible');
+      cy.get('app-account-reminder').should('not.exist');
+    });
+
+    it('«En 14 días» la oculta y vuelve a los 14 días', () => {
+      cy.boot({ seed: (b) => void b.seedCompleted('Hecha antes', TODAY) });
+      reminder().contains('button', 'En 14 días').click();
+      cy.get('app-account-reminder').should('not.exist');
+
+      cy.clock().then((clock) => clock.restore());
+      cy.clock(new Date(NOW.getTime() + 13 * 24 * 60 * 60 * 1000), ['Date']);
+      cy.reload();
+      cy.contains('h1', 'Tareas').should('be.visible');
+      cy.get('app-account-reminder').should('not.exist'); // a los 13 días sigue aplazada
+
+      cy.clock().then((clock) => clock.restore());
+      cy.clock(new Date(NOW.getTime() + 14 * 24 * 60 * 60 * 1000 + 1000), ['Date']);
+      cy.reload();
+      reminder().should('be.visible'); // a los 14 días vuelve
+    });
+
+    it('«Crear cuenta» del recordatorio lleva al formulario', () => {
+      cy.boot({ seed: (b) => void b.seedCompleted('Hecha antes', TODAY) });
+      reminder().contains('a', 'Crear cuenta').click();
+      cy.location('pathname').should('eq', '/cuenta/crear');
+    });
+
+    it('con cuenta no se ofrece, aunque haya tareas completadas', () => {
+      cy.boot({
+        seed: (b) => {
+          const id = b.addAccount('ana', PASSWORD);
+          b.seed({
+            title: 'Hecha',
+            user_id: id,
+            completed_at: '2026-11-14T08:00:00.000Z',
+            completed_day: TODAY,
+          });
+        },
+        signedInAs: 'ana',
+      });
+      cy.contains('h1', 'Tareas').should('be.visible');
+      cy.get('app-account-reminder').should('not.exist');
+    });
+
+    it('tras crear la cuenta el recordatorio deja de salir', () => {
+      cy.boot({ seed: (b) => void b.seedCompleted('Hecha antes', TODAY) });
+      reminder().contains('a', 'Crear cuenta').click();
+      typeAccount();
+      cy.location('pathname').should('eq', '/cuenta');
+      cy.get('app-account-header button.back').click();
+      cy.contains('h1', 'Tareas').should('be.visible');
+      cy.get('app-account-reminder').should('not.exist');
+    });
+
+    it('cambiar de identidad nunca deja ver datos ni celebraciones ajenos', () => {
+      cy.boot({
+        seed: (b) => {
+          const id = b.addAccount('ana', PASSWORD);
+          b.seed({ title: 'De la cuenta', user_id: id, due_date: TODAY });
+          b.seed({ title: 'Del móvil', due_date: TODAY });
+        },
+      });
+      cy.get(done('Del móvil')).click();
+      cy.get('app-celebration .celebration').should('contain', '+10 XP');
+
+      cy.get('app-profile-button a').click();
+      cy.contains('a', 'Ya tengo cuenta, iniciar sesión').click();
+      cy.get('app-account-field').eq(0).find('input.input').type('ana');
+      cy.get('app-account-field').eq(1).find('input.input').type(PASSWORD);
+      cy.get('button.submit').click();
+      cy.contains('app-discard-confirm button', 'Sí, continuar').click(); // solo había una completada
+
+      cy.location('pathname').should('eq', '/');
+      cy.contains('.title', 'De la cuenta').should('be.visible');
+      cy.contains('.title', 'Del móvil').should('not.exist');
+      cy.get('app-celebration .celebration').should('not.exist'); // la celebración era de otra identidad
     });
   });
 });

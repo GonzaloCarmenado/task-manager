@@ -298,3 +298,51 @@ describe('ProgressAccessService · tras completar o desmarcar', () => {
     expect(service.celebration()).toBeNull();
   });
 });
+
+describe('ProgressAccessService · cambio de identidad (spec 011)', () => {
+  async function celebrating() {
+    const ctx = setup();
+    ctx.next(() => ok(row({ total_xp: 40 })));
+    await ctx.service.load();
+    ctx.next(() => ok(row({ total_xp: 50, xp_today: 10 })));
+    await ctx.service.afterToggle(true, ctx.service.progress());
+    return ctx;
+  }
+
+  it('US-011-04 al cambiar de usuario se limpian la celebración y la subida de nivel pendientes', async () => {
+    const { service, userId } = await celebrating();
+    expect(service.celebration()).not.toBeNull();
+    expect(service.levelUp()).toBe(2);
+
+    userId.set(USER_B);
+    await flush();
+
+    expect(service.celebration()).toBeNull();
+    expect(service.levelUp()).toBeNull();
+  });
+
+  it('US-011-04 con el mismo usuario no se limpian', async () => {
+    const { service, userId } = await celebrating();
+    userId.set(USER_A);
+    await flush();
+    expect(service.celebration()).not.toBeNull();
+  });
+
+  it('US-011-04 el progreso del usuario saliente no se ve con el entrante', async () => {
+    const { service, userId } = await celebrating();
+    userId.set(USER_B);
+    expect(service.progress()).toBeNull();
+    expect(service.status()).toBe('idle');
+  });
+
+  it('US-011-04 una celebración propia del usuario nuevo sí se emite después del cambio', async () => {
+    const { service, userId, next } = await celebrating();
+    userId.set(USER_B);
+    await flush();
+    next(() => ok(row({ total_xp: 0 })));
+    await service.load();
+    next(() => ok(row({ total_xp: 10, xp_today: 10 })));
+    await service.afterToggle(true, service.progress());
+    expect(service.celebration()?.xpDelta).toBe(10);
+  });
+});

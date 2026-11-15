@@ -5,6 +5,7 @@ import { AlarmPermission } from '../../../core/models/alarm';
 import { Task } from '../../../core/models/task';
 import { CLOCK } from '../../../core/services/clock';
 import { Celebration, Progress } from '../../../core/models/progress';
+import { AccountAccessService } from '../../account/account.access.service';
 import { ProgressAccessService, ProgressStatus } from '../../progress/progress.access.service';
 import { AlarmsAccessService } from '../alarms/alarms.access.service';
 import {
@@ -99,6 +100,9 @@ function setup(
   const postpone = vi.fn(async (): Promise<TaskOpResult> => ({ ok: true }));
   const load = vi.fn(async () => undefined);
   const access = { tasks, status: statusSig, errorReason, load, setCompleted, postpone };
+  const reminderOn = signal(false);
+  const snoozeReminder = vi.fn(() => reminderOn.set(false));
+  const account = { reminderVisible: () => reminderOn(), snoozeReminder };
 
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
@@ -108,6 +112,7 @@ function setup(
       { provide: TasksAccessService, useValue: access },
       { provide: AlarmsAccessService, useValue: alarms },
       { provide: ProgressAccessService, useValue: progress },
+      { provide: AccountAccessService, useValue: account },
       { provide: CLOCK, useValue: () => now },
     ],
   });
@@ -130,6 +135,8 @@ function setup(
     navigate,
     alarms,
     progress,
+    reminderOn,
+    snoozeReminder,
     setNow: (d: Date) => (now = d),
     text: () => el.textContent?.replace(/\s+/g, ' ').trim() ?? '',
     detect: () => fixture.detectChanges(),
@@ -676,5 +683,44 @@ describe('TasksList · botón de perfil', () => {
   it('US-011-03 el botón de perfil está también con la lista vacía', () => {
     const t = setup([]);
     expect(t.el.querySelector('header.header app-profile-button')).not.toBeNull();
+  });
+});
+
+describe('TasksList · recordatorio de cuenta', () => {
+  it('US-011-08 sin recordatorio activo no se pinta la tarjeta', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    expect(t.el.querySelector('app-account-reminder')).toBeNull();
+  });
+
+  it('US-011-08 con el recordatorio activo aparece bajo el resumen de nivel y antes de las tareas', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.reminderOn.set(true);
+    t.detect();
+
+    const summary = t.el.querySelector('app-progress-summary') as Node;
+    const reminder = t.el.querySelector('app-account-reminder') as Node;
+    const firstGroup = t.el.querySelector('.group') as Node;
+    expect(reminder).not.toBeNull();
+    expect(summary.compareDocumentPosition(reminder)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(reminder.compareDocumentPosition(firstGroup)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('US-011-08 también aparece con la lista vacía (no depende de tener tareas pendientes)', () => {
+    const t = setup([]);
+    t.reminderOn.set(true);
+    t.detect();
+    expect(t.el.querySelector('app-account-reminder')).not.toBeNull();
+  });
+
+  it('US-011-08 el aspa o «En 14 días» aplazan el recordatorio y la tarjeta desaparece', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    t.reminderOn.set(true);
+    t.detect();
+
+    (t.el.querySelector('app-account-reminder button.close') as HTMLButtonElement).click();
+    t.detect();
+
+    expect(t.snoozeReminder).toHaveBeenCalledTimes(1);
+    expect(t.el.querySelector('app-account-reminder')).toBeNull();
   });
 });

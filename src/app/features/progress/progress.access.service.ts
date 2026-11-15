@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Celebration, Progress, ProgressRow } from '../../core/models/progress';
 import { AuthAccessService } from '../../core/services/auth.access.service';
 import { CLOCK } from '../../core/services/clock';
@@ -41,6 +41,20 @@ export class ProgressAccessService {
 
   private readonly current = signal<Celebration | null>(null);
   private readonly level = signal<number | null>(null);
+
+  constructor() {
+    // Una celebración o subida de nivel pendiente es de quien la ganó: al cambiar de identidad se descarta.
+    let previous = this.auth.userId();
+    effect(() => {
+      const uid = this.auth.userId();
+      if (uid === previous) return;
+      previous = uid;
+      untracked(() => {
+        this.current.set(null);
+        this.level.set(null);
+      });
+    });
+  }
 
   readonly progress = computed<Progress | null>(() => {
     const uid = this.auth.userId();

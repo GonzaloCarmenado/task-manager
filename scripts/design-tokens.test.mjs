@@ -458,6 +458,7 @@ const accountLiteral = {
   '--shadow-inset': 'inset 0 2px 8px rgba(70, 72, 212, 0.1)',
   '--shadow-tile': '0 8px 20px -4px rgba(70, 72, 212, 0.35)',
   '--shadow-option': '0 6px 20px -2px rgba(70, 72, 212, 0.12)',
+  '--shadow-reminder': '0 8px 24px -4px rgba(70, 72, 212, 0.12)',
 };
 
 test('US-011-01 los colores nuevos de la cuenta coinciden con el DESIGN.md en claro', () => {

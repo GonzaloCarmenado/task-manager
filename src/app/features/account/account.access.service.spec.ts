@@ -4,7 +4,10 @@ import { AccountResult } from '../../core/models/account';
 import { AuthSession } from '../../core/models/auth-session';
 import { AuthAccessService } from '../../core/services/auth.access.service';
 import { TasksAccessService } from '../tasks/tasks.access.service';
+import { Progress } from '../../core/models/progress';
 import { Task, TaskInput } from '../../core/models/task';
+import { CLOCK } from '../../core/services/clock';
+import { ProgressAccessService } from '../progress/progress.access.service';
 import { TasksStatus, TaskOpResult } from '../tasks/tasks.access.service';
 import { ACCOUNT_STORAGE, AccountAccessService } from './account.access.service';
 
@@ -30,6 +33,7 @@ function setup(initial: AuthSession | null = ANONYMOUS) {
     providers: [
       { provide: AuthAccessService, useValue: { session, signOut, canSignOut, linkAccount } },
       { provide: TasksAccessService, useValue: { forget } },
+      { provide: ProgressAccessService, useValue: { progress: signal<Progress | null>(null) } },
     ],
   });
   return {
@@ -232,6 +236,7 @@ function flowSetup(
       },
       { provide: TasksAccessService, useValue: { tasks: tasksList, status, load, create, forget } },
       { provide: ACCOUNT_STORAGE, useValue: storage },
+      { provide: ProgressAccessService, useValue: { progress: signal<Progress | null>(null) } },
     ],
   });
   return {
@@ -501,5 +506,140 @@ describe('AccountAccessService · reanudar el traspaso', () => {
     await service.resumePendingTransfer();
     expect(create).not.toHaveBeenCalled();
     expect(store.has(STORE_KEY)).toBe(false);
+  });
+});
+
+// ---- Recordatorio de cuenta (US-011-08) ----------------------------------------------------------
+const REMINDER_KEY = 'task-manager-account-reminder';
+const DAY_MS = 24 * 60 * 60 * 1000;
+const START = new Date(2026, 10, 14, 10, 0, 0);
+
+function progressOf(lastCompletedDay: string | null): Progress {
+  return {
+    totalXp: 10,
+    level: 1,
+    xpIntoLevel: 10,
+    xpForNextLevel: 50,
+    currentStreak: 1,
+    bestStreak: 1,
+    xpToday: 10,
+    lastCompletedDay,
+  };
+}
+
+function reminderSetup(
+  initial: AuthSession | null = ANONYMOUS,
+  options: { last?: string | null; stored?: string; throws?: boolean } = {}
+) {
+  const session = signal<AuthSession | null>(initial);
+  const progress = signal<Progress | null>(
+    options.last === undefined
+      ? progressOf('2026-11-14')
+      : options.last === null
+        ? null
+        : progressOf(options.last)
+  );
+  const store = new Map<string, string>();
+  if (options.stored !== undefined) store.set(REMINDER_KEY, options.stored);
+  const storage = {
+    getItem: (k: string) => {
+      if (options.throws) throw new Error('sin almacenamiento');
+      return store.get(k) ?? null;
+    },
+    setItem: (k: string, v: string) => {
+      if (options.throws) throw new Error('sin almacenamiento');
+      store.set(k, v);
+    },
+    removeItem: (k: string) => void store.delete(k),
+  };
+  let now = START;
+
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: AuthAccessService, useValue: { session } },
+      {
+        provide: TasksAccessService,
+        useValue: { tasks: signal<Task[]>([]), status: signal('ready') },
+      },
+      { provide: ProgressAccessService, useValue: { progress } },
+      { provide: ACCOUNT_STORAGE, useValue: storage },
+      { provide: CLOCK, useValue: () => now },
+    ],
+  });
+  return {
+    service: TestBed.inject(AccountAccessService),
+    session,
+    progress,
+    store,
+    advance: (ms: number) => {
+      now = new Date(now.getTime() + ms);
+    },
+    reopen: () => TestBed.resetTestingModule(),
+    storage,
+    providers: () => ({ session, progress, storage, getNow: () => now }),
+  };
+}
+
+describe('AccountAccessService · recordatorio de cuenta', () => {
+  it('US-011-08 se ofrece a quien no tiene cuenta y ya completó alguna tarea alguna vez', () => {
+    expect(reminderSetup().service.reminderVisible()).toBe(true);
+  });
+
+  it('US-011-08 no se ofrece antes de completar la primera tarea', () => {
+    expect(reminderSetup(ANONYMOUS, { last: null }).service.reminderVisible()).toBe(false);
+    const noDay = reminderSetup(ANONYMOUS);
+    noDay.progress.set(progressOf(null));
+    expect(noDay.service.reminderVisible()).toBe(false);
+  });
+
+  it('US-011-08 no se ofrece a quien ya tiene cuenta ni sin sesión', () => {
+    expect(reminderSetup(ACCOUNT).service.reminderVisible()).toBe(false);
+    expect(reminderSetup(null).service.reminderVisible()).toBe(false);
+  });
+
+  it('US-011-08 aparece en cuanto se completa la primera tarea', () => {
+    const { service, progress } = reminderSetup(ANONYMOUS, { last: null });
+    expect(service.reminderVisible()).toBe(false);
+    progress.set(progressOf('2026-11-14'));
+    expect(service.reminderVisible()).toBe(true);
+  });
+
+  it('US-011-08 aplazar lo oculta 14 días; a los 14 días vuelve', () => {
+    const { service, advance } = reminderSetup();
+    service.snoozeReminder();
+    expect(service.reminderVisible()).toBe(false);
+
+    advance(14 * DAY_MS - 1000);
+    expect(service.reminderVisible()).toBe(false);
+    advance(2000);
+    expect(service.reminderVisible()).toBe(true);
+  });
+
+  it('US-011-08 el aplazamiento sobrevive a cerrar y abrir la app', () => {
+    const first = reminderSetup();
+    first.service.snoozeReminder();
+    const saved = first.store.get(REMINDER_KEY);
+    expect(saved).toBeDefined();
+
+    const second = reminderSetup(ANONYMOUS, { stored: saved });
+    expect(second.service.reminderVisible()).toBe(false);
+    second.advance(14 * DAY_MS + 1000);
+    expect(second.service.reminderVisible()).toBe(true);
+  });
+
+  it('US-011-08 con el almacenamiento roto o un valor corrupto sigue visible y no falla', () => {
+    expect(reminderSetup(ANONYMOUS, { throws: true }).service.reminderVisible()).toBe(true);
+    expect(reminderSetup(ANONYMOUS, { stored: 'no-es-un-numero' }).service.reminderVisible()).toBe(
+      true
+    );
+    const broken = reminderSetup(ANONYMOUS, { throws: true });
+    expect(() => broken.service.snoozeReminder()).not.toThrow();
+    expect(broken.service.reminderVisible()).toBe(false); // al menos en esta apertura
+  });
+
+  it('US-011-08 no depende de la red: solo del progreso ya cargado y de la sesión', () => {
+    // Sin ninguna llamada de red simulada, la visibilidad se decide con lo que ya hay en memoria.
+    expect(reminderSetup().service.reminderVisible()).toBe(true);
   });
 });

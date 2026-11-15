@@ -6,7 +6,9 @@
 
   <app-progress-summary />
 
-  @if (alarms.bannerVisible()) {
+  @if (account.reminderVisible()) {
+  <app-account-reminder (snooze)="account.snoozeReminder()" />
+  } @if (alarms.bannerVisible()) {
   <app-alarms-banner (activate)="openNotificationSettings()" (dismiss)="alarms.dismissBanner()" />
   } @if (access.status() === 'loading' || access.status() === 'idle') {
   <section class="state" role="status" aria-live="polite">

@@ -1,7 +1,14 @@
 import { Injectable, InjectionToken, computed, inject, signal } from '@angular/core';
-import { AccountResult, LocalTask, LocalTasksSnapshot } from '../../core/models/account';
+import {
+  AccountResult,
+  LocalTask,
+  LocalTasksSnapshot,
+  REMINDER_SNOOZE_DAYS,
+} from '../../core/models/account';
+import { CLOCK } from '../../core/services/clock';
 import { AuthAccessService } from '../../core/services/auth.access.service';
 import { normalizeUsername } from '../../core/utils/username';
+import { ProgressAccessService } from '../progress/progress.access.service';
 import { TasksAccessService } from '../tasks/tasks.access.service';
 import { AccountConstructorService } from './account.constructor.service';
 
@@ -11,6 +18,8 @@ export const ACCOUNT_STORAGE = new InjectionToken<
 >('ACCOUNT_STORAGE', { providedIn: 'root', factory: () => window.localStorage });
 
 const TRANSFER_KEY = 'task-manager-pending-transfer';
+const REMINDER_KEY = 'task-manager-account-reminder';
+const DAY_MS = 24 * 60 * 60 * 1000;
 const EMPTY: LocalTasksSnapshot = { pending: [], completed: 0 };
 
 /** Qué hacer con las tareas del móvil al iniciar sesión en una cuenta. */
@@ -54,6 +63,8 @@ export class AccountAccessService {
   private readonly tasks = inject(TasksAccessService);
   private readonly rules = inject(AccountConstructorService);
   private readonly storage = inject(ACCOUNT_STORAGE);
+  private readonly progress = inject(ProgressAccessService);
+  private readonly clock = inject(CLOCK);
 
   /** Hay una cuenta con nombre de usuario (no es la sesión anónima). */
   readonly hasAccount = computed(() => {
@@ -83,12 +94,47 @@ export class AccountAccessService {
   /** Tareas del móvil capturadas al comprobar las credenciales; no cambian hasta terminar o cancelar. */
   readonly signInSnapshot = this._signInSnapshot.asReadonly();
 
+  /** Instante (ms) hasta el que el recordatorio está aplazado; 0 = no aplazado. */
+  private readonly snoozeUntil = signal(0);
+
   private readonly _transferPending = signal(false);
   /** Queda un traspaso de tareas a medias (se reintentará al arrancar). */
   readonly transferPending = this._transferPending.asReadonly();
 
   constructor() {
     this._transferPending.set(this.readBuffer() !== null);
+    this.snoozeUntil.set(this.readSnooze());
+  }
+
+  /**
+   * La tarjeta «Crea tu respaldo personal» se ofrece solo sin cuenta, tras completar alguna tarea alguna vez
+   * y fuera del aplazamiento. No depende de la red. Es una consulta (no un `computed`) para que el paso del
+   * tiempo se tenga en cuenta cada vez que se pinta.
+   */
+  reminderVisible(): boolean {
+    if (!this.isAnonymous()) return false;
+    if (this.progress.progress()?.lastCompletedDay == null) return false;
+    return this.clock().getTime() >= this.snoozeUntil();
+  }
+
+  /** Oculta el recordatorio durante 14 días (también tras reabrir la app). */
+  snoozeReminder(): void {
+    const until = this.clock().getTime() + REMINDER_SNOOZE_DAYS * DAY_MS;
+    this.snoozeUntil.set(until);
+    try {
+      this.storage.setItem(REMINDER_KEY, String(until));
+    } catch {
+      /* sin almacenamiento: el aplazamiento dura lo que la apertura */
+    }
+  }
+
+  private readSnooze(): number {
+    try {
+      const value = Number(this.storage.getItem(REMINDER_KEY));
+      return Number.isFinite(value) && value > 0 ? value : 0;
+    } catch {
+      return 0;
+    }
   }
 
   /**

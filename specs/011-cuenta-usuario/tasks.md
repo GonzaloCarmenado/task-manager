@@ -132,16 +132,16 @@
 
 ## Bloque 6 — Recordatorio e identidad sin datos ajenos (US-011-08, P1)
 
-- [ ] T-011-98 (Red): `account.access.service.spec.ts` · `reminderVisible`: solo anónimo, con al menos una tarea completada alguna vez y fuera del aplazamiento; `snoozeReminder` aplaza 14 días con `CLOCK`; recargar conserva el aplazamiento; sin red sigue visible
-- [ ] T-011-99 (Green): recordatorio en `AccountAccessService`
-- [ ] T-011-100 (Red): `account-reminder.spec.ts`: etiqueta, título, texto, «Crear cuenta» (→ `/cuenta/crear`), el aspa y «En 14 días» ocultan la tarjeta con nombres accesibles, no hay otros botones
-- [ ] T-011-101 (Green): `AccountReminder` e integración bajo el resumen de nivel en `tasks-list`
-- [ ] T-011-102 (Red): `progress.access.service.spec.ts` y `alarms.access.service.spec.ts`: al cambiar de `userId` se limpian celebración y subida de nivel pendientes; al cerrar sesión se cancelan las alarmas y al entrar se reconcilian con las de la cuenta
-- [ ] T-011-103 (Green): limpieza en `ProgressAccessService` y ajuste de `AlarmsAccessService` si hiciera falta
-- [ ] T-011-104 (Red→Green): `cypress/e2e/cuenta.cy.ts` · recordatorio: aparece tras completar la primera tarea, el aspa lo oculta, «En 14 días» lo oculta y con `cy.clock` vuelve a los 14 días; la app sin cuenta funciona igual; cambiar de identidad nunca muestra datos ajenos
-- [ ] T-011-105 (Refactor): limpiar con los tests en verde
-- [ ] T-011-106: **medidas** de la tarjeta de recordatorio (tesela 40, aspa 32, botón 46, radio 24, sombra, textos) frente al plan y **comparación** con `lista-con-recordatorio-de-cuenta/screen.png`; claro y oscuro; la lista sigue sin solapes
-- [ ] T-011-107: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
+- [x] T-011-98 (Red): `account.access.service.spec.ts` · `reminderVisible`: solo anónimo, con al menos una tarea completada alguna vez y fuera del aplazamiento; `snoozeReminder` aplaza 14 días con `CLOCK`; recargar conserva el aplazamiento; sin red sigue visible
+- [x] T-011-99 (Green): recordatorio en `AccountAccessService`
+- [x] T-011-100 (Red): `account-reminder.spec.ts`: etiqueta, título, texto, «Crear cuenta» (→ `/cuenta/crear`), el aspa y «En 14 días» ocultan la tarjeta con nombres accesibles, no hay otros botones
+- [x] T-011-101 (Green): `AccountReminder` e integración bajo el resumen de nivel en `tasks-list`
+- [x] T-011-102 (Red): `progress.access.service.spec.ts` y `alarms.access.service.spec.ts`: al cambiar de `userId` se limpian celebración y subida de nivel pendientes; al cerrar sesión se cancelan las alarmas y al entrar se reconcilian con las de la cuenta
+- [x] T-011-103 (Green): limpieza en `ProgressAccessService` y ajuste de `AlarmsAccessService` si hiciera falta
+- [x] T-011-104 (Red→Green): `cypress/e2e/cuenta.cy.ts` · recordatorio: aparece tras completar la primera tarea, el aspa lo oculta, «En 14 días» lo oculta y con `cy.clock` vuelve a los 14 días; la app sin cuenta funciona igual; cambiar de identidad nunca muestra datos ajenos
+- [x] T-011-105 (Refactor): limpiar con los tests en verde
+- [x] T-011-106: **medidas** de la tarjeta de recordatorio (tesela 40, aspa 32, botón 46, radio 24, sombra, textos) frente al plan y **comparación** con `lista-con-recordatorio-de-cuenta/screen.png`; claro y oscuro; la lista sigue sin solapes
+- [x] T-011-107: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
 
 ---
 
