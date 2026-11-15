@@ -452,6 +452,10 @@ const accountLiteral = {
   '--shadow-pop': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
   '--shadow-soft': '0 1px 2px rgba(0, 0, 0, 0.05)',
   '--shadow-header': '0 1px 8px rgba(0, 0, 0, 0.04)',
+  '--shadow-cta': '0 8px 24px -4px rgba(70, 72, 212, 0.35)',
+  '--shadow-cta-strong': '0 8px 24px -4px rgba(70, 72, 212, 0.4)',
+  '--shadow-cta-sm': '0 4px 14px -2px rgba(70, 72, 212, 0.35)',
+  '--shadow-inset': 'inset 0 2px 8px rgba(70, 72, 212, 0.1)',
 };
 
 test('US-011-01 los colores nuevos de la cuenta coinciden con el DESIGN.md en claro', () => {

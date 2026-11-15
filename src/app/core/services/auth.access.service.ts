@@ -198,17 +198,23 @@ export class AuthAccessService {
    * Cierra **solo esta sesión** (`scope: 'local'`: las de otros móviles de la cuenta siguen) y deja una
    * sesión anónima nueva y vacía. Sin red no se cierra nada: la app nunca se queda sin identidad.
    */
+  /**
+   * Con `scope: 'local'` la librería quita la sesión local antes de la petición, así que no se puede
+   * cerrar «a medias»: si el móvil declara no tener red se avisa antes de tocar nada.
+   */
+  canSignOut(): boolean {
+    return typeof navigator === 'undefined' || navigator.onLine !== false;
+  }
+
   async signOut(): Promise<AccountResult> {
     const current = this._session();
     if (current === null || current.user.isAnonymous) return { ok: false, reason: 'unauthorized' };
+    if (!this.canSignOut()) return { ok: false, reason: 'network' };
     return this.exclusive(async () => {
       this.expectedSignOut = true;
-      const outcome = await this.guarded(() =>
-        this.supabase.client.auth.signOut({ scope: 'local' })
-      );
+      // Un fallo del servidor solo deja sin revocar el token de este móvil; la sesión local ya no existe.
+      await this.guarded(() => this.supabase.client.auth.signOut({ scope: 'local' }));
       this.expectedSignOut = false;
-      if (!outcome.ok) return outcome;
-      if (outcome.value.error) return { ok: false, reason: mapAccountError(outcome.value.error) };
       this.pendingSignIn = null;
       this._session.set(null);
       this.clearRetryTimer();

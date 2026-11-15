@@ -1,0 +1,106 @@
+<app-account-header [title]="copy.title" (back)="goBack()" />
+
+<main class="page">
+  @if (access.hasAccount()) {
+  <section class="user-card">
+    <span class="halo" aria-hidden="true"></span>
+    <div class="user-row">
+      <span class="avatar" aria-hidden="true">
+        <span class="avatar-inner"><app-icon name="person" [filled]="true" /></span>
+        <span class="verified"><app-icon name="check" /></span>
+      </span>
+      <p class="username">&#64;{{ access.username() }}</p>
+    </div>
+    <p class="saved">
+      <app-icon name="cloud-check" [filled]="true" />
+      <span>{{ copy.saved }}</span>
+    </p>
+  </section>
+
+  <section class="settings">
+    <h2 class="section-label">{{ copy.settings }}</h2>
+    <div class="panel">
+      <a class="row" routerLink="/cuenta/contrasena">
+        <span class="row-icon"><app-icon name="key" /></span>
+        <span class="row-text">
+          <span class="row-title">{{ copy.changePassword }}</span>
+          <span class="row-hint">{{ copy.changePasswordHint }}</span>
+        </span>
+        <app-icon class="chevron" name="chevron-right" />
+      </a>
+      <button class="row" type="button" (click)="openLogout()">
+        <span class="row-icon strong"><app-icon name="log-out" /></span>
+        <span class="row-text">
+          <span class="row-title">{{ copy.logout }}</span>
+          <span class="row-hint">{{ copy.logoutHint }}</span>
+        </span>
+        <app-icon class="chevron" name="chevron-right" />
+      </button>
+    </div>
+  </section>
+
+  <section class="danger">
+    <h2 class="danger-label">{{ copy.dangerLabel }}</h2>
+    <div class="danger-box">
+      <div class="danger-head">
+        <app-icon class="danger-icon" name="alert" />
+        <div>
+          <h3 class="danger-title">{{ copy.dangerTitle }}</h3>
+          <p class="danger-body">{{ copy.dangerBody }}</p>
+        </div>
+      </div>
+      <a class="danger-button" routerLink="/cuenta/borrar">
+        <app-icon name="trash" />
+        {{ copy.dangerButton }}
+      </a>
+    </div>
+  </section>
+  } @else {
+  <section class="state-card">
+    <span class="halo top" aria-hidden="true"></span>
+    <span class="halo bottom" aria-hidden="true"></span>
+    <div class="mascot" aria-hidden="true">
+      <span class="mascot-circle"><app-icon name="phone-lock" /></span>
+      <span class="mascot-badge"><app-icon name="shield" [filled]="true" /></span>
+    </div>
+    <p class="pill"><span class="dot" aria-hidden="true"></span>{{ copy.localBadge }}</p>
+    <h2 class="state-title">{{ copy.localTitle }}</h2>
+    <p class="state-body">{{ copy.localBody }}</p>
+  </section>
+
+  <section class="switch-card">
+    <span class="switch-icon" aria-hidden="true">
+      <app-icon name="cloud-sync" [filled]="true" />
+    </span>
+    <div>
+      <h3 class="switch-title">{{ copy.switchTitle }}</h3>
+      <p class="switch-body">{{ copy.switchBody }}</p>
+    </div>
+  </section>
+
+  <div class="actions">
+    <a class="primary-action" routerLink="/cuenta/crear">
+      <app-icon name="cloud-up" [filled]="true" />
+      {{ copy.create }}
+    </a>
+    <a class="secondary-action" routerLink="/cuenta/entrar">
+      <app-icon name="log-in" />
+      {{ copy.signIn }}
+    </a>
+  </div>
+
+  <p class="footer">
+    <app-icon name="badge-check" />
+    {{ copy.footer }}
+  </p>
+  }
+</main>
+
+@if (logout()) {
+<app-account-logout-dialog
+  [busy]="logoutBusy()"
+  [error]="logoutError()"
+  (confirm)="confirmLogout()"
+  (cancel)="closeLogout()"
+/>
+}

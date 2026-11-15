@@ -26,6 +26,11 @@ export function buildRoutes(devMode: boolean): Routes {
       loadComponent: () => import('./features/progress/level-up/level-up').then((m) => m.LevelUp),
     },
     {
+      path: 'cuenta',
+      loadComponent: () =>
+        import('./features/account/account-screen/account-screen').then((m) => m.AccountScreen),
+    },
+    {
       path: ':id',
       loadComponent: () => import('./features/tasks/task-form/task-form').then((m) => m.TaskForm),
     },

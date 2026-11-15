@@ -98,6 +98,10 @@
   --shadow-pop: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-header: 0 1px 8px rgba(0, 0, 0, 0.04);
+  --shadow-cta: 0 8px 24px -4px rgba(70, 72, 212, 0.35);
+  --shadow-cta-strong: 0 8px 24px -4px rgba(70, 72, 212, 0.4);
+  --shadow-cta-sm: 0 4px 14px -2px rgba(70, 72, 212, 0.35);
+  --shadow-inset: inset 0 2px 8px rgba(70, 72, 212, 0.1);
 
   // Barra de nivel: pista y relleno en degradado primario → esmeralda
   --gradient-progress: linear-gradient(
@@ -176,5 +180,9 @@
     --shadow-pop: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
     --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-header: 0 1px 8px rgba(0, 0, 0, 0.3);
+    --shadow-cta: 0 8px 24px -4px rgba(99, 102, 241, 0.4);
+    --shadow-cta-strong: 0 8px 24px -4px rgba(99, 102, 241, 0.45);
+    --shadow-cta-sm: 0 4px 14px -2px rgba(99, 102, 241, 0.4);
+    --shadow-inset: inset 0 2px 8px rgba(0, 0, 0, 0.35);
   }
 }

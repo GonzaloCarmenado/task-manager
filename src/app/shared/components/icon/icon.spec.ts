@@ -125,7 +125,14 @@ describe('Icon', () => {
   });
 
   it('US-011-01 con filled los detalles interiores se pueden recortar con el color del fondo', () => {
-    for (const name of ['badge-check', 'check-circle', 'info', 'verified-user']) {
+    for (const name of [
+      'badge-check',
+      'check-circle',
+      'info',
+      'verified-user',
+      'cloud-up',
+      'cloud-sync',
+    ]) {
       expect(render(name).querySelectorAll('svg .cut').length, name).toBeGreaterThan(0);
     }
   });

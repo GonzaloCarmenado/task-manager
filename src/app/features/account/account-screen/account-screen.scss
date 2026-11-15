@@ -1,0 +1,525 @@
+@use 'type';
+
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+}
+
+.page {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-margin) calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+
+.halo {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+// ---- Sin cuenta ---------------------------------------------------------------------------------
+.state-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+
+  .halo.top {
+    top: -48px;
+    right: -48px;
+    width: 128px;
+    height: 128px;
+    background: var(--color-secondary-container);
+    opacity: 0.2;
+  }
+
+  .halo.bottom {
+    bottom: -40px;
+    left: -40px;
+    width: 112px;
+    height: 112px;
+    background: var(--color-primary);
+    opacity: 0.1;
+  }
+}
+
+.mascot {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  margin-bottom: var(--space-4);
+}
+
+.mascot-circle {
+  position: absolute;
+  inset: 8px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-high);
+  color: var(--color-primary-text);
+  box-shadow: var(--shadow-inset);
+
+  app-icon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.mascot-badge {
+  position: absolute;
+  right: 4px;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+  box-shadow: var(--shadow-card);
+  --icon-cut: transparent; // el escudo del diseño es liso
+  animation: bounce 1.6s ease-in-out infinite;
+
+  app-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 var(--space-2);
+  padding: 4px var(--space-3);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-high);
+  color: var(--color-text-muted);
+  @include type.label-sm;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-tertiary-container);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.state-title {
+  margin: 0 0 var(--space-1);
+  @include type.headline-md;
+}
+
+.state-body {
+  margin: 0;
+  max-width: 20rem;
+  color: var(--color-text-muted);
+  @include type.body-md;
+  line-height: 1.625;
+}
+
+.switch-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--tint-surface-high);
+}
+
+.switch-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
+  color: var(--color-on-primary-soft-strong);
+  --icon-cut: var(--color-primary-soft);
+
+  app-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.switch-title {
+  margin: 0 0 var(--space-1);
+  @include type.headline-sm;
+  line-height: 1.25;
+}
+
+.switch-body {
+  margin: 0;
+  color: var(--color-text-muted);
+  @include type.body-sm;
+  line-height: 1.375;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.primary-action,
+.secondary-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  @include type.label-lg;
+  transition: transform 150ms;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.primary-action {
+  height: 54px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  --icon-cut: var(--color-primary);
+  box-shadow: var(--shadow-cta);
+
+  app-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.secondary-action {
+  height: 50px;
+  background: var(--color-surface-soft);
+  color: var(--color-primary-text);
+
+  app-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-4) var(--space-2);
+  color: var(--color-text-muted);
+  @include type.label-sm;
+  text-transform: none;
+
+  app-icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    color: var(--color-outline-strong);
+  }
+}
+
+// ---- Con cuenta ---------------------------------------------------------------------------------
+.user-card {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+
+  .halo {
+    top: -40px;
+    right: -40px;
+    width: 112px;
+    height: 112px;
+    background: var(--color-primary);
+    opacity: 0.1;
+  }
+}
+
+.user-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.avatar {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: 64px;
+  height: 64px;
+  padding: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-container));
+  box-shadow: var(--shadow-card);
+}
+
+.avatar-inner {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-primary-text);
+
+  app-icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.verified {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: var(--color-tertiary);
+  color: var(--color-on-tertiary);
+
+  app-icon {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+.username {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  @include type.headline-sm;
+}
+
+.saved {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--tint-tertiary);
+  @include type.label-md;
+
+  app-icon {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--color-tertiary);
+  }
+}
+
+.section-label {
+  margin: 0 0 6px;
+  padding: 0 var(--space-1);
+  color: var(--color-text-muted);
+  @include type.label-md;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.panel {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.row {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+
+  & + .row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: var(--space-4);
+    right: var(--space-4);
+    height: 1px;
+    background: var(--color-surface-high);
+  }
+
+  &:active {
+    background: var(--color-surface-low);
+  }
+}
+
+.row-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-soft);
+  color: var(--color-text-muted);
+
+  &.strong {
+    background: var(--color-surface-high);
+    color: var(--color-text);
+  }
+
+  app-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.row-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.row-title {
+  @include type.body-lg;
+  line-height: 1.25;
+}
+
+.row-hint {
+  color: var(--color-text-muted);
+  @include type.body-sm;
+}
+
+.chevron {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--color-outline-strong);
+}
+
+.danger {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+}
+
+.danger-label {
+  margin: 0;
+  color: var(--color-error);
+  @include type.label-md;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.danger-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--tint-error);
+}
+
+.danger-head {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.danger-icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+  color: var(--color-error);
+}
+
+.danger-title {
+  margin: 0;
+  @include type.headline-sm;
+  line-height: 1.25;
+}
+
+.danger-body {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-muted);
+  @include type.body-sm;
+  line-height: 1.5;
+}
+
+.danger-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-error);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  @include type.label-md;
+  transition: transform 150ms;
+
+  &:active {
+    transform: scale(0.97);
+  }
+
+  app-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

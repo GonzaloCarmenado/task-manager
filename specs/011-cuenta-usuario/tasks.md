@@ -69,23 +69,23 @@
 
 ## Bloque 3 — Cuenta, cerrar sesión y botón de perfil (US-011-03, P1)
 
-- [ ] T-011-50 (Red): `account.access.service.spec.ts`: `isAnonymous` y `username` derivados de la sesión; `signOut` delega, vacía la caché del usuario saliente de la vista y devuelve el resultado
-- [ ] T-011-51 (Green): `features/account/account.access.service.ts` (parte de sesión y cierre)
-- [ ] T-011-52 (Red): `account-screen.spec.ts` · sin cuenta: título, texto de datos locales, «Crear cuenta gratuita» (→ `/cuenta/crear`) e «Ya tengo cuenta, iniciar sesión» (→ `/cuenta/entrar`), pie «opcional y sin correo», atrás vuelve a la lista, sin racha ni XP
-- [ ] T-011-53 (Green): `AccountScreen` sin cuenta: tarjeta de estado, mascota con rebote, píldora con pulso, tarjeta «¿Cambias de móvil pronto?», acciones de 54/50 (html y scss con las medidas del plan)
-- [ ] T-011-54 (Red): `account-screen.spec.ts` · con cuenta: tarjeta de usuario con `@usuario`, aviso «guardados en tu cuenta», filas «Cambiar contraseña» y «Cerrar sesión» con sus destinos, zona de peligro con «Borrar cuenta y datos» (→ `/cuenta/borrar`), una sesión anónima no ve los ajustes ni la zona de peligro
-- [ ] T-011-55 (Green): `AccountScreen` con cuenta: avatar con anillo, panel de ajustes, divisores, zona de peligro
-- [ ] T-011-56 (Red): `account-logout-dialog.spec.ts`: rol `alertdialog`, textos, «Sí, cerrar sesión» cierra y avisa «Sesión cerrada», «Cancelar» y el botón atrás cierran sin cambios
-- [ ] T-011-57 (Green): `AccountLogoutDialog` (velo con desenfoque, caja inferior, entrada animada)
-- [ ] T-011-58: rutas `cuenta` (y las demás con su pantalla vacía provisional) antes de `:id` en `app.routes.ts` + `app.routes.spec.ts` (rutas de producción incluyen las de cuenta)
-- [ ] T-011-59 (Red): `profile-button.spec.ts` y `tasks-list.spec.ts`: el botón de perfil en la cabecera de la lista, zona 44, círculo 36, `aria-label="Cuenta"`, abre `/cuenta`
-- [ ] T-011-60 (Green): `ProfileButton` e integración en `tasks-list` (cabecera con el título «Tareas» a la izquierda)
-- [ ] T-011-61: `cypress/support/backend.ts`: varios usuarios, tokens por usuario, `POST /auth/v1/token?grant_type=password`, `PUT /auth/v1/user`, `POST /auth/v1/logout` y errores con sus códigos; las e2e existentes siguen en verde
-- [ ] T-011-62 (Red→Green): `cypress/e2e/cuenta.cy.ts` · cerrar sesión: lista vacía y sin cuenta tras cerrar, los datos reaparecen al volver a entrar (requiere el bloque 5), atrás de Android cierra el diálogo
-- [ ] T-011-63 (Refactor): limpiar con los tests en verde
-- [ ] T-011-64: **medidas** de la pantalla Cuenta (cabecera, tarjetas, mascota 96/36, botones 54/50, filas 40, divisores, zona de peligro, botón 48, diálogo 48/48) frente al plan; **comparación** lado a lado con `cuenta/screen.png` y con el HTML (estado «con cuenta» y diálogo, que no tienen captura); claro y oscuro; consola limpia
-- [ ] T-011-65: **medidas** del botón de perfil y de la lista con él frente a `lista-con-recordatorio-de-cuenta/screen.png`
-- [ ] T-011-66: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
+- [x] T-011-50 (Red): `account.access.service.spec.ts`: `isAnonymous` y `username` derivados de la sesión; `signOut` delega, vacía la caché del usuario saliente de la vista y devuelve el resultado
+- [x] T-011-51 (Green): `features/account/account.access.service.ts` (parte de sesión y cierre)
+- [x] T-011-52 (Red): `account-screen.spec.ts` · sin cuenta: título, texto de datos locales, «Crear cuenta gratuita» (→ `/cuenta/crear`) e «Ya tengo cuenta, iniciar sesión» (→ `/cuenta/entrar`), pie «opcional y sin correo», atrás vuelve a la lista, sin racha ni XP
+- [x] T-011-53 (Green): `AccountScreen` sin cuenta: tarjeta de estado, mascota con rebote, píldora con pulso, tarjeta «¿Cambias de móvil pronto?», acciones de 54/50 (html y scss con las medidas del plan)
+- [x] T-011-54 (Red): `account-screen.spec.ts` · con cuenta: tarjeta de usuario con `@usuario`, aviso «guardados en tu cuenta», filas «Cambiar contraseña» y «Cerrar sesión» con sus destinos, zona de peligro con «Borrar cuenta y datos» (→ `/cuenta/borrar`), una sesión anónima no ve los ajustes ni la zona de peligro
+- [x] T-011-55 (Green): `AccountScreen` con cuenta: avatar con anillo, panel de ajustes, divisores, zona de peligro
+- [x] T-011-56 (Red): `account-logout-dialog.spec.ts`: rol `alertdialog`, textos, «Sí, cerrar sesión» cierra y avisa «Sesión cerrada», «Cancelar» y el botón atrás cierran sin cambios
+- [x] T-011-57 (Green): `AccountLogoutDialog` (velo con desenfoque, caja inferior, entrada animada)
+- [x] T-011-58: rutas `cuenta` (y las demás con su pantalla vacía provisional) antes de `:id` en `app.routes.ts` + `app.routes.spec.ts` (rutas de producción incluyen las de cuenta)
+- [x] T-011-59 (Red): `profile-button.spec.ts` y `tasks-list.spec.ts`: el botón de perfil en la cabecera de la lista, zona 44, círculo 36, `aria-label="Cuenta"`, abre `/cuenta`
+- [x] T-011-60 (Green): `ProfileButton` e integración en `tasks-list` (cabecera con el título «Tareas» a la izquierda)
+- [x] T-011-61: `cypress/support/backend.ts`: varios usuarios, tokens por usuario, `POST /auth/v1/token?grant_type=password`, `PUT /auth/v1/user`, `POST /auth/v1/logout` y errores con sus códigos; las e2e existentes siguen en verde
+- [x] T-011-62 (Red→Green): `cypress/e2e/cuenta.cy.ts` · cerrar sesión: lista vacía y sin cuenta tras cerrar, los datos reaparecen al volver a entrar (requiere el bloque 5), atrás de Android cierra el diálogo
+- [x] T-011-63 (Refactor): limpiar con los tests en verde
+- [x] T-011-64: **medidas** de la pantalla Cuenta (cabecera, tarjetas, mascota 96/36, botones 54/50, filas 40, divisores, zona de peligro, botón 48, diálogo 48/48) frente al plan; **comparación** lado a lado con `cuenta/screen.png` y con el HTML (estado «con cuenta» y diálogo, que no tienen captura); claro y oscuro; consola limpia
+- [x] T-011-65: **medidas** del botón de perfil y de la lista con él frente a `lista-con-recordatorio-de-cuenta/screen.png`
+- [x] T-011-66: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
 
 ---
 

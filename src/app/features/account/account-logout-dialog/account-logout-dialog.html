@@ -1,0 +1,24 @@
+<div class="scrim" (click)="cancel.emit()">
+  <div
+    class="dialog"
+    role="alertdialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleId"
+    (click)="$event.stopPropagation()"
+  >
+    <span class="badge" aria-hidden="true"><app-icon name="log-out" /></span>
+    <h2 class="title" [id]="titleId">{{ copy.title }}</h2>
+    <p class="body">{{ copy.body }}</p>
+    @if (error(); as message) {
+    <p class="error" role="alert">{{ message }}</p>
+    }
+    <div class="actions">
+      <button class="confirm" type="button" [disabled]="busy()" (click)="onConfirm()">
+        {{ copy.confirm }}
+      </button>
+      <button class="cancel" type="button" [disabled]="busy()" (click)="cancel.emit()">
+        {{ copy.cancel }}
+      </button>
+    </div>
+  </div>
+</div>

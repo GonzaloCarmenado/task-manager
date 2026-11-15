@@ -99,6 +99,20 @@ export class TasksAccessService {
   readonly status = computed<TasksStatus>(() => this.stateOf()?.status ?? 'idle');
   readonly errorReason = computed<TasksErrorReason | null>(() => this.stateOf()?.reason ?? null);
 
+  /** Borra de memoria lo de un usuario que sale (cierre de sesión o cuenta borrada). */
+  forget(userId: string): void {
+    this.cache.update((map) => {
+      const next = new Map(map);
+      next.delete(userId);
+      return next;
+    });
+    this.states.update((map) => {
+      const next = new Map(map);
+      next.delete(userId);
+      return next;
+    });
+  }
+
   get(id: string): Task | undefined {
     return this.tasks().find((t) => t.id === id);
   }

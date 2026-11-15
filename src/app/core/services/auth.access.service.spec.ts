@@ -1313,42 +1313,74 @@ describe('AuthAccessService · cuenta: cerrar sesión (spec 011)', () => {
     expect(warn).toHaveBeenCalledTimes(1);
   });
 
-  it('US-011-03 sin red no se cierra nada: la sesión sigue y no se crea otra', async () => {
+  it('US-011-03 la librería quita la sesión local antes de la petición: un fallo al revocar no impide cerrar', async () => {
     const { service, auth, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
     Object.assign(auth, {
       signOut: vi.fn().mockRejectedValue(new TypeError('Failed to fetch')),
     });
 
     const result = await service.signOut();
+    await flush();
 
-    expect(result).toEqual({ ok: false, reason: 'network' });
-    expect(service.userId()).toBe(UID);
-    expect(service.status()).toBe('ready');
-    expect(signInAnonymously).not.toHaveBeenCalled();
+    expect(result).toEqual({ ok: true });
+    expect(service.userId()).toBe(NEW_ID);
+    expect(service.session()?.user.isAnonymous).toBe(true);
   });
 
-  it('US-011-03 un error devuelto por la librería también se explica y no cambia la sesión', async () => {
+  it('US-011-03 un error devuelto por la librería (sin revocar) también deja la sesión cerrada', async () => {
     const { service, auth, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
     Object.assign(auth, {
       signOut: vi.fn().mockResolvedValue({
         error: Object.assign(new Error('x'), { name: 'AuthRetryableFetchError', status: 0 }),
       }),
     });
 
-    expect(await service.signOut()).toEqual({ ok: false, reason: 'network' });
-    expect(service.userId()).toBe(UID);
-    expect(signInAnonymously).not.toHaveBeenCalled();
+    expect(await service.signOut()).toEqual({ ok: true });
+    await flush();
+    expect(service.userId()).toBe(NEW_ID);
   });
 
-  it('US-011-03 sin respuesta en el plazo → timeout y la sesión sigue', async () => {
-    const { service, auth } = signOutSetup();
+  it('US-011-03 sin respuesta del servidor tampoco bloquea el cierre: ya está cerrada en local', async () => {
+    const { service, auth, signInAnonymously } = signOutSetup();
+    signInAnonymously.mockResolvedValue({
+      data: { session: anonymousSession(NEW_ID) },
+      error: null,
+    });
     Object.assign(auth, { signOut: vi.fn().mockReturnValue(new Promise(() => undefined)) });
 
     const pending = service.signOut();
     await vi.advanceTimersByTimeAsync(20_000);
 
-    expect(await pending).toEqual({ ok: false, reason: 'timeout' });
+    expect(await pending).toEqual({ ok: true });
+    await flush();
+    expect(service.userId()).toBe(NEW_ID);
+  });
+
+  it('US-011-03 con el móvil sin conexión no se cierra: se avisa antes de tocar nada', async () => {
+    const { service, signOut, signInAnonymously } = signOutSetup();
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+
+    expect(await service.signOut()).toEqual({ ok: false, reason: 'network' });
+
+    expect(signOut).not.toHaveBeenCalled();
+    expect(signInAnonymously).not.toHaveBeenCalled();
     expect(service.userId()).toBe(UID);
+    expect(service.status()).toBe('ready');
+  });
+
+  it('US-011-03 canSignOut: solo hay sesión que cerrar con cuenta y con red', () => {
+    const { service } = signOutSetup();
+    expect(service.canSignOut()).toBe(true);
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false);
+    expect(service.canSignOut()).toBe(false);
   });
 
   it('US-011-03 una sesión anónima no tiene nada que cerrar', async () => {

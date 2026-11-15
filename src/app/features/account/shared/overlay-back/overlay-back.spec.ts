@@ -50,3 +50,55 @@ describe('OverlayBack', () => {
     expect(closed).not.toHaveBeenCalled();
   });
 });
+
+describe('OverlayBack · cierre controlado', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    TestBed.resetTestingModule();
+  });
+
+  it('US-011-04 close() retrocede una vez y espera a que el historial se asiente', async () => {
+    const back = vi.spyOn(window.history, 'back').mockImplementation(() => {
+      queueMicrotask(() => window.dispatchEvent(new PopStateEvent('popstate')));
+    });
+    const fixture = TestBed.createComponent(Host);
+    const closed = fixture.componentInstance.closed;
+
+    await fixture.componentInstance.back.close();
+
+    expect(back).toHaveBeenCalledTimes(1);
+    expect(closed).not.toHaveBeenCalled(); // cerrar por código no se confunde con el botón atrás
+  });
+
+  it('US-011-04 tras close(), destruir el componente no vuelve a retroceder', async () => {
+    const back = vi.spyOn(window.history, 'back').mockImplementation(() => {
+      queueMicrotask(() => window.dispatchEvent(new PopStateEvent('popstate')));
+    });
+    const fixture = TestBed.createComponent(Host);
+    await fixture.componentInstance.back.close();
+    fixture.destroy();
+    expect(back).toHaveBeenCalledTimes(1);
+  });
+
+  it('US-011-04 si el historial no responde, close() no se queda colgado', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+    const fixture = TestBed.createComponent(Host);
+
+    const pending = fixture.componentInstance.back.close();
+    await vi.advanceTimersByTimeAsync(1000);
+
+    await expect(pending).resolves.toBeUndefined();
+  });
+
+  it('US-011-04 si el usuario ya retrocedió, close() no retrocede otra vez', async () => {
+    const back = vi.spyOn(window.history, 'back').mockImplementation(() => undefined);
+    const fixture = TestBed.createComponent(Host);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+
+    await fixture.componentInstance.back.close();
+
+    expect(back).not.toHaveBeenCalled();
+  });
+});

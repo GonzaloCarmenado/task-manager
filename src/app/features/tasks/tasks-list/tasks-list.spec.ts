@@ -661,3 +661,20 @@ describe('TasksList · sistema de diseño (spec 010)', () => {
     expect(t.el.querySelector('.screen')).not.toBeNull();
   });
 });
+
+describe('TasksList · botón de perfil', () => {
+  it('US-011-03 la cabecera tiene el título «Tareas» y a su derecha el botón de perfil', () => {
+    const t = setup([task({ id: 'a', dueDate: '2026-11-13' })]);
+    const header = t.el.querySelector('header.header') as HTMLElement;
+    const heading = header.querySelector('h1') as HTMLElement;
+    const profile = header.querySelector('app-profile-button') as HTMLElement;
+    expect(heading.textContent?.trim()).toBe('Tareas');
+    expect(profile).not.toBeNull();
+    expect(heading.compareDocumentPosition(profile)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('US-011-03 el botón de perfil está también con la lista vacía', () => {
+    const t = setup([]);
+    expect(t.el.querySelector('header.header app-profile-button')).not.toBeNull();
+  });
+});

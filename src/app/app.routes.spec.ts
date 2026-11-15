@@ -9,6 +9,7 @@ import { AlarmsPreview } from './features/dev/alarms-preview';
 import { PostponePreview } from './features/dev/postpone-preview';
 import { ProgressPreview } from './features/dev/progress-preview';
 import { AccountPreview } from './features/dev/account-preview';
+import { AccountScreen } from './features/account/account-screen/account-screen';
 import { LevelUp } from './features/progress/level-up/level-up';
 import { ProgressScreen } from './features/progress/progress-screen/progress-screen';
 
@@ -47,7 +48,14 @@ describe('app.routes', () => {
   it('US-003-06 en producción no se registra ninguna ruta de desarrollo', () => {
     const production = buildRoutes(false);
     expect(production.some((r) => r.path?.startsWith('__dev'))).toBe(false);
-    expect(production.map((r) => r.path)).toEqual(['', 'nueva', 'progreso', 'nivel/:level', ':id']);
+    expect(production.map((r) => r.path)).toEqual([
+      '',
+      'nueva',
+      'progreso',
+      'nivel/:level',
+      'cuenta',
+      ':id',
+    ]);
   });
 
   it('US-003-06 en desarrollo existe la ruta de vista previa y se carga de forma lazy', async () => {
@@ -114,7 +122,16 @@ describe('app.routes', () => {
   });
 });
 
-describe('rutas de la vista previa de cuenta', () => {
+describe('rutas de la cuenta', () => {
+  it('US-011-03 la ruta cuenta carga la pantalla Cuenta de forma lazy y va antes que :id', async () => {
+    const routes = buildRoutes(false);
+    const route = routes.find((r) => r.path === 'cuenta');
+    expect(route?.component).toBeUndefined();
+    expect(await route?.loadComponent?.()).toBe(AccountScreen);
+    const paths = routes.map((r) => r.path);
+    expect(paths.indexOf('cuenta')).toBeLessThan(paths.indexOf(':id'));
+  });
+
   it('US-011-01 en desarrollo existe la vista previa de cuenta, lazy, y no en producción', async () => {
     const path = '__dev/account/:screen/:state';
     const route = buildRoutes(true).find((r) => r.path === path);

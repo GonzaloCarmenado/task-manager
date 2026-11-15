@@ -51,6 +51,23 @@ describe('AccountPreview (solo desarrollo)', () => {
     expect(render('inventada', 'raro').querySelector('app-account-header')).not.toBeNull();
   });
 
+  it('US-011-03 la pantalla «cuenta» sin cuenta muestra los datos locales', () => {
+    const el = render('cuenta', 'anonymous');
+    expect(el.querySelector('app-account-screen')).not.toBeNull();
+    expect(el.textContent).toContain('ALMACENAMIENTO LOCAL ACTIVO');
+  });
+
+  it('US-011-04 la pantalla «cuenta» con cuenta muestra el usuario de ejemplo', () => {
+    const el = render('cuenta', 'account');
+    expect(el.querySelector('.username')?.textContent?.trim()).toBe('@carlos_ritmo');
+    expect(el.querySelector('[role="alertdialog"]')).toBeNull();
+  });
+
+  it('US-011-04 el estado «dialog» abre la confirmación de cerrar sesión', () => {
+    const el = render('cuenta', 'dialog');
+    expect(el.querySelector('[role="alertdialog"]')).not.toBeNull();
+  });
+
   it('US-011-01 usa ChangeDetectionStrategy.OnPush', () => {
     expect((AccountPreview as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });

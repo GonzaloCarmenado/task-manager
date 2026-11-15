@@ -1,7 +1,8 @@
 /**
  * Supabase simulado con estado para las pruebas e2e. Reproduce lo que hace el servidor real:
- * sesión anónima, CRUD de `tasks` y el progreso que calculan los disparadores (10 XP por tarea,
- * tope de 100 XP al día, desmarcar quita el XP, racha por días seguidos). Ver `docs/supabase.md`.
+ * sesión anónima, cuentas (varios usuarios con su nombre y contraseña), CRUD de `tasks` y el progreso que
+ * calculan los disparadores (10 XP por tarea, tope de 100 XP al día, desmarcar quita el XP, racha por días
+ * seguidos). Cada usuario ve solo lo suyo. Ver `docs/supabase.md`.
  */
 import type { CyHttpMessages } from 'cypress/types/net-stubbing';
 
@@ -27,8 +28,15 @@ export interface Row {
 }
 
 interface XpEvent {
+  user: string;
   day: string;
   delta: number;
+}
+
+export interface Account {
+  id: string;
+  username: string;
+  password: string;
 }
 
 export interface RecordedRequest {
@@ -37,21 +45,47 @@ export interface RecordedRequest {
   body: unknown;
 }
 
-export type Failure = 'load' | 'create' | 'update' | 'delete' | 'progress';
+export type Failure =
+  | 'load'
+  | 'create'
+  | 'update'
+  | 'delete'
+  | 'progress'
+  | 'signin'
+  | 'link'
+  | 'password'
+  | 'logout'
+  | 'delete-account'
+  | 'rate-limit';
 
 interface FailureState {
   count: number;
   network: boolean;
 }
 
-const USER_ID = '00000000-0000-4000-8000-000000000001';
+export const USER_ID = '00000000-0000-4000-8000-000000000001';
+export const INTERNAL_DOMAIN = 'cuenta.invalid';
+export const MIN_PASSWORD = 8;
 
 const b64 = (value: object): string =>
   btoa(JSON.stringify(value)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
 
-function fakeJwt(): string {
-  const payload = { sub: USER_ID, role: 'authenticated', is_anonymous: true, exp: 4102444800 };
+function fakeJwt(userId: string, anonymous: boolean): string {
+  const payload = { sub: userId, role: 'authenticated', is_anonymous: anonymous, exp: 4102444800 };
   return `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64(payload)}.e2e`;
+}
+
+/** Usuario del JWT que manda la app en `Authorization` (el anónimo inicial si no hay). */
+function subOf(authorization: unknown): string {
+  const token = String(authorization ?? '').replace(/^Bearer\s+/i, '');
+  try {
+    const part = token.split('.')[1] ?? '';
+    const padded = part.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(padded)) as { sub?: unknown };
+    return typeof payload.sub === 'string' ? payload.sub : USER_ID;
+  } catch {
+    return USER_ID;
+  }
 }
 
 export function addDay(day: string, delta: number): string {
@@ -70,9 +104,14 @@ const idle = (): FailureState => ({ count: 0, network: false });
 export class FakeBackend {
   tasks: Row[] = [];
   signups = 0;
+  logouts = 0;
+  accounts: Account[] = [];
+  /** Usuario de la petición en curso; fuera de una petición, el último que la hizo. */
+  private actor = USER_ID;
+  private accountCounter = 0;
   readonly requests: RecordedRequest[] = [];
   private events: XpEvent[] = [];
-  private best = 0;
+  private best: Record<string, number> = {};
   private counter = 0;
   private failures: Record<Failure, FailureState> = {
     load: idle(),
@@ -80,6 +119,12 @@ export class FakeBackend {
     update: idle(),
     delete: idle(),
     progress: idle(),
+    signin: idle(),
+    link: idle(),
+    password: idle(),
+    logout: idle(),
+    'delete-account': idle(),
+    'rate-limit': idle(),
   };
 
   /** Hace fallar las próximas `count` peticiones de ese tipo (500, o error de red). */
@@ -102,8 +147,31 @@ export class FakeBackend {
     return this.tasks.find((t) => t.title === title);
   }
 
-  totalXp(): number {
-    return this.events.reduce((sum, e) => sum + e.delta, 0);
+  totalXp(user = this.actor): number {
+    return this.events.filter((e) => e.user === user).reduce((sum, e) => sum + e.delta, 0);
+  }
+
+  /** Crea una cuenta con nombre de usuario y contraseña y devuelve su `user_id`. */
+  addAccount(username: string, password: string): string {
+    this.accountCounter += 1;
+    const id = `20000000-0000-4000-8000-${String(this.accountCounter).padStart(12, '0')}`;
+    this.accounts.push({ id, username, password });
+    return id;
+  }
+
+  accountByName(username: string): Account | undefined {
+    return this.accounts.find((a) => a.username === username);
+  }
+
+  /** Sesión guardada en el móvil como la dejaría supabase-js (para arrancar ya con esa cuenta). */
+  storedSession(username: string): string {
+    const account = this.accountByName(username);
+    if (!account) throw new Error(`no existe la cuenta ${username}`);
+    return JSON.stringify(this.sessionBody(account.id));
+  }
+
+  tasksOf(userId: string): Row[] {
+    return this.tasks.filter((t) => t.user_id === userId);
   }
 
   seed(partial: Partial<Row> & { title: string }): Row {
@@ -136,13 +204,14 @@ export class FakeBackend {
 
   progress(today: string): Record<string, unknown> {
     const days = this.days();
+    const best = this.best[this.actor] ?? 0;
     const current = days.has(today)
       ? this.streakEnding(today)
       : this.streakEnding(addDay(today, -1));
-    this.best = Math.max(this.best, current);
+    this.best[this.actor] = Math.max(best, current);
     return {
       total_xp: this.totalXp(),
-      best_streak: this.best,
+      best_streak: this.best[this.actor],
       current_streak: current,
       xp_today: this.earnedOn(today),
       last_completed_day: [...days].sort().pop() ?? null,
@@ -150,7 +219,9 @@ export class FakeBackend {
   }
 
   private earnedOn(day: string): number {
-    return this.events.filter((e) => e.day === day).reduce((s, e) => s + e.delta, 0);
+    return this.events
+      .filter((e) => e.user === this.actor && e.day === day)
+      .reduce((s, e) => s + e.delta, 0);
   }
 
   private award(row: Row): void {
@@ -158,13 +229,16 @@ export class FakeBackend {
     const xp = Math.max(0, Math.min(XP_PER_TASK, DAILY_CAP - this.earnedOn(day)));
     row.xp_awarded = xp;
     row.xp_day = xp > 0 ? day : null;
-    if (xp > 0) this.events.push({ day, delta: xp });
-    this.best = Math.max(this.best, this.streakEnding(day) + this.streakAfter(day));
+    if (xp > 0) this.events.push({ user: row.user_id, day, delta: xp });
+    this.best[row.user_id] = Math.max(
+      this.best[row.user_id] ?? 0,
+      this.streakEnding(day) + this.streakAfter(day)
+    );
   }
 
   private revoke(row: Row): void {
     if (row.xp_awarded > 0 && row.xp_day) {
-      this.events.push({ day: row.xp_day, delta: -row.xp_awarded });
+      this.events.push({ user: row.user_id, day: row.xp_day, delta: -row.xp_awarded });
     }
     row.xp_awarded = 0;
     row.xp_day = null;
@@ -172,7 +246,11 @@ export class FakeBackend {
   }
 
   private days(): Set<string> {
-    return new Set(this.tasks.map((t) => t.completed_day).filter((d): d is string => d !== null));
+    return new Set(
+      this.tasksOf(this.actor)
+        .map((t) => t.completed_day)
+        .filter((d): d is string => d !== null)
+    );
   }
 
   /** Días seguidos que hay justo después de `day` (sin contarlo). */
@@ -229,39 +307,142 @@ export class FakeBackend {
     return String(req.headers['accept'] ?? '').includes('vnd.pgrst.object');
   }
 
+  /** Cuerpo de sesión de Supabase Auth de un usuario (anónimo si no tiene cuenta). */
+  private sessionBody(userId: string): Record<string, unknown> {
+    const account = this.accounts.find((a) => a.id === userId);
+    return {
+      access_token: fakeJwt(userId, !account),
+      token_type: 'bearer',
+      expires_in: 3600,
+      expires_at: 4102444800,
+      // Valor ficticio de la sesión simulada (clave calculada para no parecer una credencial).
+      [`refresh_${'token'}`]: 'e2e',
+      user: this.userBody(userId),
+    };
+  }
+
+  private userBody(userId: string): Record<string, unknown> {
+    const account = this.accounts.find((a) => a.id === userId);
+    return {
+      id: userId,
+      aud: 'authenticated',
+      role: 'authenticated',
+      is_anonymous: !account,
+      ...(account ? { email: `${account.username}@${INTERNAL_DOMAIN}` } : {}),
+      app_metadata: {},
+      user_metadata: {},
+      created_at: NOW.toISOString(),
+    };
+  }
+
+  private authError(req: Req, status: number, code: string): void {
+    req.reply({ statusCode: status, body: { code, error_code: code, msg: code, message: code } });
+  }
+
   /** Registra todas las rutas de Supabase. Llamar antes de `cy.visit`. */
   install(): void {
     cy.intercept('POST', '**/auth/v1/signup*', (req) => {
       this.signups += 1;
-      req.reply({
-        statusCode: 200,
-        body: {
-          access_token: fakeJwt(),
-          token_type: 'bearer',
-          expires_in: 3600,
-          expires_at: 4102444800,
-          // Valor ficticio de la sesión simulada (clave calculada para no parecer una credencial).
-          [`refresh_${'token'}`]: 'e2e',
-          user: {
-            id: USER_ID,
-            aud: 'authenticated',
-            role: 'authenticated',
-            is_anonymous: true,
-            app_metadata: {},
-            user_metadata: {},
-            created_at: NOW.toISOString(),
-          },
-        },
-      });
+      // El primer anónimo es siempre el mismo; los siguientes (tras cerrar sesión) son usuarios nuevos.
+      const id =
+        this.signups === 1
+          ? USER_ID
+          : `30000000-0000-4000-8000-${String(this.signups).padStart(12, '0')}`;
+      req.reply({ statusCode: 200, body: this.sessionBody(id) });
+    });
+
+    cy.intercept('POST', '**/auth/v1/token*', (req) => {
+      this.record(req);
+      const grant = new URL(req.url).searchParams.get('grant_type');
+      if (grant !== 'password') {
+        req.reply({ statusCode: 200, body: this.sessionBody(subOf(req.headers['authorization'])) });
+        return;
+      }
+      if (this.shouldFail('rate-limit', req)) {
+        this.authError(req, 429, 'over_request_rate_limit');
+        return;
+      }
+      if (this.shouldFail('signin', req)) return;
+      const { email, password } = req.body as { email?: string; password?: string };
+      const account = this.accounts.find((a) => `${a.username}@${INTERNAL_DOMAIN}` === email);
+      if (!account || account.password !== password) {
+        this.authError(req, 400, 'invalid_credentials');
+        return;
+      }
+      req.reply({ statusCode: 200, body: this.sessionBody(account.id) });
+    });
+
+    cy.intercept('PUT', '**/auth/v1/user*', (req) => {
+      this.record(req);
+      const actor = subOf(req.headers['authorization']);
+      const body = req.body as { email?: string; password?: string };
+      const account = this.accounts.find((a) => a.id === actor);
+
+      if (body.email !== undefined && !account) {
+        // Vincular la sesión anónima: conserva el user_id.
+        if (this.shouldFail('link', req)) return;
+        const username = body.email.split('@')[0];
+        if (this.accountByName(username)) {
+          this.authError(req, 422, 'email_exists');
+          return;
+        }
+        if ((body.password ?? '').length < MIN_PASSWORD) {
+          this.authError(req, 422, 'weak_password');
+          return;
+        }
+        this.accounts.push({ id: actor, username, password: body.password ?? '' });
+        req.reply({ statusCode: 200, body: this.userBody(actor) });
+        return;
+      }
+
+      if (body.password !== undefined && account) {
+        if (this.shouldFail('password', req)) return;
+        if (body.password === account.password) {
+          this.authError(req, 422, 'same_password');
+          return;
+        }
+        if (body.password.length < MIN_PASSWORD) {
+          this.authError(req, 422, 'weak_password');
+          return;
+        }
+        account.password = body.password;
+        req.reply({ statusCode: 200, body: this.userBody(actor) });
+        return;
+      }
+      this.authError(req, 422, 'validation_failed');
+    });
+
+    cy.intercept('POST', '**/auth/v1/logout*', (req) => {
+      this.record(req);
+      if (this.shouldFail('logout', req)) return;
+      this.logouts += 1;
+      req.reply({ statusCode: 204, body: '' });
+    });
+
+    cy.intercept('POST', '**/rest/v1/rpc/delete_my_account*', (req) => {
+      this.record(req);
+      const actor = subOf(req.headers['authorization']);
+      if (this.shouldFail('delete-account', req)) return;
+      if (!this.accounts.some((a) => a.id === actor)) {
+        req.reply({ statusCode: 403, body: { code: '42501', message: 'anonymous' } });
+        return;
+      }
+      this.accounts = this.accounts.filter((a) => a.id !== actor);
+      this.tasks = this.tasks.filter((t) => t.user_id !== actor);
+      this.events = this.events.filter((e) => e.user !== actor);
+      req.reply({ statusCode: 204, body: '' });
     });
 
     cy.intercept({ pathname: '/rest/v1/tasks' }, (req) => {
       this.record(req);
+      this.actor = subOf(req.headers['authorization']);
       const prefersBody = String(req.headers['prefer'] ?? '').includes('return=representation');
 
       if (req.method === 'GET') {
         if (this.shouldFail('load', req)) return;
-        const sorted = [...this.tasks].sort((a, b) => a.created_at.localeCompare(b.created_at));
+        const sorted = this.tasksOf(this.actor).sort((a, b) =>
+          a.created_at.localeCompare(b.created_at)
+        );
         req.reply({ statusCode: 200, body: sorted });
         return;
       }
@@ -270,6 +451,7 @@ export class FakeBackend {
         if (this.shouldFail('create', req)) return;
         const input = req.body as Record<string, unknown>;
         const row = this.seed({
+          user_id: this.actor,
           title: String(input['title']),
           due_date: (input['due_date'] as string | null) ?? null,
           due_time: normalizeTime(input['due_time']),
@@ -280,7 +462,7 @@ export class FakeBackend {
       }
 
       const id = this.idFilter(req);
-      const row = this.tasks.find((t) => t.id === id);
+      const row = this.tasks.find((t) => t.id === id && t.user_id === this.actor);
 
       if (req.method === 'PATCH') {
         if (this.shouldFail('update', req)) return;
@@ -300,7 +482,7 @@ export class FakeBackend {
 
       if (req.method === 'DELETE') {
         if (this.shouldFail('delete', req)) return;
-        this.tasks = this.tasks.filter((t) => t.id !== id);
+        this.tasks = this.tasks.filter((t) => !(t.id === id && t.user_id === this.actor));
         req.reply({ statusCode: 204, body: '' });
         return;
       }
@@ -309,6 +491,7 @@ export class FakeBackend {
 
     cy.intercept('POST', '**/rest/v1/rpc/get_progress*', (req) => {
       this.record(req);
+      this.actor = subOf(req.headers['authorization']);
       if (this.shouldFail('progress', req)) return;
       const { p_today: today } = req.body as { p_today: string };
       req.reply({ statusCode: 200, body: this.progress(today) });

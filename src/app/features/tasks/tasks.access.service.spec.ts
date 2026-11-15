@@ -275,6 +275,33 @@ describe('TasksAccessService · datos por usuario', () => {
     expect(service.tasks().map((t) => t.id)).toEqual(['t1']);
   });
 
+  it('US-011-04 forget borra de memoria las tareas y el estado de un usuario que sale', async () => {
+    const { service, userId, next } = setup();
+    next(() => ok([row()]));
+    await service.load();
+    expect(service.tasks()).toHaveLength(1);
+
+    service.forget(USER_A);
+    expect(service.tasks()).toEqual([]);
+    expect(service.status()).toBe('idle');
+
+    userId.set(USER_B);
+    userId.set(USER_A);
+    expect(service.tasks()).toEqual([]);
+  });
+
+  it('US-011-04 forget solo afecta al usuario indicado', async () => {
+    const { service, userId, next } = setup();
+    next(() => ok([row()]));
+    await service.load();
+    userId.set(USER_B);
+    next(() => ok([row({ id: 'b1', title: 'De B' })]));
+    await service.load();
+
+    service.forget(USER_A);
+    expect(service.tasks().map((t) => t.id)).toEqual(['b1']);
+  });
+
   it('US-005-05 el estado loading de un usuario nuevo no hereda el de otro', async () => {
     const { service, userId, next } = setup();
     next(() => ok([row()]));

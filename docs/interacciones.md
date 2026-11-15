@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 137 |
+| Turnos del usuario | 138 |
 | Preguntas `F` (funcionalidad) | 44 |
-| Preguntas `W` (flujo) | 64 |
-| **Total preguntas** | **108** |
+| Preguntas `W` (flujo) | 65 |
+| **Total preguntas** | **109** |
 
 ## Log
 
@@ -143,3 +143,4 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 134 | 2026-11-14 | "si" (commit bloque 1) · "lo de la contraseña no se como hacerlo" · "ya esta seguimos" · "es este" · "ya" · "si" (db push) · "Si quitalo" | 1 F, 2 W | Commit `3521f29`. CLI en otra cuenta: logout y login del propietario, verificada por id de organización. Migración `account` aplicada al remoto. Spike `verify:account`: todo OK salvo cambiar el nombre (el servicio rechaza el identificador `.invalid`); decisión F: se descarta US-011-07 y se elimina `changeUsername`. Preguntas W: cerrar sesión de la CLI, aplicar la migración. |
 | 135 | 2026-11-15 | "si" (commit) · "dale" (extensión de Chrome reconectada) | 1 W | Commit `32903ec`. Bloque 2 (primera parte): tokens nuevos de la cuenta y 28 iconos con variante `filled`. Revisión visual de la rejilla de iconos en el navegador (claro y oscuro): ajustado el recorte de detalles en iconos rellenos. La extensión no estaba conectada al principio: se paró y se avisó. Pregunta W: commit de la primera parte del Bloque 2. |
 | 136 | 2026-11-15 | "si" (commit de tokens e iconos) | 0 | Commit `4053694`. Bloque 2 completo en local: `AccountConstructorService`, `AccountHeader`, `AccountField`, `RuleList`, `OfflineBanner`, `AccountToast` (montado en `app.html`), `OverlayBack` y la vista previa `__dev/account/<pantalla>/<estado>`. Revisión en navegador con un marco de 390×844 del mismo origen (el redimensionado de ventana de la extensión no surte efecto): medidas del plan comprobadas, claro y oscuro, consola limpia; corregido el color de la indicación del campo según el diseño. |
+| 137 | 2026-11-15 | "si" (commit del Bloque 2) | 1 W | Commit `7e62db7`. Bloque 3: pantalla Cuenta (sin y con cuenta), diálogo de cerrar sesión, botón de perfil en la lista, `AccountAccessService`, simulador e2e multiusuario y 8 e2e de cuenta (50 en total). Hallazgo: con `scope: 'local'` la librería quita la sesión local antes de la petición, así que `signOut` cierra siempre en local y solo se rechaza antes si el móvil declara estar sin conexión (`canSignOut`); el diálogo se cierra antes de cerrar sesión para que el historial no deshaga la navegación. Revisión en navegador (marco 390×844, claro/oscuro) con medidas del plan. Pregunta W: commit del Bloque 3. |

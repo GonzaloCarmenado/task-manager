@@ -260,13 +260,13 @@ export type IconName = (typeof ICON_NAMES)[number];
           }
           @case ('cloud-sync') {
             <path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1-1 8H7" />
-            <path d="M9.5 14a3 3 0 0 1 5-1" />
-            <path d="M14.5 11v2h-2" />
+            <path class="cut" d="M9.5 14a3 3 0 0 1 5-1" />
+            <path class="cut" d="M14.5 11v2h-2" />
           }
           @case ('cloud-up') {
             <path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1-1 8" />
-            <path d="M12 17v-6" />
-            <path d="M9.5 13.5L12 11l2.5 2.5" />
+            <path class="cut" d="M12 17v-6" />
+            <path class="cut" d="M9.5 13.5L12 11l2.5 2.5" />
           }
           @case ('cloud-check') {
             <path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1-1 8H7" />

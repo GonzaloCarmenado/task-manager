@@ -14,6 +14,7 @@ import { AlarmsConstructorService } from '../../../core/services/alarms.construc
 import { CLOCK } from '../../../core/services/clock';
 import { Icon } from '../../../shared/components/icon/icon';
 import { Illustration } from '../../../shared/components/illustration/illustration';
+import { ProfileButton } from '../../account/profile-button/profile-button';
 import { Celebration } from '../../progress/celebration/celebration';
 import { ProgressAccessService } from '../../progress/progress.access.service';
 import { ProgressSummary } from '../../progress/progress-summary/progress-summary';
@@ -41,6 +42,7 @@ import { TasksNoticeService } from '../tasks-notice.service';
     PostponeSheet,
     ProgressSummary,
     Celebration,
+    ProfileButton,
   ],
   templateUrl: './tasks-list.html',
   styleUrl: './tasks-list.scss',
