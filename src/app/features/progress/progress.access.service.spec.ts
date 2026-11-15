@@ -346,3 +346,32 @@ describe('ProgressAccessService · cambio de identidad (spec 011)', () => {
     expect(service.celebration()?.xpDelta).toBe(10);
   });
 });
+
+describe('ProgressAccessService · forget (cuenta borrada o cerrada)', () => {
+  it('US-011-06 forget borra de memoria el progreso y el estado de un usuario', async () => {
+    const { service, userId, next } = setup();
+    next(() => ok(row({ total_xp: 40 })));
+    await service.load();
+    expect(service.progress()?.totalXp).toBe(40);
+
+    service.forget(USER_A);
+    expect(service.progress()).toBeNull();
+    expect(service.status()).toBe('idle');
+
+    userId.set(USER_B);
+    userId.set(USER_A);
+    expect(service.progress()).toBeNull();
+  });
+
+  it('US-011-06 forget solo afecta al usuario indicado', async () => {
+    const { service, userId, next } = setup();
+    next(() => ok(row({ total_xp: 40 })));
+    await service.load();
+    userId.set(USER_B);
+    next(() => ok(row({ total_xp: 10 })));
+    await service.load();
+
+    service.forget(USER_A);
+    expect(service.progress()?.totalXp).toBe(10);
+  });
+});

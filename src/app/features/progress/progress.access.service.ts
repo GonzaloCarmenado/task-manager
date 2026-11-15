@@ -104,6 +104,20 @@ export class ProgressAccessService {
     this.level.set(celebration.leveledUpTo);
   }
 
+  /** Borra de memoria lo de un usuario que sale (cierre de sesión o cuenta borrada). */
+  forget(userId: string): void {
+    this.cache.update((m) => {
+      const next = new Map(m);
+      next.delete(userId);
+      return next;
+    });
+    this.states.update((m) => {
+      const next = new Map(m);
+      next.delete(userId);
+      return next;
+    });
+  }
+
   dismissCelebration(): void {
     this.current.set(null);
   }

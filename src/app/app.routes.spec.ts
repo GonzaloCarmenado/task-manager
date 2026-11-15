@@ -12,6 +12,8 @@ import { AccountPreview } from './features/dev/account-preview';
 import { AccountScreen } from './features/account/account-screen/account-screen';
 import { CreateAccount } from './features/account/create-account/create-account';
 import { SignIn } from './features/account/sign-in/sign-in';
+import { ChangePassword } from './features/account/change-password/change-password';
+import { DeleteAccount } from './features/account/delete-account/delete-account';
 import { LevelUp } from './features/progress/level-up/level-up';
 import { ProgressScreen } from './features/progress/progress-screen/progress-screen';
 
@@ -58,6 +60,8 @@ describe('app.routes', () => {
       'cuenta',
       'cuenta/crear',
       'cuenta/entrar',
+      'cuenta/contrasena',
+      'cuenta/borrar',
       ':id',
     ]);
   });
@@ -127,6 +131,20 @@ describe('app.routes', () => {
 });
 
 describe('rutas de la cuenta', () => {
+  it('US-011-05 y US-011-06 cuenta/contrasena y cuenta/borrar cargan sus pantallas de forma lazy, antes que :id', async () => {
+    const routes = buildRoutes(false);
+    const paths = routes.map((r) => r.path);
+    for (const [path, component] of [
+      ['cuenta/contrasena', ChangePassword],
+      ['cuenta/borrar', DeleteAccount],
+    ] as const) {
+      const route = routes.find((r) => r.path === path);
+      expect(route?.component, path).toBeUndefined();
+      expect(await route?.loadComponent?.(), path).toBe(component);
+      expect(paths.indexOf(path), path).toBeLessThan(paths.indexOf(':id'));
+    }
+  });
+
   it('US-011-02 la ruta cuenta/entrar carga Iniciar sesión de forma lazy y va antes que :id', async () => {
     const routes = buildRoutes(false);
     const route = routes.find((r) => r.path === 'cuenta/entrar');

@@ -147,16 +147,16 @@
 
 ## Bloque 7 — Cambiar contraseña y borrar cuenta (US-011-05 y 06, P2)
 
-- [ ] T-011-108 (Red): `account.access.service.spec.ts` · `changePassword` y `deleteAccount`: validan, delegan en `AuthAccessService`, no cambian nada si falla; tras borrar se limpian cachés, alarmas y buffers
-- [ ] T-011-109 (Green): `changePassword` y `deleteAccount` en `AccountAccessService`
-- [ ] T-011-110 (Red): `change-password.spec.ts`: tres tarjetas (actual, nueva con tres reglas, repetir), contraseña actual incorrecta, rechazo de igual a la actual y de débil, cargando «Cambiando tu contraseña…», éxito con aviso «Contraseña cambiada» y vuelta a Cuenta, sin conexión
-- [ ] T-011-111 (Green): `ChangePassword` (derivada de Crear cuenta)
-- [ ] T-011-112 (Red): `delete-account.spec.ts`: caja de peligro, tarjeta de contraseña, bloque de confirmación con casilla, botón deshabilitado hasta casilla y contraseña, cargando «Borrando tu cuenta…», contraseña incorrecta, error del servidor «No se ha borrado nada», éxito con aviso «Cuenta eliminada» y vuelta a la lista sin cuenta
-- [ ] T-011-113 (Green): `DeleteAccount` (derivada de Crear cuenta y de la zona de peligro)
-- [ ] T-011-114 (Red→Green): `cypress/e2e/cuenta.cy.ts` · cambiar contraseña (la antigua deja de valer) y borrar cuenta (datos eliminados, sesión anónima nueva, sin alarmas)
-- [ ] T-011-115 (Refactor): limpiar con los tests en verde
-- [ ] T-011-116: **medidas y comparación** de las dos pantallas derivadas contra Crear cuenta y contra la zona de peligro de Cuenta (mismos valores de tarjeta, campo, bloque de aviso y botones); claro y oscuro
-- [ ] T-011-117: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
+- [x] T-011-108 (Red): `account.access.service.spec.ts` · `changePassword` y `deleteAccount`: validan, delegan en `AuthAccessService`, no cambian nada si falla; tras borrar se limpian cachés, alarmas y buffers
+- [x] T-011-109 (Green): `changePassword` y `deleteAccount` en `AccountAccessService`
+- [x] T-011-110 (Red): `change-password.spec.ts`: tres tarjetas (actual, nueva con tres reglas, repetir), contraseña actual incorrecta, rechazo de igual a la actual y de débil, cargando «Cambiando tu contraseña…», éxito con aviso «Contraseña cambiada» y vuelta a Cuenta, sin conexión
+- [x] T-011-111 (Green): `ChangePassword` (derivada de Crear cuenta)
+- [x] T-011-112 (Red): `delete-account.spec.ts`: caja de peligro, tarjeta de contraseña, bloque de confirmación con casilla, botón deshabilitado hasta casilla y contraseña, cargando «Borrando tu cuenta…», contraseña incorrecta, error del servidor «No se ha borrado nada», éxito con aviso «Cuenta eliminada» y vuelta a la lista sin cuenta
+- [x] T-011-113 (Green): `DeleteAccount` (derivada de Crear cuenta y de la zona de peligro)
+- [x] T-011-114 (Red→Green): `cypress/e2e/cuenta.cy.ts` · cambiar contraseña (la antigua deja de valer) y borrar cuenta (datos eliminados, sesión anónima nueva, sin alarmas)
+- [x] T-011-115 (Refactor): limpiar con los tests en verde
+- [x] T-011-116: **medidas y comparación** de las dos pantallas derivadas contra Crear cuenta y contra la zona de peligro de Cuenta (mismos valores de tarjeta, campo, bloque de aviso y botones); claro y oscuro
+- [x] T-011-117: `pnpm lint:fix && pnpm format && pnpm secrets:check && pnpm test:ci && pnpm test:scripts` y `pnpm e2e` en verde
 
 ---
 

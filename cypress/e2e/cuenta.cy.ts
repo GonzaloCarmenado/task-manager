@@ -636,4 +636,201 @@ describe('Cuenta (extremo a extremo)', () => {
       cy.get('app-celebration .celebration').should('not.exist'); // la celebración era de otra identidad
     });
   });
+
+  describe('cambiar contraseña', () => {
+    const NEXT = ['Nueva', 'Clave', '456'].join('');
+    const boot = () =>
+      cy.boot({
+        path: '/cuenta/contrasena',
+        seed: (b) => {
+          const id = b.addAccount('ana', PASSWORD);
+          b.seed({ title: 'De la cuenta', user_id: id, due_date: TODAY });
+        },
+        signedInAs: 'ana',
+      });
+    const typeIn = (index: number, text: string) =>
+      cy.get('app-account-field').eq(index).find('input.input').clear().type(text);
+    const fill = (current = PASSWORD, next = NEXT, repeat = NEXT) => {
+      typeIn(0, current);
+      typeIn(1, next);
+      typeIn(2, repeat);
+    };
+
+    it('las reglas de la nueva y la repetición se ven en vivo, y el botón espera a todo válido', () => {
+      boot();
+      cy.get('button.submit').should('be.disabled');
+      typeIn(0, PASSWORD);
+      typeIn(1, 'corta');
+      cy.get('app-account-field').eq(1).find('li[data-state="error"]').should('have.length', 1);
+      typeIn(1, PASSWORD); // igual a la actual
+      cy.get('app-account-field').eq(1).find('li[data-state="error"]').should('have.length', 1);
+      cy.get('button.submit').should('be.disabled');
+      typeIn(1, NEXT);
+      cy.get('app-account-field').eq(1).find('li[data-state="ok"]').should('have.length', 3);
+      typeIn(2, 'otra');
+      cy.get('app-account-field').eq(2).contains('No coinciden').should('be.visible');
+      cy.get('button.submit').should('be.disabled');
+      typeIn(2, NEXT);
+      cy.get('app-account-field').eq(2).contains('Coinciden').should('be.visible');
+      cy.get('button.submit').should('be.enabled');
+    });
+
+    it('contraseña actual incorrecta: lo indica, conserva lo escrito y no cambia nada', () => {
+      boot().then((backend) => {
+        fill('otra-clave-1');
+        cy.get('button.submit').click();
+        cy.get('app-account-field')
+          .eq(0)
+          .contains('La contraseña actual no es correcta.')
+          .should('be.visible');
+        cy.get('app-account-field').eq(1).find('input.input').should('have.value', NEXT);
+        cy.location('pathname').should('eq', '/cuenta/contrasena');
+        cy.wrap(null).should(() => expect(backend.accountByName('ana')?.password).to.eq(PASSWORD));
+      });
+    });
+
+    it('cambia la contraseña: aviso, vuelta a Cuenta, y la antigua deja de valer', () => {
+      boot().then((backend) => {
+        fill();
+        cy.get('button.submit').click();
+
+        cy.location('pathname').should('eq', '/cuenta');
+        cy.contains('[role="status"]', 'Contraseña cambiada').should('be.visible');
+        cy.contains('.username', '@ana').should('be.visible'); // la sesión sigue abierta
+        cy.wrap(null).should(() => expect(backend.accountByName('ana')?.password).to.eq(NEXT));
+
+        // Cerrar sesión y volver a entrar: la antigua falla, la nueva funciona
+        cy.contains('button.row', 'Cerrar sesión').click();
+        cy.contains('[role="alertdialog"] button', 'Sí, cerrar sesión').click();
+        cy.get('app-profile-button a').click();
+        cy.contains('a', 'Ya tengo cuenta, iniciar sesión').click();
+        cy.get('app-account-field').eq(0).find('input.input').type('ana');
+        cy.get('app-account-field').eq(1).find('input.input').type(PASSWORD);
+        cy.get('button.submit').click();
+        cy.contains('[role="alert"]', 'Acceso no válido').should('be.visible');
+
+        cy.get('app-account-field').eq(1).find('input.input').clear().type(NEXT);
+        cy.get('button.submit').click();
+        cy.location('pathname').should('eq', '/');
+        cy.contains('.title', 'De la cuenta').should('be.visible');
+      });
+    });
+
+    it('sin conexión: banner, conserva lo escrito y reintenta al volver la red', () => {
+      boot().then((backend) => {
+        backend.fail('password', 50, true);
+        fill();
+        cy.get('button.submit').click();
+        cy.contains('app-offline-banner', 'Sin conexión a Internet').should('be.visible');
+        cy.get('app-account-field').eq(1).find('input.input').should('have.value', NEXT);
+        cy.wrap(null).should(() => expect(backend.accountByName('ana')?.password).to.eq(PASSWORD));
+
+        cy.wrap(null).then(() => backend.fail('password', 0));
+        cy.contains('app-offline-banner button', 'Reintentar ahora').click();
+        cy.location('pathname').should('eq', '/cuenta');
+        cy.wrap(null).should(() => expect(backend.accountByName('ana')?.password).to.eq(NEXT));
+      });
+    });
+
+    it('«Cancelar y volver» regresa a Cuenta sin cambiar nada', () => {
+      boot().then((backend) => {
+        fill();
+        cy.contains('button.cancel', 'Cancelar y volver').click();
+        cy.location('pathname').should('eq', '/cuenta');
+        cy.wrap(null).should(() => expect(backend.accountByName('ana')?.password).to.eq(PASSWORD));
+      });
+    });
+  });
+
+  describe('borrar la cuenta', () => {
+    const boot = () =>
+      cy.boot({
+        path: '/cuenta/borrar',
+        seed: (b) => {
+          const id = b.addAccount('ana', PASSWORD);
+          b.seed({ title: 'De la cuenta', user_id: id, due_date: TODAY });
+          b.seedCompleted('Hecha de la cuenta', TODAY);
+          b.tasks[b.tasks.length - 1].user_id = id;
+        },
+        signedInAs: 'ana',
+      });
+    const typePassword = (text: string) =>
+      cy.get('app-account-field').find('input.input').clear().type(text);
+    const accept = () => cy.get('input.accept').check({ force: true });
+
+    it('muestra el peligro y el botón espera a la contraseña y a la casilla', () => {
+      boot();
+      cy.contains('.danger-title', 'Borrar cuenta permanentemente').should('be.visible');
+      cy.get('button.submit').should('be.disabled');
+      typePassword(PASSWORD);
+      cy.get('button.submit').should('be.disabled');
+      accept();
+      cy.get('button.submit').should('be.enabled');
+    });
+
+    it('contraseña incorrecta: lo indica y no se borra nada', () => {
+      boot().then((backend) => {
+        typePassword('otra-clave-1');
+        accept();
+        cy.get('button.submit').click();
+        cy.contains('La contraseña no es correcta.').should('be.visible');
+        cy.location('pathname').should('eq', '/cuenta/borrar');
+        cy.wrap(null).should(() => {
+          expect(backend.accountByName('ana')).to.not.eq(undefined);
+          expect(backend.byTitle('De la cuenta')).to.not.eq(undefined);
+        });
+      });
+    });
+
+    it('si el servidor falla: «No se ha borrado nada» y se puede reintentar', () => {
+      boot().then((backend) => {
+        backend.fail('delete-account', 50, true);
+        typePassword(PASSWORD);
+        accept();
+        cy.get('button.submit').click();
+        cy.contains('[role="alert"]', 'No se ha borrado nada. Inténtalo de nuevo.').should(
+          'be.visible'
+        );
+        cy.wrap(null).should(() => expect(backend.accountByName('ana')).to.not.eq(undefined));
+
+        cy.wrap(null).then(() => backend.fail('delete-account', 0));
+        cy.get('button.submit').click();
+        cy.location('pathname').should('eq', '/');
+      });
+    });
+
+    it('borra la cuenta y sus datos, deja una sesión anónima nueva y vacía, y avisa', () => {
+      boot().then((backend) => {
+        const id = backend.accountByName('ana')?.id as string;
+        typePassword(PASSWORD);
+        accept();
+        cy.get('button.submit').click();
+
+        cy.location('pathname').should('eq', '/');
+        cy.contains('[role="status"]', 'Cuenta eliminada').should('be.visible');
+        cy.contains('h2', 'Todo despejado por aquí').should('be.visible');
+        cy.contains('.title', 'De la cuenta').should('not.exist');
+
+        cy.wrap(null).should(() => {
+          expect(backend.accountByName('ana')).to.eq(undefined);
+          expect(backend.tasksOf(id)).to.have.length(0);
+          expect(backend.totalXp(id)).to.eq(0);
+          expect(backend.signups).to.eq(1); // sesión anónima nueva
+        });
+
+        cy.get('app-profile-button a').click();
+        cy.contains('Tus datos viven solo en este móvil').should('be.visible'); // vuelve a ser anónimo
+        cy.contains('.username').should('not.exist');
+      });
+    });
+
+    it('«Cancelar y volver» regresa a Cuenta sin borrar nada', () => {
+      boot().then((backend) => {
+        typePassword(PASSWORD);
+        cy.contains('button.cancel', 'Cancelar y volver').click();
+        cy.location('pathname').should('eq', '/cuenta');
+        cy.wrap(null).should(() => expect(backend.accountByName('ana')).to.not.eq(undefined));
+      });
+    });
+  });
 });

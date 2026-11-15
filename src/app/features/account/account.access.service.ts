@@ -273,6 +273,37 @@ export class AccountAccessService {
     this._transferPending.set(false);
   }
 
+  /**
+   * Cambia la contraseña de la cuenta abierta. Valida antes de llamar al servidor (8–64 caracteres, distinta
+   * del usuario y de la actual); la actual se comprueba con el servidor y, si falla, no cambia nada.
+   */
+  async changePassword(current: string, next: string): Promise<AccountResult> {
+    const username = this.username();
+    if (username === null) return { ok: false, reason: 'unauthorized' };
+    if (next === current) return { ok: false, reason: 'same-password' };
+    if (!this.rules.isPasswordValid(next, username, { notSameAs: current })) {
+      return { ok: false, reason: 'weak-password' };
+    }
+    return this.auth.changePassword(current, next);
+  }
+
+  /**
+   * Borra la cuenta y todos sus datos tras comprobar la contraseña. Si va bien, descarta de memoria lo de la
+   * cuenta (tareas, progreso) y cualquier traspaso pendiente; las alarmas se cancelan solas al quedar la
+   * lista vacía. Si falla, no cambia nada.
+   */
+  async deleteAccount(password: string): Promise<AccountResult> {
+    const leaving = this.auth.session();
+    if (leaving === null || leaving.user.isAnonymous) return { ok: false, reason: 'unauthorized' };
+    if (password === '') return { ok: false, reason: 'invalid-credentials' };
+    const result = await this.auth.deleteOwnAccount(password);
+    if (!result.ok) return result;
+    this.tasks.forget(leaving.user.id);
+    this.progress.forget(leaving.user.id);
+    this.clearBuffer();
+    return result;
+  }
+
   /** Sin conexión no se cierra sesión: la app no puede crear la identidad anónima siguiente. */
   canSignOut(): boolean {
     return this.auth.canSignOut();

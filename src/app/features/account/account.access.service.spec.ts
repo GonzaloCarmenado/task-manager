@@ -218,6 +218,11 @@ function flowSetup(
     return { ok: true };
   });
   const cancelSignIn = vi.fn();
+  const changePassword = vi.fn<(c: string, n: string) => Promise<AccountResult>>(async () => ({
+    ok: true,
+  }));
+  const deleteOwnAccount = vi.fn<(p: string) => Promise<AccountResult>>(async () => ({ ok: true }));
+  const progressForget = vi.fn();
   const load = vi.fn(async () => {
     status.set('ready');
   });
@@ -232,15 +237,28 @@ function flowSetup(
     providers: [
       {
         provide: AuthAccessService,
-        useValue: { session, checkCredentials, completeSignIn, cancelSignIn },
+        useValue: {
+          session,
+          checkCredentials,
+          completeSignIn,
+          cancelSignIn,
+          changePassword,
+          deleteOwnAccount,
+        },
       },
       { provide: TasksAccessService, useValue: { tasks: tasksList, status, load, create, forget } },
       { provide: ACCOUNT_STORAGE, useValue: storage },
-      { provide: ProgressAccessService, useValue: { progress: signal<Progress | null>(null) } },
+      {
+        provide: ProgressAccessService,
+        useValue: { progress: signal<Progress | null>(null), forget: progressForget },
+      },
     ],
   });
   return {
     service: TestBed.inject(AccountAccessService),
+    changePassword,
+    deleteOwnAccount,
+    progressForget,
     session,
     tasksList,
     status,
@@ -641,5 +659,102 @@ describe('AccountAccessService · recordatorio de cuenta', () => {
   it('US-011-08 no depende de la red: solo del progreso ya cargado y de la sesión', () => {
     // Sin ninguna llamada de red simulada, la visibilidad se decide con lo que ya hay en memoria.
     expect(reminderSetup().service.reminderVisible()).toBe(true);
+  });
+});
+
+// ---- Cambiar contraseña y borrar cuenta (US-011-05 y 06) ------------------------------------------
+describe('AccountAccessService · cambiar contraseña', () => {
+  const CURRENT = ['Vieja', 'Clave', '123'].join('');
+  const NEXT = ['Nueva', 'Clave', '456'].join('');
+
+  it('US-011-05 con una nueva válida delega con la actual y la nueva', async () => {
+    const { service, changePassword } = flowSetup(ACCOUNT);
+    expect(await service.changePassword(CURRENT, NEXT)).toEqual({ ok: true });
+    expect(changePassword).toHaveBeenCalledWith(CURRENT, NEXT);
+  });
+
+  it('US-011-05 una nueva igual a la actual se rechaza sin llamar', async () => {
+    const { service, changePassword } = flowSetup(ACCOUNT);
+    expect(await service.changePassword(CURRENT, CURRENT)).toEqual({
+      ok: false,
+      reason: 'same-password',
+    });
+    expect(changePassword).not.toHaveBeenCalled();
+  });
+
+  it('US-011-05 una nueva que no cumple las reglas (corta, larga o igual al usuario) se rechaza sin llamar', async () => {
+    const { service, changePassword } = flowSetup(ACCOUNT); // usuario: carlos_ritmo
+    for (const bad of ['corta', 'x'.repeat(65), 'Carlos_Ritmo']) {
+      expect(await service.changePassword(CURRENT, bad), bad).toEqual({
+        ok: false,
+        reason: 'weak-password',
+      });
+    }
+    expect(changePassword).not.toHaveBeenCalled();
+  });
+
+  it('US-011-05 sin cuenta (anónimo o sin sesión) no se puede cambiar', async () => {
+    for (const initial of [ANONYMOUS, null]) {
+      const { service, changePassword } = flowSetup(initial);
+      expect(await service.changePassword(CURRENT, NEXT)).toEqual({
+        ok: false,
+        reason: 'unauthorized',
+      });
+      expect(changePassword).not.toHaveBeenCalled();
+    }
+  });
+
+  it('US-011-05 devuelve tal cual el fallo (actual incorrecta, sin red…) sin tocar nada más', async () => {
+    const { service, changePassword, forget } = flowSetup(ACCOUNT);
+    for (const reason of ['invalid-credentials', 'network', 'timeout', 'unknown'] as const) {
+      changePassword.mockResolvedValueOnce({ ok: false, reason });
+      expect(await service.changePassword(CURRENT, NEXT)).toEqual({ ok: false, reason });
+    }
+    expect(forget).not.toHaveBeenCalled();
+  });
+});
+
+describe('AccountAccessService · borrar la cuenta', () => {
+  const PASS = ['Clave', 'Segura', '123'].join('');
+
+  it('US-011-06 delega con la contraseña y, si va bien, limpia cachés y buffers de la cuenta saliente', async () => {
+    const buffer = JSON.stringify({ source: 'a', target: 'user-1', tasks: [] });
+    const { service, deleteOwnAccount, forget, progressForget, store } = flowSetup(ACCOUNT, {
+      stored: buffer,
+    });
+
+    expect(await service.deleteAccount(PASS)).toEqual({ ok: true });
+
+    expect(deleteOwnAccount).toHaveBeenCalledWith(PASS);
+    expect(forget).toHaveBeenCalledWith('user-1');
+    expect(progressForget).toHaveBeenCalledWith('user-1');
+    expect(store.has(STORE_KEY)).toBe(false);
+    expect(service.transferPending()).toBe(false);
+  });
+
+  it('US-011-06 si falla no cambia nada: ni cachés ni buffers', async () => {
+    const buffer = JSON.stringify({ source: 'a', target: 'user-1', tasks: [] });
+    const { service, deleteOwnAccount, forget, progressForget, store } = flowSetup(ACCOUNT, {
+      stored: buffer,
+    });
+    for (const reason of ['invalid-credentials', 'network', 'timeout', 'unknown'] as const) {
+      deleteOwnAccount.mockResolvedValueOnce({ ok: false, reason });
+      expect(await service.deleteAccount(PASS)).toEqual({ ok: false, reason });
+    }
+    expect(forget).not.toHaveBeenCalled();
+    expect(progressForget).not.toHaveBeenCalled();
+    expect(store.has(STORE_KEY)).toBe(true);
+  });
+
+  it('US-011-06 sin contraseña no llama al servidor', async () => {
+    const { service, deleteOwnAccount } = flowSetup(ACCOUNT);
+    expect(await service.deleteAccount('')).toEqual({ ok: false, reason: 'invalid-credentials' });
+    expect(deleteOwnAccount).not.toHaveBeenCalled();
+  });
+
+  it('US-011-06 una sesión anónima no puede borrar cuenta', async () => {
+    const { service, deleteOwnAccount } = flowSetup(ANONYMOUS);
+    expect(await service.deleteAccount(PASS)).toEqual({ ok: false, reason: 'unauthorized' });
+    expect(deleteOwnAccount).not.toHaveBeenCalled();
   });
 });

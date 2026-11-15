@@ -40,6 +40,16 @@ export function buildRoutes(devMode: boolean): Routes {
       loadComponent: () => import('./features/account/sign-in/sign-in').then((m) => m.SignIn),
     },
     {
+      path: 'cuenta/contrasena',
+      loadComponent: () =>
+        import('./features/account/change-password/change-password').then((m) => m.ChangePassword),
+    },
+    {
+      path: 'cuenta/borrar',
+      loadComponent: () =>
+        import('./features/account/delete-account/delete-account').then((m) => m.DeleteAccount),
+    },
+    {
       path: ':id',
       loadComponent: () => import('./features/tasks/task-form/task-form').then((m) => m.TaskForm),
     },

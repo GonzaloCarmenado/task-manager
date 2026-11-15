@@ -6,6 +6,8 @@ import { AccountConstructorService } from '../account/account.constructor.servic
 import { AccountLogoutDialog } from '../account/account-logout-dialog/account-logout-dialog';
 import { AccountScreen } from '../account/account-screen/account-screen';
 import { CreateAccount } from '../account/create-account/create-account';
+import { ChangePassword } from '../account/change-password/change-password';
+import { DeleteAccount } from '../account/delete-account/delete-account';
 import { SignIn } from '../account/sign-in/sign-in';
 import { AccountField } from '../account/shared/account-field/account-field';
 import { AccountHeader } from '../account/shared/account-header/account-header';
@@ -50,6 +52,14 @@ function sampleSignIn(state: string) {
   };
 }
 
+/** Resultado simulado de cambiar contraseña o borrar: `normal` (ok), `wrong` (contraseña incorrecta), `offline` o `slow`. */
+function sampleChange(state: string): () => Promise<AccountResult> {
+  if (state === 'wrong') return async () => ({ ok: false, reason: 'invalid-credentials' });
+  if (state === 'offline') return async () => ({ ok: false, reason: 'network' });
+  if (state === 'slow') return () => new Promise<AccountResult>(() => undefined);
+  return async () => ({ ok: true });
+}
+
 /** Datos de ejemplo de la pantalla Cuenta: `anonymous`, `account` o `dialog` (con cuenta y el diálogo abierto). */
 function sampleAccess(state: string) {
   const withAccount = state === 'account' || state === 'dialog';
@@ -61,6 +71,8 @@ function sampleAccess(state: string) {
     signOut: async () => ({ ok: true as const }),
     createAccount: sampleCreate(state),
     ...sampleSignIn(state),
+    changePassword: sampleChange(state),
+    deleteAccount: sampleChange(state),
   };
 }
 
@@ -70,6 +82,7 @@ function sampleAccess(state: string) {
  * Pantalla `base`: campos y cabecera. Estados: `fields`, `errors`, `valid` y `toast`.
  * Pantalla `cuenta`: la pantalla Cuenta con datos de ejemplo. Estados: `anonymous`, `account` y `dialog`.
  * Pantalla `crear`: Crear cuenta con un servicio simulado. Estados: `normal`, `taken`, `offline` y `slow`.
+ * Pantallas `contrasena` y `borrar`: estados `normal`, `wrong`, `offline` y `slow`.
  * Pantalla `entrar`: Iniciar sesión. Estados: `form`, `error`, `limit`, `offline`, `sheet` y `completed`.
  */
 @Component({
@@ -83,6 +96,8 @@ function sampleAccess(state: string) {
     AccountLogoutDialog,
     CreateAccount,
     SignIn,
+    ChangePassword,
+    DeleteAccount,
   ],
   providers: [
     {
@@ -95,6 +110,10 @@ function sampleAccess(state: string) {
       <app-create-account />
     } @else if (screen === 'entrar') {
       <app-sign-in />
+    } @else if (screen === 'contrasena') {
+      <app-change-password />
+    } @else if (screen === 'borrar') {
+      <app-delete-account />
     } @else if (screen === 'cuenta') {
       <app-account-screen />
       @if (requested === 'dialog') {

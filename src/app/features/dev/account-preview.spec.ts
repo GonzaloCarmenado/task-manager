@@ -80,6 +80,16 @@ describe('AccountPreview (solo desarrollo)', () => {
     }
   });
 
+  it('US-011-05 y US-011-06 las pantallas «contrasena» y «borrar» se pueden previsualizar', () => {
+    for (const state of ['normal', 'wrong', 'offline', 'slow']) {
+      expect(
+        render('contrasena', state).querySelector('app-change-password'),
+        state
+      ).not.toBeNull();
+      expect(render('borrar', state).querySelector('app-delete-account'), state).not.toBeNull();
+    }
+  });
+
   it('US-011-01 usa ChangeDetectionStrategy.OnPush', () => {
     expect((AccountPreview as unknown as ComponentDef).ɵcmp.onPush).toBe(true);
   });
