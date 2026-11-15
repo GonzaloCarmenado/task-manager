@@ -56,15 +56,32 @@ describe('App', () => {
     );
   });
 
-  it('US-011-02 reanuda un traspaso de tareas a medias al tener identidad lista, y no antes', () => {
+  it('US-011-02 reanuda un traspaso de tareas a medias al tener identidad lista, y no antes', async () => {
     const loading = setup('loading');
+    await new Promise((r) => setTimeout(r, 30));
     expect(loading.resumeTransfer).not.toHaveBeenCalled();
     loading.status.set('ready');
     loading.fixture.detectChanges();
-    expect(loading.resumeTransfer).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(loading.resumeTransfer).toHaveBeenCalledTimes(1));
 
     const ready = setup('ready');
-    expect(ready.resumeTransfer).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(ready.resumeTransfer).toHaveBeenCalledTimes(1));
+  });
+
+  it('US-011-02 si la app se destruye antes de cargar la lógica de cuenta no hay rechazos sin gestionar', async () => {
+    const rejected: unknown[] = [];
+    const onRejection = (event: PromiseRejectionEvent) => {
+      rejected.push(event.reason);
+      event.preventDefault();
+    };
+    window.addEventListener('unhandledrejection', onRejection);
+    const { fixture, resumeTransfer } = setup('ready');
+    fixture.destroy();
+    await new Promise((r) => setTimeout(r, 80));
+    window.removeEventListener('unhandledrejection', onRejection);
+
+    expect(rejected).toEqual([]);
+    expect(resumeTransfer).not.toHaveBeenCalled();
   });
 
   it('US-003-01 con ready pinta el router-outlet y no la pantalla de estado', () => {

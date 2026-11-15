@@ -4,7 +4,7 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
@@ -16,7 +16,8 @@ import { AlarmsAccessService } from './features/tasks/alarms/alarms.access.servi
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    // Cada navegación empieza arriba: el WebView conserva el desplazamiento del documento entre rutas.
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
     {
       provide: SUPABASE_CONFIG,
       useValue: { url: environment.supabaseUrl, key: environment.supabaseKey },

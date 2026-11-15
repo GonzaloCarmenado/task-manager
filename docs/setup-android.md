@@ -74,6 +74,15 @@ Los selectores de fecha y hora del formulario son los **nativos** del sistema (`
 - **Limitación conocida**: si Android mata el proceso pero la tarea sigue en «recientes», el toque en el aviso abre la lista en vez de la tarea (Android no entrega el intent en ese caso). Con la app abierta, cerrada por el usuario o tras un reinicio, sí abre la tarea.
 - Al compilar con `pnpm tauri android build`, **no** definir `MSYS_NO_PATHCONV` en la misma sesión (rompe la ruta de `pnpm` y falla con `MODULE_NOT_FOUND`).
 
+## Cuenta de usuario (spec 011)
+
+- Es JavaScript puro sobre Supabase Auth: **no hay plugin nativo ni permisos nuevos**. La cuenta vive en el WebView y la sesión en `localStorage`.
+- **Botón atrás de Android**: las hojas y diálogos (cerrar sesión, tareas de este móvil, confirmación de descarte) añaden una entrada al historial (`OverlayBack`) y el gesto las cierra. Con capas superpuestas cierra solo la de arriba. Probar: `adb shell input keyevent KEYCODE_BACK` con una capa abierta (se cierra sin salir de la pantalla) y sin ninguna (vuelve a la pantalla anterior).
+- **Teclado virtual**: en Crear cuenta, Cambiar contraseña, Iniciar sesión y Borrar cuenta el teclado no debe tapar el campo activo ni el botón principal (la cabecera es fija y el contenido hace scroll). `adb shell input text` escribe en el campo enfocado.
+- **Arranque en frío, claro y oscuro**: cambiar el tema con la app abierta no recrea la barra de estado (ver spec 010); cerrar y abrir la app tras cambiarlo (`adb shell cmd uimode night yes`).
+- Si la app se cierra a mitad de un traspaso de tareas (entrar con tareas pendientes en el móvil), al abrirla de nuevo se reanuda sin duplicar (buffer en `localStorage`).
+- Comprobación manual recomendada tras cambios en la cuenta: crear cuenta → cerrar sesión → entrar con tareas locales (traer y descartar) → cambiar contraseña → borrar cuenta, con el backend real (`pnpm tauri android dev`).
+
 ## Interfaz y diseño (spec 010)
 
 - **Fuente empaquetada**: Plus Jakarta Sans (SIL OFL 1.1, `@fontsource-variable/plus-jakarta-sans` con versión exacta). `angular.json` copia solo los `woff2` `latin` y `latin-ext` a `/fonts/` y `src/styles/_fonts.scss` los declara con `font-display: swap`. Va dentro del APK: no se pide a ningún servicio externo y la app la aplica sin red.

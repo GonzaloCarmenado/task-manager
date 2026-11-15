@@ -6,10 +6,10 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 
 | Métrica | Total |
 |---|---|
-| Turnos del usuario | 142 |
+| Turnos del usuario | 144 |
 | Preguntas `F` (funcionalidad) | 44 |
-| Preguntas `W` (flujo) | 69 |
-| **Total preguntas** | **113** |
+| Preguntas `W` (flujo) | 70 |
+| **Total preguntas** | **114** |
 
 ## Log
 
@@ -148,3 +148,5 @@ Ver reglas en `CLAUDE.md` → "Registro de interacciones".
 | 139 | 2026-11-15 | "si" (commit del Bloque 4) | 1 W | Commit `9a27215`. Bloque 5 completo en local: tareas de este móvil, inicio de sesión en dos fases (`startSignIn`/`finishSignIn`/`cancelSignIn`), traspaso de pendientes con buffer en `localStorage` (origen y destino, reanudable sin duplicar ni mezclar cuentas) reanudado al arrancar, pantalla Iniciar sesión, hoja «Tareas de este móvil», confirmación de descarte (y variante solo completadas), ruta `cuenta/entrar`, vista previa `entrar/<estado>` y 17 e2e nuevos (67 en total). Hallazgos: (1) al retirar una capa por código su `history.back()` cerraba la de debajo; `OverlayBack` ahora distingue los retrocesos propios y tiene pila y `closeAll()`; (2) el router de Angular atiende su `popstate` en un `setTimeout(0)` y pisaba la navegación posterior: se espera una macrotarea. Revisión en navegador con medidas del plan. Pregunta W: commit del Bloque 5. |
 | 140 | 2026-11-15 | "si" (commit del Bloque 5) | 1 W | Commit `e2129f4`. Bloque 6 completo en local: recordatorio de cuenta (`reminderVisible`/`snoozeReminder` con 14 días y persistencia, sin depender de la red), tarjeta `AccountReminder` bajo el resumen de nivel, `ProgressAccessService` limpia celebración y subida de nivel al cambiar de identidad, test que fija que las alarmas se reconcilian con las de la cuenta, y 8 e2e nuevos (75 en total). Revisión en navegador con medidas del plan (tesela 40, aspa 32, botones 46, radio 24, separación 16 a ambos lados). Pregunta W: commit del Bloque 6. |
 | 141 | 2026-11-15 | "si dale" (commit del Bloque 6) | 1 W | Commit `7f02a79`. Bloque 7 completo en local: `changePassword` y `deleteAccount` en `AccountAccessService` (validan antes, no cambian nada si falla; tras borrar limpian tareas, progreso y buffer), `forget` en el progreso, pantallas Cambiar contraseña y Borrar cuenta derivadas de Crear cuenta y de la zona de peligro, rutas `cuenta/contrasena` y `cuenta/borrar`, vista previa y 10 e2e nuevos (85 en total). Revisión en navegador (390×844, claro y oscuro) con los mismos valores que Crear cuenta y la zona de peligro de Cuenta. Pregunta W: commit del Bloque 7. |
+| 142 | 2026-11-15 | "si" (commit del Bloque 7) | 1 W | Commit `c36847f`. Bloque 9 (cierre) en local: build sin avisos (lógica de cuenta cargada bajo demanda −14 kB; avisos de presupuesto a 560 kB y 10 kB con test), e2e de fidelidad a 390 px (98 e2e en total), documentación (`supabase.md`, `setup-android.md`, `CLAUDE.md`) y `review.md`. Pendientes por requerir emulador y confirmación: comprobación en Android (T-011-130) y `verify:account` final (T-011-131). Pregunta W: commit del cierre y cómo seguir con lo pendiente. |
+| 143 | 2026-11-15 | "arranca el emulador y lo probamos todo" | 0 | Emulador Android (APK debug x86_64, proyecto real) con toques reales y teclado virtual: crear cuenta, cerrar sesión, iniciar sesión con tareas locales (traer/descartar, atrás con capas apiladas), cambiar contraseña (la antigua deja de valer), borrar cuenta, sin conexión con «Reintentar ahora», arranque en frío claro y oscuro, persistencia. Hallazgo: el WebView conserva el scroll entre rutas → `scrollPositionRestoration: 'top'` (con test) verificado en el emulador. `verify:account` final: 11/11, sin usuarios de prueba. `review.md` aprobado; spec Implementada. |

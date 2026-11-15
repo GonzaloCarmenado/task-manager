@@ -132,7 +132,11 @@ El progreso lo calcula la **base de datos**: el cliente solo envía el **día lo
 - Vincular la sesión anónima (`updateUser`) conserva el mismo `user_id`: tareas y progreso siguen siendo suyos.
 - **Configuración remota (panel de Supabase, la hace el propietario; no se versiona)**: Authentication → Providers → Email: desactivar «Confirm email» y fijar longitud mínima de contraseña en 8. Sin esto, vincular deja la cuenta pendiente de verificar.
 - Migración `<marca>_account.sql`: `delete_my_account()` (security definer, solo `authenticated` y no anónimo; borra `auth.users` y las tablas de datos caen en cascada). Rollback al final del fichero.
-- Verificación real (manual): `pnpm verify:account` crea una cuenta de prueba aleatoria, la vincula, cambia nombre y contraseña, la borra y comprueba que una sesión anónima no puede borrar. Solo imprime booleanos.
+- Verificación real (manual): `pnpm verify:account` crea una cuenta de prueba aleatoria, la vincula, cambia la contraseña, la borra y comprueba que una sesión anónima no puede borrar. Solo imprime booleanos; no deja usuarios de prueba.
+- **No se puede cambiar el nombre de usuario** (US-011-07 descartada tras el spike): el servicio rechaza (`email_address_invalid`) cambiar el identificador a una dirección `.invalid`. Quien quiera otro nombre crea una cuenta nueva.
+- **Cerrar sesión** usa `signOut({ scope: 'local' })`: la librería quita la sesión local antes de la petición, así que solo se rechaza antes de empezar si el móvil declara estar sin conexión. Un fallo al revocar el token en el servidor no impide cerrar.
+- **Iniciar sesión** va en dos fases con un cliente «sonda» (sin persistencia, almacenamiento en memoria): comprueba credenciales sin tocar la sesión anónima; solo `completeSignIn` cambia de identidad.
+- Las contraseñas y los identificadores internos no se escriben nunca en consola ni en el repo.
 
 ## Estado
 

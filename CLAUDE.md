@@ -90,6 +90,16 @@ Heredado de un proyecto de referencia privado anterior, con las diferencias indi
 - **Orden de despliegue**: las migraciones `tasks_postponed_count` (007) y `progress` (008) se aplican **antes** de ejecutar el cliente contra el remoto (el cliente exige `postponed_count` y envía `completed_day`).
 - Pruebas reales (manuales, contra el remoto): `pnpm verify:rls` y `pnpm verify:progress`.
 
+### Cuenta de usuario (spec 011)
+
+- **Sin correo, sin verificación y sin recuperación**: usuario + contraseña. Internamente el usuario es `<usuario>@cuenta.invalid` (dominio reservado; la persona no lo ve; el escáner de secretos lo admite). No hay forma de cambiar el nombre (descartado tras el spike) ni de recuperar el acceso (se avisa al crear y hay casilla obligatoria).
+- Solo `AuthAccessService` toca `supabase.auth`. El inicio de sesión va en **dos fases** (`checkCredentials` con cliente sonda → `completeSignIn`); cancelar nunca destruye la sesión anónima. Cerrar sesión es `scope: 'local'`; `canSignOut()` rechaza antes de empezar si no hay conexión.
+- `AccountAccessService` orquesta los flujos y las cachés. Al salir una identidad (cerrar sesión o borrar cuenta) se llama a `forget(userId)` de tareas y progreso; el progreso pendiente (celebración, subida de nivel) se limpia al cambiar de `userId`. El traspaso de tareas pendientes al entrar usa un buffer en `localStorage` con origen y destino y se reanuda al arrancar.
+- **Capas (hojas y diálogos)**: usar `OverlayBack` (pila, `close()`/`closeAll()`). Antes de **navegar** tras un flujo con capas hay que retirarlas del historial y esperar (`await closeAll()`/`close()`): el router de Angular atiende su `popstate` en un `setTimeout(0)` y pisaría la navegación. Los retrocesos propios no cierran la capa de debajo.
+- **Paquete inicial**: `app.ts` no importa de forma estática los servicios de cuenta (la reanudación del traspaso usa `import()`; lo comprueba `scripts/initial-bundle.test.mjs`). Los presupuestos de build están en `angular.json` (`scripts/budgets.test.mjs`).
+- **Fidelidad**: las pantallas siguen las medidas de `specs/011-cuenta-usuario/plan.md`; `cypress/e2e/cuenta-fidelidad.cy.ts` las comprueba a 390 px. Vistas previas en desarrollo: `/__dev/account/<pantalla>/<estado>`.
+- `pnpm verify:account` (manual, contra el remoto, con confirmación) crea y borra una cuenta de prueba.
+
 ### Pruebas e2e (spec 009)
 
 - `pnpm e2e` ejecuta Cypress contra la app con la configuración `e2e` (entorno ficticio, puerto 4300). Toda la red a Supabase se simula con estado en `cypress/support/backend.ts`: **nunca** toca el remoto.
@@ -162,6 +172,7 @@ pnpm secrets:check        # escaneo de secretos (también en pre-commit)
 pnpm e2e                   # pruebas e2e con Cypress (arranca la app en :4300 con el entorno ficticio; sin red real)
 pnpm e2e:open              # Cypress en modo interactivo
 pnpm verify:rls            # prueba REAL de RLS de `tasks` con dos sesiones anónimas (manual, contra el remoto)
+pnpm verify:account        # prueba REAL de la cuenta (alta, entrada, contraseña, borrado) con una cuenta aleatoria (manual, contra el remoto; pedir confirmación)
 pnpm env:init              # crea src/environments/environment.ts (ignorado) desde el ejemplo
 pnpm db:new <nombre>       # nueva migración SQL
 pnpm db:push:dry           # simula la subida de migraciones (siempre --remote)

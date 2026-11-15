@@ -168,28 +168,28 @@ El spike mostró que el servicio no permite cambiar el identificador (`email_add
 
 ## Bloque 9 — Cierre y verificación (todas las historias)
 
-- [ ] T-011-126: `cypress/e2e/cuenta-fidelidad.cy.ts`: a 390×844, medidas de cada pantalla frente a la tabla del plan (cabecera 64, atrás 44, entradas 48/56, botones 52/54/50/48/46/44, tarjetas, radios, iconos, tamaños de texto) y que no hay referencias a fuentes externas
-- [ ] T-011-127: `pnpm e2e` completo en verde (las 42 anteriores más las de cuenta)
-- [ ] T-011-128: recorrido completo en navegador (390×844, claro y oscuro) de **todas** las pantallas y estados, comparando cada una con su `screen.png`/HTML: anotar y corregir cualquier diferencia; consola limpia; objetivos táctiles ≥ 44 px
-- [ ] T-011-129: `pnpm build` sin avisos nuevos y comprobar el presupuesto de tamaño (los iconos nuevos y los componentes)
-- [ ] T-011-130 *(manual)*: emulador Android (arranque en frío, claro y oscuro): cabecera fija con la barra de estado, **teclado virtual** que no tape campo ni botón, botón atrás de Android en formularios y diálogos, crear cuenta, cerrar sesión, iniciar sesión con tareas locales y borrar cuenta; alarmas al cambiar de identidad
-- [ ] T-011-131 *(requiere confirmación del usuario)*: `pnpm verify:account` final contra el proyecto y borrado de los usuarios de prueba
-- [ ] T-011-132: `docs/setup-android.md` y `CLAUDE.md` (reglas de cuenta: identificador interno, sin recuperación, solo `AuthAccessService` toca la autenticación, dos fases de inicio de sesión)
-- [ ] T-011-133: `specs/011-cuenta-usuario/review.md` con lo comprobado, las discrepancias diseño ↔ comportamiento y lo detectado fuera de alcance; estado de la spec a Implementada y fila del `README`
-- [ ] T-011-134: pedir confirmación antes de cada commit, push y apertura o actualización de PR
+- [x] T-011-126: `cypress/e2e/cuenta-fidelidad.cy.ts`: a 390×844, medidas de cada pantalla frente a la tabla del plan (cabecera 64, atrás 44, entradas 48/56, botones 52/54/50/48/46/44, tarjetas, radios, iconos, tamaños de texto) y que no hay referencias a fuentes externas
+- [x] T-011-127: `pnpm e2e` completo en verde (las 42 anteriores más las de cuenta)
+- [x] T-011-128: recorrido completo en navegador (390×844, claro y oscuro) de **todas** las pantallas y estados, comparando cada una con su `screen.png`/HTML: anotar y corregir cualquier diferencia; consola limpia; objetivos táctiles ≥ 44 px
+- [x] T-011-129: `pnpm build` sin avisos nuevos y comprobar el presupuesto de tamaño (los iconos nuevos y los componentes)
+- [x] T-011-130 *(manual)*: emulador Android (arranque en frío, claro y oscuro): cabecera fija con la barra de estado, **teclado virtual** que no tape campo ni botón, botón atrás de Android en formularios y diálogos, crear cuenta, cerrar sesión, iniciar sesión con tareas locales y borrar cuenta; alarmas al cambiar de identidad
+- [x] T-011-131 *(requiere confirmación del usuario)*: `pnpm verify:account` final contra el proyecto y borrado de los usuarios de prueba
+- [x] T-011-132: `docs/setup-android.md` y `CLAUDE.md` (reglas de cuenta: identificador interno, sin recuperación, solo `AuthAccessService` toca la autenticación, dos fases de inicio de sesión)
+- [x] T-011-133: `specs/011-cuenta-usuario/review.md` con lo comprobado, las discrepancias diseño ↔ comportamiento y lo detectado fuera de alcance; estado de la spec a Implementada y fila del `README`
+- [x] T-011-134: pedir confirmación antes de cada commit, push y apertura o actualización de PR
 
 ---
 
 ## Checklist de cierre
 
-- [ ] `pnpm lint:fix && pnpm format` sin errores
-- [ ] `pnpm secrets:check` sin hallazgos
-- [ ] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar (≥ 80 % en `AuthAccessService` y `AccountAccessService`)
-- [ ] `pnpm e2e` en verde (incluida `cuenta-fidelidad.cy.ts`)
-- [ ] Criterios P1 de `spec.md` verificados (US-011-01, 02, 03 y 08)
-- [ ] Cada pantalla comparada lado a lado con su `screen.png`/HTML, con las diferencias anotadas o corregidas
-- [ ] Revisión visual en navegador con la extensión de Chrome, en claro y en oscuro
-- [ ] Comprobado en el emulador Android (arranque en frío, claro y oscuro, teclado y botón atrás)
-- [ ] Migración aplicada y `verify:account` en verde, con usuarios de prueba borrados
-- [ ] Ningún correo, contraseña, token ni identificador del proyecto en repo, logs ni capturas
+- [x] `pnpm lint:fix && pnpm format` sin errores
+- [x] `pnpm secrets:check` sin hallazgos
+- [x] `pnpm test:ci` y `pnpm test:scripts` en verde, cobertura sin bajar (≥ 80 % en `AuthAccessService` y `AccountAccessService`)
+- [x] `pnpm e2e` en verde (incluida `cuenta-fidelidad.cy.ts`)
+- [x] Criterios P1 de `spec.md` verificados (US-011-01, 02, 03 y 08)
+- [x] Cada pantalla comparada lado a lado con su `screen.png`/HTML, con las diferencias anotadas o corregidas
+- [x] Revisión visual en navegador con la extensión de Chrome, en claro y en oscuro
+- [x] Comprobado en el emulador Android (arranque en frío, claro y oscuro, teclado y botón atrás)
+- [x] Migración aplicada y `verify:account` en verde, con usuarios de prueba borrados
+- [x] Ningún correo, contraseña, token ni identificador del proyecto en repo, logs ni capturas
 - [ ] Confirmación del usuario antes de cada commit, push y de todo lo que toque el remoto
