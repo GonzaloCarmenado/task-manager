@@ -41,13 +41,13 @@
 
 ## Bloque 2 — Base visual compartida (US-011-01, 02, 03)
 
-- [ ] T-011-27 (Red): `scripts/design-tokens.test.mjs`: tokens nuevos del plan (`--color-surface-highest`, `--color-inverse-surface`/`-on-surface`, `--color-tertiary-soft-dim`, `--color-on-primary-soft-strong`, `--glass-bar`, tintes, velos, sombras nuevas) con los valores claros del diseño, definidos en oscuro, y contraste AA de los pares nuevos
-- [ ] T-011-28 (Green): `src/styles/_tokens.scss`: tokens nuevos en claro y oscuro
-- [ ] T-011-29 (Red): `shared/components/icon/icon.spec.ts`: existen los iconos nuevos (`arrow-left`, `arrow-right`, `person`, `at`, `id-card`, `key`, `eye`, `eye-off`, `check-circle`, `circle`, `alert-circle`, `user-plus`, `x`), la entrada `filled` rellena el icono, sigue sin recursos externos
-- [ ] T-011-30 (Green): `icon.ts`: entrada `filled` y los iconos del T-011-29
-- [ ] T-011-31 (Red): `icon.spec.ts`: iconos de cuenta (`shield-user`, `lock-reset`, `phone-lock`, `shield`, `cloud-sync`, `cloud-up`, `cloud-check`, `log-in`, `log-out`, `badge-check`, `verified-user`, `swap`, `list-plus`, `info`, `trash-sweep`, `bolt`, `chevron-right` existente)
-- [ ] T-011-32 (Green): `icon.ts`: los iconos del T-011-31
-- [ ] T-011-33: revisión visual de los iconos nuevos en una vista previa (rejilla, claro y oscuro) comparados con los glifos de las capturas; ajustar trazo y proporciones
+- [x] T-011-27 (Red): `scripts/design-tokens.test.mjs`: tokens nuevos del plan (`--color-surface-highest`, `--color-inverse-surface`/`-on-surface`, `--color-tertiary-soft-dim`, `--color-on-primary-soft-strong`, `--glass-bar`, tintes, velos, sombras nuevas) con los valores claros del diseño, definidos en oscuro, y contraste AA de los pares nuevos
+- [x] T-011-28 (Green): `src/styles/_tokens.scss`: tokens nuevos en claro y oscuro
+- [x] T-011-29 (Red): `shared/components/icon/icon.spec.ts`: existen los iconos nuevos (`arrow-left`, `arrow-right`, `person`, `at`, `id-card`, `key`, `eye`, `eye-off`, `check-circle`, `circle`, `alert-circle`, `user-plus`, `x`), la entrada `filled` rellena el icono, sigue sin recursos externos
+- [x] T-011-30 (Green): `icon.ts`: entrada `filled` y los iconos del T-011-29
+- [x] T-011-31 (Red): `icon.spec.ts`: iconos de cuenta (`shield-user`, `lock-reset`, `phone-lock`, `shield`, `cloud-sync`, `cloud-up`, `cloud-check`, `log-in`, `log-out`, `badge-check`, `verified-user`, `swap`, `list-plus`, `info`, `trash-sweep`, `bolt`, `chevron-right` existente)
+- [x] T-011-32 (Green): `icon.ts`: los iconos del T-011-31
+- [x] T-011-33: revisión visual de los iconos nuevos en una vista previa (rejilla, claro y oscuro) comparados con los glifos de las capturas; ajustar trazo y proporciones
 - [ ] T-011-34 (Red): `account.constructor.service.spec.ts`: `usernameRules`, `passwordRules` (incluida «distinta de la actual»), `matchState`, `errorText` por contexto y todos los textos fijos de las pantallas del plan
 - [ ] T-011-35 (Green): `features/account/account.constructor.service.ts`
 - [ ] T-011-36 (Red): `shared/account-header.spec.ts`: título, botón atrás con nombre accesible y zona 44, círculo decorativo `aria-hidden`

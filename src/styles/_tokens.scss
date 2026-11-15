@@ -79,6 +79,26 @@
   --scrim: rgba(15, 14, 23, 0.55);
   --scrim-blur: 8px;
 
+  // Spec 011 (cuenta): colores, tintes, velos y sombras que usa el diseño de las pantallas de cuenta
+  --color-surface-highest: #e3dfff; // botón principal deshabilitado
+  --color-inverse-surface: #2d2a5b; // aviso pequeño inferior
+  --color-inverse-on-surface: #f3eeff;
+  --color-tertiary-soft-dim: #4edea3; // icono del aviso y «guardados en tu cuenta»
+  --color-on-primary-soft-strong: #07006c; // icono sobre primary-soft
+  --glass-bar: rgba(252, 248, 255, 0.85); // cabecera fija con desenfoque
+  --tint-secondary: rgba(255, 221, 184, 0.3);
+  --tint-error: rgba(255, 218, 214, 0.3);
+  --tint-surface-high: rgba(233, 229, 255, 0.6);
+  --tint-tertiary: rgba(78, 222, 163, 0.3);
+  --scrim-inverse-40: rgba(45, 42, 91, 0.4);
+  --scrim-inverse-60: rgba(45, 42, 91, 0.6);
+  --scrim-inverse-75: rgba(45, 42, 91, 0.75);
+  --shadow-field: 0 4px 20px -2px rgba(70, 72, 212, 0.06);
+  --shadow-input: 0 2px 12px rgba(96, 99, 238, 0.06);
+  --shadow-pop: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-header: 0 1px 8px rgba(0, 0, 0, 0.04);
+
   // Barra de nivel: pista y relleno en degradado primario → esmeralda
   --gradient-progress: linear-gradient(
     90deg,
@@ -137,5 +157,24 @@
 
     --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
     --shadow-button: 0 10px 25px -5px rgba(99, 102, 241, 0.45);
+
+    --color-surface-highest: #43407a;
+    --color-inverse-surface: #e2e8f0;
+    --color-inverse-on-surface: #181445;
+    --color-tertiary-soft-dim: #006c49;
+    --color-on-primary-soft-strong: #e1e0ff;
+    --glass-bar: rgba(15, 14, 23, 0.85);
+    --tint-secondary: rgba(255, 185, 95, 0.12);
+    --tint-error: rgba(255, 180, 171, 0.12);
+    --tint-surface-high: rgba(56, 51, 102, 0.6);
+    --tint-tertiary: rgba(78, 222, 163, 0.16);
+    --scrim-inverse-40: rgba(15, 14, 23, 0.5);
+    --scrim-inverse-60: rgba(15, 14, 23, 0.68);
+    --scrim-inverse-75: rgba(15, 14, 23, 0.8);
+    --shadow-field: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+    --shadow-input: 0 2px 12px rgba(0, 0, 0, 0.3);
+    --shadow-pop: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-header: 0 1px 8px rgba(0, 0, 0, 0.3);
   }
 }

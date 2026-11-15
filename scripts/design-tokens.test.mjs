@@ -428,3 +428,69 @@ test('US-010-05 la tarjeta de error de sesión es una tarjeta del diseño y las 
     assert.match(scss(f), /safe-area-inset-bottom/, `${f}: no respeta la zona segura inferior`);
   }
 });
+
+// ---- Spec 011: tokens nuevos de la cuenta (T-011-27) ------------------------------------------------
+const accountColorMap = {
+  '--color-surface-highest': 'surface-container-highest',
+  '--color-inverse-surface': 'inverse-surface',
+  '--color-inverse-on-surface': 'inverse-on-surface',
+  '--color-tertiary-soft-dim': 'tertiary-fixed-dim',
+  '--color-on-primary-soft-strong': 'on-primary-fixed',
+};
+
+const accountLiteral = {
+  '--glass-bar': 'rgba(252, 248, 255, 0.85)',
+  '--tint-secondary': 'rgba(255, 221, 184, 0.3)',
+  '--tint-error': 'rgba(255, 218, 214, 0.3)',
+  '--tint-surface-high': 'rgba(233, 229, 255, 0.6)',
+  '--tint-tertiary': 'rgba(78, 222, 163, 0.3)',
+  '--scrim-inverse-40': 'rgba(45, 42, 91, 0.4)',
+  '--scrim-inverse-60': 'rgba(45, 42, 91, 0.6)',
+  '--scrim-inverse-75': 'rgba(45, 42, 91, 0.75)',
+  '--shadow-field': '0 4px 20px -2px rgba(70, 72, 212, 0.06)',
+  '--shadow-input': '0 2px 12px rgba(96, 99, 238, 0.06)',
+  '--shadow-pop': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+  '--shadow-soft': '0 1px 2px rgba(0, 0, 0, 0.05)',
+  '--shadow-header': '0 1px 8px rgba(0, 0, 0, 0.04)',
+};
+
+test('US-011-01 los colores nuevos de la cuenta coinciden con el DESIGN.md en claro', () => {
+  for (const [token, key] of Object.entries(accountColorMap)) {
+    assert.ok(designColors[key], `el DESIGN.md no trae ${key}`);
+    assert.equal(light[token], designColors[key], `${token} debe ser ${key} (${designColors[key]})`);
+  }
+});
+
+test('US-011-01 los tintes, velos y sombras nuevos tienen el valor claro del diseño', () => {
+  for (const [token, value] of Object.entries(accountLiteral)) {
+    assert.equal(light[token], value, `${token} debe valer ${value}`);
+  }
+});
+
+test('US-011-01 los tokens nuevos están redefinidos en oscuro (no heredan el valor claro)', () => {
+  const darkOnly = vars(blockAt(darkBlock, ':root'));
+  const missing = [...Object.keys(accountColorMap), ...Object.keys(accountLiteral)].filter(
+    (token) => !darkOnly[token]
+  );
+  assert.deepEqual(missing, [], 'tokens sin valor propio en oscuro');
+});
+
+test('US-011-01 contraste de los pares nuevos: texto 4,5:1 e iconos 3:1, en claro y oscuro', () => {
+  const text = [['--color-inverse-on-surface', '--color-inverse-surface']];
+  const icons = [
+    ['--color-tertiary-soft-dim', '--color-inverse-surface'],
+    ['--color-on-primary-soft-strong', '--color-primary-soft'],
+  ];
+  const fails = [];
+  for (const [name, theme] of [['claro', light], ['oscuro', dark]]) {
+    for (const [fg, bg] of text) {
+      const r = contrast(theme[fg], theme[bg]);
+      if (r < 4.5) fails.push(`${name} ${fg} sobre ${bg}: ${r.toFixed(2)}:1`);
+    }
+    for (const [fg, bg] of icons) {
+      const r = contrast(theme[fg], theme[bg]);
+      if (r < 3) fails.push(`${name} ${fg} sobre ${bg}: ${r.toFixed(2)}:1`);
+    }
+  }
+  assert.deepEqual(fails, []);
+});

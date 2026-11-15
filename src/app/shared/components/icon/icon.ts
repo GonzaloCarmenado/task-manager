@@ -22,6 +22,34 @@ export const ICON_NAMES = [
   'flame',
   'star',
   'trophy',
+  'arrow-left',
+  'arrow-right',
+  'person',
+  'at',
+  'id-card',
+  'key',
+  'eye',
+  'eye-off',
+  'check-circle',
+  'circle',
+  'alert-circle',
+  'user-plus',
+  'x',
+  'shield-user',
+  'lock-reset',
+  'phone-lock',
+  'cloud-sync',
+  'cloud-up',
+  'cloud-check',
+  'log-in',
+  'log-out',
+  'badge-check',
+  'verified-user',
+  'swap',
+  'list-plus',
+  'info',
+  'trash-sweep',
+  'bolt',
 ] as const;
 export type IconName = (typeof ICON_NAMES)[number];
 
@@ -33,7 +61,8 @@ export type IconName = (typeof ICON_NAMES)[number];
     @if (known()) {
       <svg
         viewBox="0 0 24 24"
-        fill="none"
+        [class.filled]="filled()"
+        [attr.fill]="filled() ? 'currentColor' : 'none'"
         stroke="currentColor"
         stroke-width="2"
         stroke-linecap="round"
@@ -87,7 +116,7 @@ export type IconName = (typeof ICON_NAMES)[number];
           @case ('lock') {
             <rect x="5" y="11" width="14" height="10" rx="2" />
             <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-            <path d="M12 15.5V17" />
+            <path class="cut" d="M12 15.5V17" />
           }
           @case ('plus') {
             <path d="M12 5v14" />
@@ -150,7 +179,146 @@ export type IconName = (typeof ICON_NAMES)[number];
           }
           @case ('shield') {
             <path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z" />
-            <path d="M9 12l2 2 4-4" />
+            <path class="cut" d="M9 12l2 2 4-4" />
+          }
+          @case ('arrow-left') {
+            <path d="M19 12H5" />
+            <path d="M11 6l-6 6 6 6" />
+          }
+          @case ('arrow-right') {
+            <path d="M5 12h14" />
+            <path d="M13 6l6 6-6 6" />
+          }
+          @case ('person') {
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 21a8 8 0 0 1 16 0" />
+          }
+          @case ('at') {
+            <circle cx="12" cy="12" r="4" />
+            <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+          }
+          @case ('id-card') {
+            <rect x="3" y="5" width="18" height="14" rx="3" />
+            <circle cx="9" cy="11" r="2" />
+            <path d="M6 16a3.2 3.2 0 0 1 6 0" />
+            <path d="M14.5 10h3.5" />
+            <path d="M14.5 14h3.5" />
+          }
+          @case ('key') {
+            <circle cx="8" cy="15" r="4" />
+            <path d="M11 12l9-9" />
+            <path d="M16 7l3 3" />
+          }
+          @case ('eye') {
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+            <circle cx="12" cy="12" r="3" />
+          }
+          @case ('eye-off') {
+            <path d="M3 3l18 18" />
+            <path d="M10.6 6.1A9.8 9.8 0 0 1 12 6c6.5 0 10 6 10 6a17 17 0 0 1-3.2 3.9" />
+            <path d="M6.6 7.6A16.5 16.5 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 4-.9" />
+            <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+          }
+          @case ('check-circle') {
+            <circle cx="12" cy="12" r="9" />
+            <path class="cut" d="M8 12.5l3 3 5-6" />
+          }
+          @case ('circle') {
+            <circle cx="12" cy="12" r="9" />
+          }
+          @case ('alert-circle') {
+            <circle cx="12" cy="12" r="9" />
+            <path class="cut" d="M12 8v5" />
+            <path class="cut" d="M12 16.5h.01" />
+          }
+          @case ('user-plus') {
+            <circle cx="10" cy="8" r="4" />
+            <path d="M2 21a8 8 0 0 1 16 0" />
+            <path d="M19 8v6" />
+            <path d="M16 11h6" />
+          }
+          @case ('x') {
+            <path d="M6 6l12 12" />
+            <path d="M18 6L6 18" />
+          }
+          @case ('shield-user') {
+            <path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z" />
+            <circle class="cut" cx="12" cy="10" r="2" />
+            <path class="cut" d="M8.5 16a3.8 3.8 0 0 1 7 0" />
+          }
+          @case ('lock-reset') {
+            <rect x="5" y="12" width="14" height="9" rx="2" />
+            <path d="M12 15.5V17.5" />
+            <path d="M8 12V9a4 4 0 0 1 7.2-2.4" />
+            <path d="M16 3.5v3h-3" />
+          }
+          @case ('phone-lock') {
+            <rect x="6" y="2" width="12" height="20" rx="3" />
+            <path d="M10 19h4" />
+            <rect x="9.5" y="10" width="5" height="4" rx="1" />
+            <path d="M10.5 10V9a1.5 1.5 0 0 1 3 0v1" />
+          }
+          @case ('cloud-sync') {
+            <path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1-1 8H7" />
+            <path d="M9.5 14a3 3 0 0 1 5-1" />
+            <path d="M14.5 11v2h-2" />
+          }
+          @case ('cloud-up') {
+            <path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1-1 8" />
+            <path d="M12 17v-6" />
+            <path d="M9.5 13.5L12 11l2.5 2.5" />
+          }
+          @case ('cloud-check') {
+            <path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1-1 8H7" />
+            <path class="cut" d="M9 14l2.5 2.5L15.5 12" />
+          }
+          @case ('log-in') {
+            <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" />
+            <path d="M10 17l5-5-5-5" />
+            <path d="M15 12H3" />
+          }
+          @case ('log-out') {
+            <path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4" />
+            <path d="M14 17l5-5-5-5" />
+            <path d="M19 12H9" />
+          }
+          @case ('badge-check') {
+            <path
+              d="M12 3l2.4 1.6 2.9-.1 1 2.7 2.3 1.8-.9 2.8.9 2.8-2.3 1.8-1 2.7-2.9-.1L12 21l-2.4-1.6-2.9.1-1-2.7-2.3-1.8.9-2.8-.9-2.8 2.3-1.8 1-2.7 2.9.1L12 3z"
+            />
+            <path class="cut" d="M8.5 12l2.5 2.5 4.5-5" />
+          }
+          @case ('verified-user') {
+            <path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z" />
+            <path class="cut" d="M8.5 12l2.5 2.5 4.5-5" />
+          }
+          @case ('swap') {
+            <path d="M7 4L3 8l4 4" />
+            <path d="M3 8h14" />
+            <path d="M17 20l4-4-4-4" />
+            <path d="M21 16H7" />
+          }
+          @case ('list-plus') {
+            <path d="M4 6h12" />
+            <path d="M4 12h8" />
+            <path d="M4 18h8" />
+            <path d="M18 14v6" />
+            <path d="M15 17h6" />
+          }
+          @case ('info') {
+            <circle cx="12" cy="12" r="9" />
+            <path class="cut" d="M12 11v5" />
+            <path class="cut" d="M12 8h.01" />
+          }
+          @case ('trash-sweep') {
+            <path d="M4 7h16" />
+            <path d="M9 7V4h6v3" />
+            <path d="M6 7l1 13h10l1-13" />
+            <path d="M10 11l4 5" />
+            <path d="M14 11l-4 5" />
+          }
+          @case ('bolt') {
+            <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />
           }
         }
       </svg>
@@ -166,12 +334,19 @@ export type IconName = (typeof ICON_NAMES)[number];
       width: 100%;
       height: 100%;
     }
+    /* En la variante llena, los detalles interiores se recortan con el color del fondo. */
+    svg.filled .cut {
+      stroke: var(--icon-cut, var(--color-surface));
+      fill: none;
+    }
   `,
 })
 export class Icon {
   readonly name = input.required<IconName>();
   /** Texto accesible. Sin él, el icono es decorativo y se oculta a los lectores de pantalla. */
   readonly label = input<string>('');
+  /** Rellena las formas cerradas con el color actual (variante «llena» del diseño). */
+  readonly filled = input<boolean>(false);
 
   protected readonly known = computed(() =>
     (ICON_NAMES as readonly string[]).includes(this.name())
